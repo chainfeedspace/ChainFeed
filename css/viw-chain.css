@@ -1,0 +1,366 @@
+                .cfv-container {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: #000;
+                    z-index: 99999;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: opacity 0.3s ease;
+                    overscroll-behavior: none;
+                }
+
+                .cfv-container.active {
+                    opacity: 1;
+                    visibility: visible;
+                }
+
+                /* Progress Bar */
+                .cfv-progress-container {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    padding: 10px;
+                    display: flex;
+                    gap: 4px;
+                    z-index: 100;
+                    background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+                }
+
+                .cfv-progress-bar {
+                    flex: 1;
+                    height: 3px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 2px;
+                    overflow: hidden;
+                }
+
+                .cfv-progress-fill {
+                    height: 100%;
+                    width: 0%;
+                    background: white;
+                    transition: width 0.1s linear;
+                }
+
+                /* Header */
+                .cfv-header {
+                    position: fixed;
+                    top: 50px;
+                    left: 0;
+                    right: 0;
+                    padding: 1rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    z-index: 99;
+                    background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+                }
+
+                .cfv-user-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
+
+                .cfv-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #6366f1, #ec4899);
+                    overflow: hidden;
+                    border: 2px solid white;
+                }
+
+                .cfv-avatar img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+                .cfv-user-details {
+                    color: white;
+                }
+
+                .cfv-username {
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                .cfv-time-ago {
+                    font-size: 0.8rem;
+                    opacity: 0.8;
+                }
+
+                .cfv-close-btn {
+                    background: rgba(0, 0, 0, 0.5);
+                    border: none;
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                }
+
+                .cfv-close-btn:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+
+                /* Media Container */
+                .cfv-media-container {
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: absolute !important;
+                }
+
+.cfv-media-container video,
+.cfv-media-container img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center;
+}
+
+                .cfv-text-content {
+                    width: 90%;
+                    max-width: 600px;
+                    padding: 2rem;
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+                    border-radius: 20px;
+                    color: white;
+                    font-size: 1.5rem;
+                    line-height: 1.6;
+                    text-align: center;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+
+                /* Stats Badge */
+                .cfv-stats-badge {
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(10px);
+                    border-radius: 12px;
+                    padding: 0.75rem 1rem;
+                    color: white;
+                    z-index: 98;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+
+                .cfv-stat-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-size: 0.85rem;
+                    margin-bottom: 0.5rem;
+                }
+
+                .cfv-stat-item:last-child {
+                    margin-bottom: 0;
+                }
+
+                .cfv-stat-icon {
+                    font-size: 1rem;
+                }
+
+                /* Reactions Bar */
+                .cfv-reactions-container {
+                    position: fixed;
+                    bottom: 100px;
+                    right: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    z-index: 98;
+                }
+
+                .cfv-reaction-btn {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(10px);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    color: white;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                    position: relative;
+                }
+
+                .cfv-reaction-btn:hover {
+                    transform: scale(1.1);
+                    border-color: rgba(255, 255, 255, 0.6);
+                }
+
+                .cfv-reaction-btn.reacted {
+                    background: linear-gradient(135deg, #6366f1, #ec4899);
+                    border-color: white;
+                    animation: reactionPulse 0.5s ease;
+                }
+
+                @keyframes reactionPulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.2); }
+                }
+
+                .cfv-reaction-cost {
+                    position: absolute;
+                    bottom: -20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(251, 191, 36, 0.9);
+                    color: #000;
+                    padding: 0.2rem 0.5rem;
+                    border-radius: 10px;
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    white-space: nowrap;
+                }
+
+                /* Navigation Areas */
+                .cfv-nav-area {
+                    position: absolute;
+                    width: 30%;
+                    height: 100%;
+                    z-index: 50;
+                    cursor: pointer;
+                }
+
+                .cfv-nav-prev {
+                    left: 0;
+                    top: 0;
+                }
+
+                .cfv-nav-next {
+                    right: 0;
+                    top: 0;
+                }
+
+                /* Owner Actions */
+                .cfv-owner-actions {
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    display: flex;
+                    gap: 1rem;
+                    z-index: 98;
+                }
+
+                .cfv-action-btn {
+                    background: rgba(0, 0, 0, 0.7);
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    color: white;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                }
+
+                .cfv-action-btn:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                    transform: translateY(-2px);
+                }
+
+                .cfv-action-btn.danger {
+                    border-color: rgba(239, 68, 68, 0.5);
+                    color: #ef4444;
+                }
+
+                .cfv-action-btn.primary {
+                    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+                    border-color: #fbbf24;
+                    color: #000;
+                }
+
+                /* Anclado Badge */
+                .cfv-anclado-badge {
+                    position: fixed;
+                    top: 100px;
+                    left: 20px;
+                    background: rgba(251, 191, 36, 0.9);
+                    color: #000;
+                    padding: 0.5rem 1rem;
+                    border-radius: 20px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    z-index: 98;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+.cfv-anclado-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(251, 191, 36, 0.9);
+    color: #000;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+    
+                /* Responsive */
+                @media (max-width: 768px) {
+                    .cfv-header {
+top: 0px;
+        padding: 1.5rem 0.75rem 0;
+                    }
+
+                    .cfv-stats-badge {
+                        top: 90px;
+                        right: 10px;
+                        padding: 0.5rem 0.75rem;
+                    }
+
+                    .cfv-reactions-container {
+                        bottom: 80px;
+                        right: 10px;
+                        gap: 0.75rem;
+                    }
+
+                    .cfv-reaction-btn {
+                        width: 45px;
+                        height: 45px;
+                        font-size: 1.3rem;
+                    }
+
+                    .cfv-owner-actions {
+                        bottom: 10px;
+                        flex-direction: column;
+                        width: 90%;
+                    }
+
+                    .cfv-action-btn {
+                        width: 100%;
+                    }
+                }

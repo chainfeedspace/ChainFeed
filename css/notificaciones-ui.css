@@ -1,0 +1,281 @@
+/* =====================================================
+   SISTEMA DE NOTIFICACIONES UI - CHAINFEED
+   ===================================================== */
+
+/* =====================================================
+   TOASTS - Notificaciones rápidas
+   ===================================================== */
+.toasts-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: #1a1a24;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    max-width: 400px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.toast-mensaje {
+    flex: 1;
+    color: #ffffff;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.toast-cerrar {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.toast-cerrar:hover {
+    color: #ffffff;
+}
+
+/* Tipos de toast */
+.toast-success {
+    border-left: 4px solid #10b981;
+}
+
+.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.toast-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.toast-info {
+    border-left: 4px solid #6366f1;
+}
+
+/* =====================================================
+   MODALES - Alertas y confirmaciones
+   ===================================================== */
+.notif-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.notif-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.notif-modal {
+    background: #1a1a24;
+    border-radius: 20px;
+    padding: 1.75rem;
+    max-width: 450px;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.notif-modal-overlay.show .notif-modal {
+    transform: scale(1) translateY(0);
+}
+
+.notif-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.notif-modal-icon {
+    font-size: 1.75rem;
+}
+
+.notif-modal-titulo {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.notif-modal-cuerpo {
+    margin-bottom: 1.5rem;
+}
+
+.notif-modal-cuerpo p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.notif-modal-acciones {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+/* Botones */
+.notif-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.notif-btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #ffffff;
+}
+
+.notif-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.notif-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.notif-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.notif-btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+}
+
+.notif-btn-danger:hover {
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Colores por tipo de modal */
+.notif-modal-success .notif-modal-header {
+    border-bottom: 2px solid #10b981;
+    padding-bottom: 1rem;
+}
+
+.notif-modal-success .notif-btn-primary {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.notif-modal-error .notif-modal-header {
+    border-bottom: 2px solid #ef4444;
+    padding-bottom: 1rem;
+}
+
+.notif-modal-error .notif-btn-primary {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.notif-modal-warning .notif-modal-header {
+    border-bottom: 2px solid #f59e0b;
+    padding-bottom: 1rem;
+}
+
+.notif-modal-warning .notif-btn-primary {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.notif-modal-danger .notif-modal-header {
+    border-bottom: 2px solid #ef4444;
+    padding-bottom: 1rem;
+}
+
+/* Input en modales */
+.notif-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    margin-top: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.notif-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.notif-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+@media (max-width: 480px) {
+    .toasts-container {
+        top: 1rem;
+        right: 1rem;
+        left: 1rem;
+    }
+    
+    .toast {
+        max-width: 100%;
+    }
+    
+    .notif-modal {
+        padding: 1.25rem;
+    }
+    
+    .notif-modal-acciones {
+        flex-direction: column;
+    }
+    
+    .notif-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

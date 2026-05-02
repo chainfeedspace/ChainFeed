@@ -1,0 +1,260 @@
+/* ========================================== */
+/* NUEVO LAYOUT ESTILO INSTAGRAM */
+/* ========================================== */
+
+.profile-main {
+    display: block; /* Cambiar de flex a block */
+    margin-bottom: 1.5rem;
+}
+
+.profile-top-section {
+    display: flex;
+    gap: 4rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    border: 4px solid var(--dark);
+    box-shadow: 0 15px 35px rgba(99, 102, 241, 0.3);
+    position: relative;
+    animation: avatarPulse 3s ease-in-out infinite;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@keyframes avatarPulse {
+    0%, 100% { box-shadow: 0 15px 35px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 20px 45px rgba(99, 102, 241, 0.4); }
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background: var(--success);
+    border-radius: 50%;
+    border: 3px solid var(--dark);
+    animation: pulse 2s infinite;
+}
+
+/* Stats al lado del avatar (estilo Instagram) */
+.profile-stats-inline {
+    flex: 1;
+    display: flex;
+    gap: 2.5rem;
+    align-items: center;
+    padding-top: 1rem;
+}
+
+.stat-item-inline {
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.stat-item-inline:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+}
+
+.stat-value-inline {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label-inline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Info del perfil (nombre, username, bio) - estilo Instagram */
+.profile-info-section {
+    margin-bottom: 1.5rem;
+}
+
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.profile-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--text), var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.verified-badge {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.profile-username {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.profile-bio {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+    max-width: 100%;
+}
+
+/* Botones de acción */
+.profile-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-follow {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 0.7rem 2.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.95rem;
+}
+
+.btn-follow::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.3);
+    transition: left 0.5s ease;
+}
+
+.btn-follow:hover::before {
+    left: 100%;
+}
+
+.btn-follow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: var(--primary);
+    padding: 0.7rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.btn-secondary:hover {
+    background: rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* OCULTAR la vieja stats-row (la movimos arriba) */
+.stats-row {
+    display: none !important;
+}
+
+/* ========================================== */
+/* RESPONSIVE - MOBILE */
+/* ========================================== */
+
+@media (max-width: 768px) {
+    .profile-top-section {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        font-size: 2.5rem;
+    }
+    
+    .profile-stats-inline {
+        justify-content: center;
+        width: 100%;
+        gap: 2rem;
+    }
+    
+    .stat-value-inline {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label-inline {
+        font-size: 0.85rem;
+    }
+    
+    .profile-name {
+        font-size: 1.5rem;
+    }
+    
+    .profile-info-section {
+        text-align: center;
+    }
+    
+    .profile-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .profile-actions button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,74 @@
+/* ============================================ */
+/* FIX CRÍTICO: SCROLL Y BARRA INFERIOR */
+/* ============================================ */
+
+/* Forzar scroll natural en inicio */
+html, body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
+}
+
+/* Asegurar que el main container permita scroll */
+.main-container {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: calc(100vh + 300px) !important;
+}
+
+/* Prevenir que feed-navigation bloquee scroll */
+.feed-navigation {
+    position: sticky !important;
+    top: 70px !important;
+    z-index: 100 !important;
+    pointer-events: auto !important;
+}
+
+/* Asegurar que los tabs no interfieran */
+.nav-tab {
+    pointer-events: auto !important;
+}
+
+/* Forzar comportamiento correcto de barra inferior */
+#bottomNavBar,
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    transform: translateY(0) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    will-change: transform !important;
+    pointer-events: auto !important;
+}
+
+/* Estado oculto */
+#bottomNavBar.hidden,
+.bottom-nav.hidden {
+    transform: translateY(100%) !important;
+}
+
+/* Prevenir conflictos con otros elementos */
+.feed-posts,
+.center-feed {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Asegurar espacio para la barra inferior */
+body {
+    padding-bottom: 70px !important;
+}
+
+@media (min-width: 768px) {
+    body {
+        padding-bottom: 0 !important;
+    }
+    
+    #bottomNavBar,
+    .bottom-nav {
+        display: none !important;
+    }
+}

@@ -1,0 +1,199 @@
+.feed-navigation {
+    position: relative !important;
+    display: flex !important;
+    gap: 8px !important;
+    margin-bottom: 15px !important;
+    background: rgba(26, 26, 36, 0.5) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 20px !important;
+    padding: 4px 8px !important;
+    overflow: visible !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    height: auto !important;
+    transition: all 0.3s ease !important;
+}
+
+.feed-navigation::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* ✅ TAB BASE - CORREGIDO */
+.nav-tab {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-secondary) !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    outline: none !important;
+    user-select: none !important;
+    position: relative !important;
+    overflow: hidden !important;
+    
+    /* ✅ ESTILOS CORREGIDOS - SIN BLOQUEOS */
+    opacity: 1 !important;            /* ✅ VISIBLE */
+    pointer-events: auto !important;  /* ✅ CLICKS HABILITADOS */
+    width: auto !important;           /* ✅ CON ANCHO */
+    margin: 0 !important;             /* ✅ CON MARGIN NORMAL */
+}
+
+/* ✅ Tab Activo - SIEMPRE VISIBLE */
+.nav-tab.active {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+    color: #f8f8f8d9 !important;
+    opacity: 1 !important;
+    transform: translateX(0) scale(1) !important;
+    pointer-events: auto !important;
+    width: auto !important;
+    margin: 0 !important;
+    border: 1px solid #7a48ee45 !important;
+}
+
+/* ✅ Tabs INACTIVOS cuando NO están expandidos - OCULTOS PERO NO BLOQUEADOS */
+.feed-navigation:not(.expanded) .nav-tab:not(.active) {
+    display: none !important;  /* ✅ Oculta pero no bloquea */
+}
+
+/* ✅ Tabs visibles cuando están expandidos */
+.feed-navigation.expanded .nav-tab {
+    display: flex !important;  /* ✅ Muestra todos los tabs */
+    opacity: 1 !important;
+    transform: translateX(0) scale(1) !important;
+    pointer-events: auto !important;
+    width: auto !important;
+    justify-content: space-around !important;
+}
+
+/* Último tab sin margen */
+.feed-navigation.expanded .nav-tab:last-child {
+    margin-right: 0 !important;
+}
+
+/* Animación de entrada (izquierda a derecha) */
+.feed-navigation.expanding .nav-tab:nth-child(1) {
+    transition-delay: 0s !important;
+}
+
+.feed-navigation.expanding .nav-tab:nth-child(2) {
+    transition-delay: 0.08s !important;
+}
+
+.feed-navigation.expanding .nav-tab:nth-child(3) {
+    transition-delay: 0.16s !important;
+}
+
+.feed-navigation.expanding .nav-tab:nth-child(4) {
+    transition-delay: 0.24s !important;
+}
+
+/* Animación de salida (derecha a izquierda) */
+.feed-navigation.collapsing .nav-tab:not(.active) {
+    transition-delay: 0s !important;
+}
+
+.feed-navigation.collapsing .nav-tab:nth-child(4):not(.active) {
+    transition-delay: 0s !important;
+}
+
+.feed-navigation.collapsing .nav-tab:nth-child(3):not(.active) {
+    transition-delay: 0.08s !important;
+}
+
+.feed-navigation.collapsing .nav-tab:nth-child(2):not(.active) {
+    transition-delay: 0.16s !important;
+}
+
+.feed-navigation.collapsing .nav-tab:nth-child(1):not(.active) {
+    transition-delay: 0.24s !important;
+}
+
+/* Hover solo cuando está expandido */
+.feed-navigation.expanded .nav-tab:not(.active):hover {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: var(--primary) !important;
+    transform: translateX(0) scale(1.05) translateY(-2px) !important;
+}
+
+/* Efecto brillante en tab activo */
+.nav-tab.active::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent) !important;
+    transition: left 0.6s ease !important;
+}
+
+.nav-tab.active:hover::before {
+    left: 100% !important;
+}
+
+/* Indicador visual de expandible en tab activo */
+.nav-tab.active::after {
+    content: "\203A" !important;
+    right: 8px !important;
+    padding-left: 10px;
+    top: 50% !important;
+    font-size: 1.2rem !important;
+    opacity: 0.6 !important;
+    transition: all 0.3s ease !important;
+    font-weight: 700 !important;
+}
+
+.feed-navigation.expanded .nav-tab.active::after {
+    opacity: 0 !important;
+    transform: translateY(-50%) scale(0) !important;
+}
+
+/* Animación de pulso sutil en tab activo cuando está colapsado */
+@keyframes pulseActive {
+    0%, 100% {
+        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3) !important;
+    }
+    50% {
+        box-shadow: 0 5px 20px rgba(99, 102, 241, 0.5) !important;
+    }
+}
+
+.feed-navigation:not(.expanded) .nav-tab.active {
+    animation: pulseActive 3s ease-in-out infinite !important;
+}
+
+.feed-navigation.expanded .nav-tab.active {
+    animation: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .feed-navigation {
+        padding: 4px 6px !important;
+    }
+    
+    .nav-tab.active,
+    .feed-navigation.expanded .nav-tab {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* Cursor pointer siempre habilitado */
+.nav-tab {
+    cursor: pointer !important;
+}
+
+/* Transición suave del contenedor */
+.feed-navigation {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.feed-navigation.collapsing {
+    gap: 4px !important;
+}
