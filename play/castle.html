@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Castle Siege</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #03050e; }
+    #root { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; user-select: none; }
+    input { user-select: text !important; }
+    .scroll-screen { width: 100%; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script src="/play/castle/castle-siege-api.js"></script>
+
+  <script type="text/babel">
+    
+
+function mapApiProfile(p) {
+  if (!p) return null;
+  return {
+    username:         p.username,
+    points:           parseInt(p.points)            || 0,
+    lives:            parseInt(p.lives)             ?? 3,
+    livesRestoredAt:  p.lives_restored_at  ? new Date(p.lives_restored_at).getTime() : null,
+    totalGamesPlayed: parseInt(p.total_games_played) || 0,
+    bestScore:        parseInt(p.best_score)         || 0,
+    purchaseCount:    parseInt(p.purchase_count)     || 0,
+    firstPurchaseAt:  p.first_purchase_at  ? new Date(p.first_purchase_at).getTime() : null,
+    displayName:      p.display_name       || p.username,
+    avatarUrl:        p.avatar_url         || null,
+    castleLevel:      parseInt(p.castle_level)       || 1,
+  };
+}
+
+    const { useRef, useEffect, useState, useCallback } = React;
+
+    const BASE_W = 480;
+    const BASE_H = 720;
+    const MAX_LIVES = 3;
+    
+// HP: base 15, +25% del base por nivel (15×0.25 = 3.75 → redondeado)
+const CASTLE_LEVELS = {
+  1: { hp: 15, cost: 0,        label: "TORRE",     color: "#8ecaf0" },
+  2: { hp: 19, cost: 200000,   label: "BASTIÓN",   color: "#44ffaa" },
+  3: { hp: 23, cost: 500000,   label: "FORTALEZA", color: "#ff9500" },
+  4: { hp: 26, cost: 1000000,  label: "CIUDADELA", color: "#aa55ff" },
+  5: { hp: 30, cost: 2000000,  label: "FORTALEZA IMPERIAL", color: "#ff2266" },
+};
+
+    const LIVES_RESTORE_MS  = 24 * 60 * 60 * 1000;
+    const LIVES_COST_BASE   = 4000;
+    const LIVES_COST_TIERS  = [4000, 6000, 8000, 10000]; // índice = nº de compra (0-based), último se repite
+    // Helpers de costo escalable
+    function getLivesCost(profile) {
+      const count = profile.purchaseCount || 0;
+      const first = profile.firstPurchaseAt || null;
+      // Si pasaron 24h desde la primera compra, el ciclo reinicia
+      if(first && Date.now() - first >= LIVES_RESTORE_MS) return LIVES_COST_TIERS[0];
+      return LIVES_COST_TIERS[Math.min(count, LIVES_COST_TIERS.length - 1)];
+    }
+    function applyPurchase(profile) {
+      const now = Date.now();
+      const first = profile.firstPurchaseAt || null;
+      // Si pasaron 24h, reiniciar ciclo
+      const reset = first && now - first >= LIVES_RESTORE_MS;
+      const count = reset ? 0 : (profile.purchaseCount || 0);
+      return {
+        ...profile,
+        purchaseCount: count + 1,
+        firstPurchaseAt: (reset || !first) ? now : first,
+      };
+    }
+    const CFT_TO_POINTS    = 1000;
+const DEPOSIT_MIN_PTS = 1000;
+    const MONTHLY_PRIZES   = [20000, 15000, 10000, 1000, 1000, 1000, 1000, 1000, 1000, 1000];
+    const XP_PER_LEVEL     = 15;
+    const AUTO_UPGRADES    = [];
+
+    function currentMonthKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+    }
+
+    const C = {
+      bg:"#03050e", panel:"#080c1a", border:"#1a2240",
+      gold:"#ffcc44", cyan:"#00ccff", purple:"#aa55ff",
+      red:"#ff3344", green:"#44ffaa", orange:"#ff8800",
+      text:"#c8d8f0", muted:"#445566",
+    };
+
+async function loadProfile() {
+  try {
+    const res = await castleSiege.perfil.obtener();
+    // La API devuelve { success, perfil: {...}, timestamp }
+    // mapApiProfile necesita recibir el objeto perfil, no el wrapper
+    const raw = res?.perfil ?? res;
+    return mapApiProfile(raw);
+  } catch { return null; }
+}
+
+// saveProfile ya no escribe nada — el backend es la fuente de verdad.
+// Se mantiene como no-op para no romper llamadas que queden en el código.
+async function saveProfile(_p) { /* manejado por backend */ }
+
+async function loadRanking() {
+  try {
+    const data = await castleSiege.ranking.obtener();
+    // Normalizar al formato que usa RankingScreen: [{username, score, month}]
+    if (!data?.ranking) return [];
+    const mes = data.mes || currentMonthKey();
+    return data.ranking.map(r => ({
+      username: r.username,
+      score:    r.score,
+      month:    mes,
+    }));
+  } catch { return []; }
+}
+
+// saveRanking y submitScore son manejados por el backend (guardar-partida.php).
+async function saveRanking(_list) { /* manejado por backend */ }
+async function submitScore(_username, _score) {
+  return await loadRanking(); // devuelve ranking actualizado tras guardar partida
+}
+    const POWERUP_TYPES = {
+      triple:  {label:"×3 SHOT", color:"#ff9500", glyph:"🏹", duration:8000},
+      rapid:   {label:"RAPID",   color:"#00f5ff", glyph:"⚡", duration:6000},
+      shield:  {label:"SHIELD",  color:"#4488ff", glyph:"🛡", duration:5000},
+      scatter: {label:"SCATTER", color:"#ff44cc", glyph:"💥", duration:7000},
+      laser:   {label:"LASER",   color:"#ff2244", glyph:"🔴", duration:6000},
+      bomb:    {label:"BOMB",    color:"#ffdd00", glyph:"💣", duration:0},
+      heal:    {label:"HEAL",    color:"#44ff88", glyph:"💚", duration:0},
+      freeze:  {label:"FREEZE",  color:"#88ddff", glyph:"❄",  duration:5000},
+    };
+    const ENEMY_DEFS = {
+      soldier:{hp:3,  speed:1.07, color:"#ff4444",size:7, score:10},
+      tank:   {hp:14, speed:0.37, color:"#ff8800",size:11,score:50},
+      cannon: {hp:6,  speed:0.57, color:"#cc44ff",size:8,score:30},
+      plane:  {hp:4,  speed:1.53, color:"#00ccff",size:7,score:35,flying:true},
+    };
+
+    function rnd(a,b){return Math.random()*(b-a)+a;}
+    function rndInt(a,b){return Math.floor(rnd(a,b+1));}
+
+    function waveEnemyCount(wave) {
+      return Math.floor(7 + wave * 2);
+    }
+
+function createGameState(baseHp = 15){
+      return{
+        enemies:[],bullets:[],particles:[],xpOrbs:[],powerupItems:[],activeBuffs:{},
+        wave:1,xp:0,xpTotal:0,level:1,hp: baseHp, maxHp: baseHp,score:0,
+        upgrades:{dmg:0,pierce:0,multishot:false,speed:0},
+        upgradeIndex:0,
+        _gw:typeof window!=="undefined"?window.innerWidth:BASE_W,
+        _gh:typeof window!=="undefined"?window.innerHeight:BASE_H,
+        waveTimer:0,waveActive:false,enemiesLeft:0,lastShot:0,time:0,
+        powerupSpawnTimer:0,
+        bgStars:Array.from({length:80},()=>({x:rnd(0,BASE_W),y:rnd(0,BASE_H*.55),r:rnd(.5,2),tw:rnd(0,Math.PI*2)})),
+        bgClouds:Array.from({length:9},()=>({x:rnd(0,BASE_W),y:rnd(BASE_H*.08,BASE_H*.42),w:rnd(60,140),a:rnd(.05,.16),sp:rnd(.1,.35)})),
+      };
+    }
+
+    function spawnParts(x,y,color,n=10){
+      return Array.from({length:n},()=>({x,y,vx:rnd(-3,3),vy:rnd(-3.5,3.5),life:1,decay:rnd(.028,.06),size:rnd(2,5),color}));
+    }
+
+    function spawnPUDyn(GW,GH){
+      const types=Object.keys(POWERUP_TYPES),type=types[rndInt(0,types.length-1)];
+      return{x:rnd(50,GW-50),y:rnd(GH*.15,GH*.72),type,def:POWERUP_TYPES[type],life:600,pulse:rnd(0,Math.PI*2),id:Math.random()};
+    }
+    function spawnEnemyDyn(wave,GW,GH){
+      const avail=["soldier","soldier",...(wave>=2?["cannon"]:[]),...(wave>=4?["tank"]:[]),...(wave>=6?["plane"]:[])];
+      const type=avail[rndInt(0,avail.length-1)];
+      const def=ENEMY_DEFS[type];
+      const side=rndInt(0,3);let x,y;const mg=40;
+      if(side===0){x=rnd(mg,GW-mg);y=-35;}
+      else if(side===1){x=GW+35;y=rnd(mg,GH*.85);}
+      else if(side===2){x=rnd(mg,GW-mg);y=GH+35;}
+      else{x=-35;y=rnd(mg,GH*.85);}
+      const sc=1+wave*.10;
+      return{x,y,type,hp:Math.ceil(def.hp*sc),maxHp:Math.ceil(def.hp*sc),
+        speed:def.speed*(1+wave*.045),color:def.color,size:def.size,
+        score:def.score,flying:def.flying||false,frame:0,id:Math.random()};
+    }
+
+    function rrect(ctx,x,y,w,h,r){
+      ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+      ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+      ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+      ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+    }
+    function lc(hex,amt){
+      const n=parseInt(hex.replace("#",""),16);
+      return`rgb(${Math.min(255,(n>>16)+amt)},${Math.min(255,((n>>8)&0xff)+amt)},${Math.min(255,(n&0xff)+amt)})`;
+    }
+
+    function drawBG(ctx,gs,GW,GH){
+      const t=gs.time;
+      const sx=GW/BASE_W, sy=GH/BASE_H;
+      ctx.save();
+      ctx.scale(sx,sy);
+
+      const sky=ctx.createLinearGradient(0,0,0,BASE_H*.58);
+      sky.addColorStop(0,"#020610");sky.addColorStop(0.25,"#080e24");sky.addColorStop(0.6,"#161230");sky.addColorStop(1,"#2a1218");
+      ctx.fillStyle=sky;ctx.fillRect(0,0,BASE_W,BASE_H);
+
+      ctx.save();ctx.shadowBlur=50;ctx.shadowColor="#8899ccaa";ctx.fillStyle="#ccd8f0";
+      ctx.beginPath();ctx.arc(BASE_W*.82,BASE_H*.08,20,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#080e24";ctx.beginPath();ctx.arc(BASE_W*.82+9,BASE_H*.08-5,16,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=.12;const mg=ctx.createRadialGradient(BASE_W*.82,BASE_H*.08,18,BASE_W*.82,BASE_H*.08,60);
+      mg.addColorStop(0,"#aabbff");mg.addColorStop(1,"transparent");
+      ctx.fillStyle=mg;ctx.beginPath();ctx.arc(BASE_W*.82,BASE_H*.08,60,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+
+      gs.bgStars.forEach((s,i)=>{
+        const tw=.4+Math.sin(t*.04+s.tw)*.5;
+        ctx.save();ctx.globalAlpha=tw*.85;ctx.fillStyle=i%5===0?"#aad4ff":i%7===0?"#ffddaa":"#ffffff";
+        ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();ctx.restore();
+      });
+
+      ctx.save();ctx.globalAlpha=.18+Math.sin(t*.022)*.06;
+      const hfg=ctx.createLinearGradient(0,BASE_H*.44,0,BASE_H*.62);
+      hfg.addColorStop(0,"transparent");hfg.addColorStop(.4,"#ff550066");hfg.addColorStop(.7,"#ff220044");hfg.addColorStop(1,"transparent");
+      ctx.fillStyle=hfg;ctx.fillRect(0,BASE_H*.44,BASE_W,BASE_H*.2);ctx.restore();
+
+      gs.bgClouds.forEach(c=>{
+        c.x-=c.sp*.4;if(c.x+c.w<0)c.x=BASE_W+c.w;
+        ctx.save();ctx.globalAlpha=c.a*.7;
+        const cg=ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,c.w);
+        cg.addColorStop(0,"#441100");cg.addColorStop(.6,"#220a00");cg.addColorStop(1,"transparent");
+        ctx.fillStyle=cg;ctx.beginPath();ctx.ellipse(c.x,c.y,c.w,c.w*.3,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      });
+
+      const tws=[
+        {x:8,y:.50,w:28,h:.14},{x:50,y:.46,w:18,h:.18},{x:82,y:.52,w:22,h:.12},{x:148,y:.47,w:30,h:.17},
+        {x:196,y:.54,w:16,h:.12},{x:268,y:.44,w:26,h:.19},{x:312,y:.50,w:20,h:.14},{x:362,y:.47,w:32,h:.17},
+        {x:412,y:.53,w:18,h:.13},{x:445,y:.48,w:24,h:.16},
+      ];
+      tws.forEach(tw=>{
+        const tg=ctx.createLinearGradient(tw.x,0,tw.x+tw.w,0);
+        tg.addColorStop(0,"#0a0918");tg.addColorStop(.5,"#13102a");tg.addColorStop(1,"#080714");
+        ctx.fillStyle=tg;ctx.fillRect(tw.x,BASE_H*tw.y,tw.w,BASE_H*tw.h);
+        const nb=Math.max(2,Math.floor(tw.w/10));
+        for(let b=0;b<nb;b++){ctx.fillRect(tw.x+b*(tw.w/nb)+1,BASE_H*tw.y-7,tw.w/nb-3,8);}
+        const wx=tw.x+tw.w/2,wy=BASE_H*tw.y+BASE_H*tw.h*.35;
+        ctx.save();ctx.globalAlpha=.35+Math.sin(t*.09+tw.x)*.15;
+        const wg=ctx.createRadialGradient(wx,wy,0,wx,wy,7);
+        wg.addColorStop(0,"#ff8800");wg.addColorStop(1,"transparent");
+        ctx.fillStyle=wg;ctx.beginPath();ctx.arc(wx,wy,7,0,Math.PI*2);ctx.fill();ctx.restore();
+      });
+      tws.filter((_,i)=>i%2===0).forEach(tw=>{
+        const fx=tw.x+tw.w/2,fy=BASE_H*tw.y,fl=Math.sin(t*.16+tw.x)*.5;
+        ctx.save();ctx.globalAlpha=.65+fl*.25;
+        const fg2=ctx.createRadialGradient(fx,fy,0,fx,fy,14);
+        fg2.addColorStop(0,"#ffdd44");fg2.addColorStop(.4,"#ff5500");fg2.addColorStop(1,"transparent");
+        ctx.fillStyle=fg2;ctx.beginPath();ctx.ellipse(fx,fy-7,5+fl*2,13+fl*3,fl*.3,0,Math.PI*2);ctx.fill();ctx.restore();
+      });
+
+      const GROUND_Y=BASE_H*.60;
+      const gnd=ctx.createLinearGradient(0,GROUND_Y,0,BASE_H);
+      gnd.addColorStop(0,"#3d2410");gnd.addColorStop(.08,"#2e1a0b");gnd.addColorStop(.25,"#241408");gnd.addColorStop(.6,"#1a0e05");gnd.addColorStop(1,"#0f0803");
+      ctx.fillStyle=gnd;
+      ctx.beginPath();ctx.moveTo(0,GROUND_Y);
+      for(let i=0;i<=BASE_W;i+=8){
+        const bump=Math.sin(i*.08+t*.008)*2.5+Math.sin(i*.03)*3+Math.cos(i*.15)*1.5;
+        ctx.lineTo(i,GROUND_Y+bump);
+      }
+      ctx.lineTo(BASE_W,BASE_H);ctx.lineTo(0,BASE_H);ctx.closePath();ctx.fill();
+
+      for(let row=0;row<6;row++){
+        const gy=GROUND_Y+row*((BASE_H-GROUND_Y)/6)+12;
+        ctx.save();ctx.globalAlpha=.06+row*.01;ctx.strokeStyle="#8b5a2b";ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(0,gy);
+        for(let xi=0;xi<BASE_W;xi+=14)ctx.lineTo(xi,gy+Math.sin(xi*.11+row*2.3)*3+Math.cos(xi*.07+row)*2);
+        ctx.stroke();ctx.restore();
+      }
+
+      [{x:30,y:.66,rx:55,ry:9},{x:145,y:.72,rx:40,ry:7},{x:240,y:.64,rx:65,ry:10},
+       {x:380,y:.70,rx:50,ry:8},{x:440,y:.65,rx:35,ry:6},{x:100,y:.80,rx:45,ry:8},
+       {x:300,y:.77,rx:60,ry:9},{x:60,y:.88,rx:70,ry:11},{x:400,y:.85,rx:55,ry:10}].forEach(p=>{
+        ctx.save();ctx.globalAlpha=.18;
+        const dg=ctx.createRadialGradient(p.x,BASE_H*p.y,0,p.x,BASE_H*p.y,p.rx);
+        dg.addColorStop(0,"#6b3a1a");dg.addColorStop(.5,"#4a2510");dg.addColorStop(1,"transparent");
+        ctx.fillStyle=dg;ctx.beginPath();ctx.ellipse(p.x,BASE_H*p.y,p.rx,p.ry,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      });
+
+      [{x:22,y:.63,w:14,h:8,a:.8},{x:70,y:.67,w:8,h:5,a:.7},{x:120,y:.62,w:18,h:10,a:.9},
+       {x:180,y:.70,w:10,h:6,a:.75},{x:230,y:.64,w:22,h:12,a:.85},{x:290,y:.68,w:7,h:4,a:.7},
+       {x:340,y:.63,w:16,h:9,a:.8},{x:395,y:.71,w:11,h:7,a:.75},{x:455,y:.65,w:19,h:11,a:.85},
+       {x:50,y:.78,w:9,h:5,a:.6},{x:160,y:.82,w:13,h:7,a:.65},{x:320,y:.80,w:10,h:6,a:.6},
+       {x:420,y:.76,w:15,h:8,a:.7},{x:250,y:.85,w:12,h:7,a:.6}].forEach(r=>{
+        const ry=BASE_H*r.y;ctx.save();ctx.globalAlpha=r.a;
+        const rg=ctx.createLinearGradient(r.x-r.w/2,ry-r.h,r.x+r.w/2,ry);
+        rg.addColorStop(0,"#4a4a55");rg.addColorStop(.5,"#333340");rg.addColorStop(1,"#1e1e28");
+        ctx.fillStyle=rg;ctx.strokeStyle="#22222e";ctx.lineWidth=.8;
+        ctx.beginPath();ctx.moveTo(r.x-r.w*.4,ry);ctx.lineTo(r.x-r.w*.5,ry-r.h*.5);ctx.lineTo(r.x-r.w*.2,ry-r.h);
+        ctx.lineTo(r.x+r.w*.3,ry-r.h*.9);ctx.lineTo(r.x+r.w*.5,ry-r.h*.4);ctx.lineTo(r.x+r.w*.4,ry);
+        ctx.closePath();ctx.fill();ctx.stroke();
+        ctx.globalAlpha=r.a*.3;ctx.strokeStyle="#6a6a80";ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(r.x-r.w*.3,ry-r.h*.6);ctx.lineTo(r.x+r.w*.1,ry-r.h*.95);ctx.lineTo(r.x+r.w*.3,ry-r.h*.55);ctx.stroke();
+        ctx.restore();
+      });
+
+      [{sx:55,sy:.615,segs:[{dx:18,dy:4},{dx:8,dy:7},{dx:-4,dy:6}]},
+       {sx:170,sy:.635,segs:[{dx:-12,dy:5},{dx:6,dy:8},{dx:10,dy:4}]},
+       {sx:295,sy:.620,segs:[{dx:20,dy:3},{dx:6,dy:9},{dx:-8,dy:5}]},
+       {sx:400,sy:.640,segs:[{dx:-15,dy:6},{dx:8,dy:5},{dx:12,dy:7}]},
+       {sx:130,sy:.680,segs:[{dx:10,dy:4},{dx:4,dy:8}]},
+       {sx:350,sy:.720,segs:[{dx:-9,dy:5},{dx:5,dy:6}]}].forEach(c=>{
+        ctx.save();ctx.strokeStyle="#0f0803";ctx.lineWidth=1.8;ctx.globalAlpha=.65;ctx.shadowBlur=3;ctx.shadowColor="#000";
+        ctx.beginPath();let cx2=c.sx,cy2=BASE_H*c.sy;ctx.moveTo(cx2,cy2);
+        c.segs.forEach(s=>{cx2+=s.dx;cy2+=s.dy;ctx.lineTo(cx2,cy2);});ctx.stroke();
+        ctx.globalAlpha=.15;ctx.strokeStyle="#6b3a1a";ctx.lineWidth=.8;
+        let cx3=c.sx+1,cy3=BASE_H*c.sy-1;ctx.beginPath();ctx.moveTo(cx3,cy3);
+        c.segs.forEach(s=>{cx3+=s.dx;cy3+=s.dy;ctx.lineTo(cx3,cy3);});ctx.stroke();ctx.restore();
+      });
+
+      [{x:95,y:.655,rx:18,ry:4},{x:260,y:.643,rx:22,ry:5},{x:435,y:.660,rx:16,ry:4}].forEach((lp,li)=>{
+        const pulse=.6+Math.sin(t*.07+li*2.1)*.2;ctx.save();
+        const lg=ctx.createRadialGradient(lp.x,BASE_H*lp.y,0,lp.x,BASE_H*lp.y,lp.rx);
+        lg.addColorStop(0,"#ff8800");lg.addColorStop(.4,"#cc3300");lg.addColorStop(.8,"#440a00");lg.addColorStop(1,"transparent");
+        ctx.globalAlpha=pulse*.7;ctx.fillStyle=lg;ctx.beginPath();ctx.ellipse(lp.x,BASE_H*lp.y,lp.rx,lp.ry,0,0,Math.PI*2);ctx.fill();
+        ctx.globalAlpha=pulse*.4;ctx.strokeStyle="#ffaa22";ctx.lineWidth=.8;
+        ctx.beginPath();ctx.ellipse(lp.x,BASE_H*lp.y-1,lp.rx*.65,lp.ry*.4,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+      });
+
+      [{x:40},{x:110},{x:210},{x:275},{x:330},{x:385},{x:465},{x:75},{x:155},{x:310},{x:445}].forEach((tf,ti)=>{
+        const bx=tf.x,by=GROUND_Y+4+Math.sin(bx*.13)*3,sw=Math.sin(t*.04+ti*1.3)*.8;
+        ctx.save();ctx.strokeStyle="#5a4010";ctx.lineWidth=1.2;ctx.globalAlpha=.6;
+        for(let g=0;g<3;g++){const gx=bx+(g-1)*4,ang=-0.5+(g-1)*.25+sw*.3;ctx.beginPath();ctx.moveTo(gx,by);ctx.lineTo(gx+Math.sin(ang)*6,by-10-g*2);ctx.stroke();}
+        ctx.restore();
+      });
+
+      [{x:85,y:.645,r:2.5,c:"#3a3040"},{x:200,y:.660,r:2,c:"#2e2038"},{x:350,y:.650,r:3,c:"#383044"},
+       {x:470,y:.655,r:2.5,c:"#2a2035"},{x:135,y:.700,r:2,c:"#1e1828"},{x:280,y:.690,r:3.5,c:"#33283e"}].forEach(d=>{
+        ctx.save();ctx.globalAlpha=.7;ctx.fillStyle=d.c;ctx.beginPath();ctx.arc(d.x,BASE_H*d.y,d.r,0,Math.PI*2);ctx.fill();ctx.restore();
+      });
+
+      ctx.save();ctx.globalAlpha=.55;
+      const fv=ctx.createLinearGradient(0,BASE_H*.88,0,BASE_H);fv.addColorStop(0,"transparent");fv.addColorStop(1,"#000000");
+      ctx.fillStyle=fv;ctx.fillRect(0,BASE_H*.88,BASE_W,BASE_H*.12);ctx.restore();
+
+      ctx.restore();
+    }
+
+
+function drawCastle(ctx, cx, cy, hp, maxHp, t, shielded, level = 1) {
+  const hr   = hp / maxHp;
+  const lvl  = CASTLE_LEVELS[level] || CASTLE_LEVELS[1];
+  const wallC = hr > .6 ? lvl.color : hr > .3 ? "#f0c84a" : "#f06060";
+  const glow  = hr > .6 ? lvl.color : hr > .3 ? "#ffcc00" : "#ff3333";
+  const pulse = Math.sin(t * .05) * 2;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(0.55, 0.55);          // bbox fijo: ~±55px en todas las direcciones
+
+  // ── Escudo (igual en todos los niveles) ──────────────────────────────────
+  if (shielded) {
+    ctx.save();
+    const sg = ctx.createRadialGradient(0, 0, 30, 0, 0, 78);
+    sg.addColorStop(0, "#4488ff00"); sg.addColorStop(.7, "#4488ff22"); sg.addColorStop(1, "#4488ff88");
+    ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(0, -10, 78, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#88bbff"; ctx.lineWidth = 2; ctx.shadowBlur = 20;
+    ctx.shadowColor = "#4488ff"; ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.arc(0, -10, 78, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── Sombra base ──────────────────────────────────────────────────────────
+  ctx.fillStyle = "#1a2a3a88";
+  ctx.beginPath(); ctx.ellipse(0, 32, 54, 11, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.shadowBlur = 16; ctx.shadowColor = glow;
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  NIVEL 1 — Torre simple
+  //  Bbox real: cuerpo [-25,-48] 50×76 | torres laterales ±[22..48]×[-50..20]
+  // ════════════════════════════════════════════════════════════════════════
+  if (level === 1) {
+    // Cuerpo central
+    const bg = ctx.createLinearGradient(-25, -50, 25, 14);
+    bg.addColorStop(0, "#5a7a9a"); bg.addColorStop(.5, wallC); bg.addColorStop(1, "#3a5a7a");
+    ctx.fillStyle = bg; ctx.strokeStyle = wallC; ctx.lineWidth = 1.5;
+    rrect(ctx, -25, -48, 50, 76, 3); ctx.fill(); ctx.stroke();
+
+    // Almenas ×5
+    ctx.fillStyle = wallC; ctx.strokeStyle = glow; ctx.lineWidth = 1.5; ctx.shadowBlur = 10;
+    for (let i = 0; i < 5; i++) { rrect(ctx, -25 + i * 10, -60 + pulse * .5, 9, 13, 2); ctx.fill(); ctx.stroke(); }
+
+    // Torres laterales
+    [[-35, -20], [35, -20]].forEach(([tx, ty]) => {
+      const tg = ctx.createLinearGradient(tx - 13, ty - 32, tx + 13, ty + 6);
+      tg.addColorStop(0, "#4a6a8a"); tg.addColorStop(1, "#2a4a6a");
+      ctx.fillStyle = tg; ctx.strokeStyle = wallC; ctx.lineWidth = 1.2;
+      rrect(ctx, tx - 13, ty - 30, 26, 40, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = wallC;
+      [-8, -1, 6].forEach(bx => { rrect(ctx, tx + bx, ty - 38 + pulse * .3, 6.5, 9, 1); ctx.fill(); ctx.stroke(); });
+    });
+
+    // Puerta
+    ctx.fillStyle = "#0a1520"; ctx.strokeStyle = glow + "88"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-12, 30); ctx.lineTo(-12, -2);
+    ctx.arc(0, -2, 12, Math.PI, 0); ctx.lineTo(12, 30); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // 1 bandera
+    _drawFlag(ctx, 0, -60, glow, pulse, t, hr);
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  NIVEL 2 — Bastión
+  //  Mismas dimensiones externas. Visual: murallas más detalladas,
+  //  ventanas saeteras, 2 banderas, línea de cornisa.
+  // ════════════════════════════════════════════════════════════════════════
+  } else if (level === 2) {
+    // Cuerpo central (mismo tamaño que N1)
+    const bg = ctx.createLinearGradient(-25, -50, 25, 14);
+    bg.addColorStop(0, "#4a7a9a"); bg.addColorStop(.5, wallC); bg.addColorStop(1, "#2a5a7a");
+    ctx.fillStyle = bg; ctx.strokeStyle = wallC; ctx.lineWidth = 1.5;
+    rrect(ctx, -25, -48, 50, 76, 3); ctx.fill(); ctx.stroke();
+
+    // Cornisa decorativa
+    ctx.strokeStyle = wallC + "66"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-25, -18); ctx.lineTo(25, -18); ctx.stroke();
+
+    // Almenas ×5 (misma posición, ligeramente más anchas)
+    ctx.fillStyle = wallC; ctx.strokeStyle = glow; ctx.lineWidth = 1.5; ctx.shadowBlur = 10;
+    for (let i = 0; i < 5; i++) { rrect(ctx, -25 + i * 10, -60 + pulse * .5, 9, 13, 2); ctx.fill(); ctx.stroke(); }
+
+    // Ventanas saeteras (nuevo en N2)
+    ctx.fillStyle = "#0a1520"; ctx.strokeStyle = glow + "66"; ctx.lineWidth = 1;
+    [[-10, -8], [10, -8]].forEach(([wx, wy]) => {
+      ctx.beginPath(); ctx.moveTo(wx - 3, wy + 7); ctx.lineTo(wx - 3, wy);
+      ctx.arc(wx, wy, 3, Math.PI, 0); ctx.lineTo(wx + 3, wy + 7); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    });
+
+    // Torres laterales (mismo bbox, más adornadas)
+    [[-35, -20], [35, -20]].forEach(([tx, ty]) => {
+      const tg = ctx.createLinearGradient(tx - 13, ty - 32, tx + 13, ty + 6);
+      tg.addColorStop(0, "#3a6a8a"); tg.addColorStop(1, "#1a4a6a");
+      ctx.fillStyle = tg; ctx.strokeStyle = wallC; ctx.lineWidth = 1.2;
+      rrect(ctx, tx - 13, ty - 30, 26, 40, 3); ctx.fill(); ctx.stroke();
+      // Franja decorativa en torres
+      ctx.strokeStyle = wallC + "44"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(tx - 13, ty - 10); ctx.lineTo(tx + 13, ty - 10); ctx.stroke();
+      ctx.fillStyle = wallC;
+      [-8, -1, 6].forEach(bx => { rrect(ctx, tx + bx, ty - 38 + pulse * .3, 6.5, 9, 1); ctx.fill(); ctx.stroke(); });
+    });
+
+    // Puerta doble arco
+    ctx.fillStyle = "#0a1520"; ctx.strokeStyle = glow + "88"; ctx.lineWidth = 1.2;
+    [[-7, 0], [7, 0]].forEach(([ox]) => {
+      ctx.beginPath(); ctx.moveTo(ox - 5, 30); ctx.lineTo(ox - 5, -2);
+      ctx.arc(ox, -2, 5, Math.PI, 0); ctx.lineTo(ox + 5, 30);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    });
+    // Separador central puerta
+    ctx.strokeStyle = glow + "55"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, 30); ctx.lineTo(0, -2); ctx.stroke();
+
+    // 2 banderas (misma altura Y que N1)
+    _drawFlag(ctx, -8, -60, glow, pulse, t, hr);
+    _drawFlag(ctx,  8, -60, glow, pulse, t, hr);
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  NIVEL 3 — Fortaleza
+  //  Mismo bbox. Visual: muro interior, 6 almenas, 4 torrecillas esquina,
+  //  rastrillo, 3 banderas, escudo central.
+  // ════════════════════════════════════════════════════════════════════════
+  } else if (level === 3) {
+    // Cuerpo central
+    const bg = ctx.createLinearGradient(-25, -50, 25, 14);
+    bg.addColorStop(0, "#3a6a8a"); bg.addColorStop(.4, wallC); bg.addColorStop(1, "#1a4a6a");
+    ctx.fillStyle = bg; ctx.strokeStyle = wallC; ctx.lineWidth = 2;
+    rrect(ctx, -25, -48, 50, 76, 3); ctx.fill(); ctx.stroke();
+
+    // Muro interior decorativo
+    ctx.strokeStyle = wallC + "33"; ctx.lineWidth = 1;
+    rrect(ctx, -21, -44, 42, 66, 2); ctx.stroke();
+
+    // Escudo central (nuevo en N3)
+    ctx.strokeStyle = wallC + "88"; ctx.lineWidth = 1.5; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.moveTo(0, -30); ctx.lineTo(8, -22); ctx.lineTo(8, -12);
+    ctx.lineTo(0, -6); ctx.lineTo(-8, -12); ctx.lineTo(-8, -22); ctx.closePath(); ctx.stroke();
+
+    // Almenas ×6 (una más que N1/N2, mismo Y)
+    ctx.fillStyle = wallC; ctx.strokeStyle = glow; ctx.lineWidth = 1.5; ctx.shadowBlur = 10;
+    for (let i = 0; i < 6; i++) { rrect(ctx, -27.5 + i * 9.5, -60 + pulse * .5, 8, 13, 2); ctx.fill(); ctx.stroke(); }
+
+    // Torres laterales — torrecillas pequeñas en las 4 esquinas dentro del bbox
+    const cornerTowers = [[-35, -32], [35, -32], [-35, -8], [35, -8]];
+    cornerTowers.forEach(([tx, ty]) => {
+      const tg = ctx.createLinearGradient(tx - 11, ty - 18, tx + 11, ty + 8);
+      tg.addColorStop(0, "#2a5a7a"); tg.addColorStop(1, "#0a3a5a");
+      ctx.fillStyle = tg; ctx.strokeStyle = wallC; ctx.lineWidth = 1;
+      rrect(ctx, tx - 11, ty - 16, 22, 28, 3); ctx.fill(); ctx.stroke();
+      [-5, 0, 5].forEach(bx => { rrect(ctx, tx + bx - 2.5, ty - 22 + pulse * .3, 4, 7, 1); ctx.fill(); ctx.stroke(); });
+    });
+
+    // Puerta con rastrillo
+    ctx.fillStyle = "#060e18"; ctx.strokeStyle = glow + "aa"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(-13, 30); ctx.lineTo(-13, -6);
+    ctx.arc(0, -6, 13, Math.PI, 0); ctx.lineTo(13, 30); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = glow + "44"; ctx.lineWidth = 1;
+    for (let g = -9; g <= 9; g += 6) { ctx.beginPath(); ctx.moveTo(g, -5); ctx.lineTo(g, 30); ctx.stroke(); }
+    ctx.beginPath(); ctx.moveTo(-12, 8); ctx.lineTo(12, 8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-12, 18); ctx.lineTo(12, 18); ctx.stroke();
+
+    // 3 banderas (mismo Y que N1)
+    _drawFlag(ctx, -12, -60, glow, pulse, t, hr);
+    _drawFlag(ctx,   0, -62, glow, pulse, t, hr);
+    _drawFlag(ctx,  12, -60, glow, pulse, t, hr);
+
+  // ════════════════════════════════════════════════════════════════════════
+  //  NIVEL 4 — Ciudadela
+  //  Mismo bbox. Visual: anillo ornamental exterior (no supera ±55),
+  //  7 almenas con pico, muro doble, 4 torrecillas, puerta triple,
+  //  4 banderas, aura pulsante, gárgolas decorativas.
+  // ════════════════════════════════════════════════════════════════════════
+  } else if (level === 4) {
+    // Anillo ornamental exterior — radio máximo 53 (dentro del bbox 55)
+    ctx.save(); ctx.globalAlpha = .25 + Math.sin(t * .04) * .08;
+    ctx.strokeStyle = wallC; ctx.lineWidth = 1;
+    ctx.setLineDash([4, 5]);
+    ctx.beginPath(); ctx.arc(0, -10, 52, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Cuerpo central
+    const bg = ctx.createLinearGradient(-25, -50, 25, 14);
+    bg.addColorStop(0, "#2a5a8a"); bg.addColorStop(.35, wallC);
+    bg.addColorStop(.7, "#1a3a6a"); bg.addColorStop(1, "#0a1a4a");
+    ctx.fillStyle = bg; ctx.strokeStyle = wallC; ctx.lineWidth = 2;
+    rrect(ctx, -25, -48, 50, 76, 3); ctx.fill(); ctx.stroke();
+
+    // Muro interior doble
+    ctx.strokeStyle = wallC + "44"; ctx.lineWidth = 1.5;
+    rrect(ctx, -21, -44, 42, 66, 2); ctx.stroke();
+    ctx.strokeStyle = wallC + "22"; ctx.lineWidth = 1;
+    rrect(ctx, -17, -40, 34, 56, 2); ctx.stroke();
+
+    // Escudo elaborado (versión N4)
+    ctx.strokeStyle = wallC + "aa"; ctx.lineWidth = 1.8; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.moveTo(0, -32); ctx.lineTo(9, -22); ctx.lineTo(9, -10);
+    ctx.lineTo(0, -4); ctx.lineTo(-9, -10); ctx.lineTo(-9, -22); ctx.closePath(); ctx.stroke();
+    // Cruz interior del escudo
+    ctx.lineWidth = 1; ctx.strokeStyle = wallC + "66";
+    ctx.beginPath(); ctx.moveTo(0, -32); ctx.lineTo(0, -4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-9, -18); ctx.lineTo(9, -18); ctx.stroke();
+
+    // Almenas ×7 con pico (mismo Y base, pico hacia arriba dentro del bbox)
+    ctx.fillStyle = wallC; ctx.strokeStyle = glow; ctx.lineWidth = 1.5; ctx.shadowBlur = 12;
+    for (let i = 0; i < 7; i++) {
+      const bx = -28 + i * 9, by = -60 + pulse * .5;
+      rrect(ctx, bx, by, 8, 13, 2); ctx.fill(); ctx.stroke();
+      // Pico — máximo Y: by - 7 ≈ -67, dentro del bbox (-70 sin escala)
+      ctx.beginPath(); ctx.moveTo(bx + 1, by); ctx.lineTo(bx + 4, by - 7); ctx.lineTo(bx + 7, by);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+
+    // 4 torrecillas (mismo bbox que N3)
+    const cTowers = [[-35, -32], [35, -32], [-35, -8], [35, -8]];
+    cTowers.forEach(([tx, ty]) => {
+      const tg = ctx.createLinearGradient(tx - 11, ty - 18, tx + 11, ty + 8);
+      tg.addColorStop(0, "#1a4a6a"); tg.addColorStop(1, "#081828");
+      ctx.fillStyle = tg; ctx.strokeStyle = wallC; ctx.lineWidth = 1.5;
+      rrect(ctx, tx - 11, ty - 16, 22, 28, 3); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = wallC + "33"; ctx.lineWidth = 1;
+      rrect(ctx, tx - 8, ty - 13, 16, 21, 2); ctx.stroke();
+      [-5, 0, 5].forEach(bx => { rrect(ctx, tx + bx - 2.5, ty - 22 + pulse * .3, 4, 7, 1); ctx.fill(); ctx.stroke(); });
+    });
+
+    // Gárgolas decorativas (pequeñas, solo N4, dentro del bbox)
+    [[-28, -44], [28, -44]].forEach(([gx, gy]) => {
+      ctx.save(); ctx.globalAlpha = .7; ctx.fillStyle = wallC + "88";
+      ctx.beginPath(); ctx.arc(gx, gy, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = wallC; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(gx, gy + 4); ctx.lineTo(gx + (gx > 0 ? 6 : -6), gy + 2); ctx.stroke();
+      ctx.restore();
+    });
+
+    // Puerta triple arco
+    ctx.fillStyle = "#040c14";
+    [[-10, 0], [0, 0], [10, 0]].forEach(([ox]) => {
+      ctx.strokeStyle = glow + "bb"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ox - 4.5, 30); ctx.lineTo(ox - 4.5, -6);
+      ctx.arc(ox, -6, 4.5, Math.PI, 0); ctx.lineTo(ox + 4.5, 30);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    });
+
+    // 4 banderas (mismo Y que niveles anteriores)
+    _drawFlag(ctx, -15, -60, glow, pulse, t, hr);
+    _drawFlag(ctx,  -5, -62, glow, pulse, t, hr);
+    _drawFlag(ctx,   5, -62, glow, pulse, t, hr);
+    _drawFlag(ctx,  15, -60, glow, pulse, t, hr);
+
+    // Aura pulsante (radial, dentro del bbox)
+    ctx.save(); ctx.globalAlpha = .05 + Math.sin(t * .04) * .03;
+    const aura = ctx.createRadialGradient(0, -20, 15, 0, -20, 52);
+    aura.addColorStop(0, wallC); aura.addColorStop(1, "transparent");
+    ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(0, -20, 52, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+   } else {
+    // Anillo exterior pulsante
+    ctx.save();
+    ctx.globalAlpha = .3 + Math.sin(t * .05) * .1;
+    ctx.strokeStyle = wallC; ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath(); ctx.arc(0, -10, 52, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Anillo interior decorativo
+    ctx.save();
+    ctx.globalAlpha = .15 + Math.sin(t * .07 + 1) * .05;
+    ctx.strokeStyle = wallC; ctx.lineWidth = 1;
+    ctx.setLineDash([2, 6]);
+    ctx.beginPath(); ctx.arc(0, -10, 40, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Cuerpo central con gradiente imperial
+    const bg = ctx.createLinearGradient(-25, -50, 25, 14);
+    bg.addColorStop(0, "#4a0a2a"); bg.addColorStop(.3, wallC);
+    bg.addColorStop(.6, "#2a0818"); bg.addColorStop(1, "#1a0410");
+    ctx.fillStyle = bg; ctx.strokeStyle = wallC; ctx.lineWidth = 2.5;
+    rrect(ctx, -25, -48, 50, 76, 3); ctx.fill(); ctx.stroke();
+
+    // Muro triple interior
+    ctx.strokeStyle = wallC + "55"; ctx.lineWidth = 1.5;
+    rrect(ctx, -21, -44, 42, 66, 2); ctx.stroke();
+    ctx.strokeStyle = wallC + "22"; ctx.lineWidth = 1;
+    rrect(ctx, -17, -40, 34, 56, 2); ctx.stroke();
+
+    // Escudo imperial (más elaborado que N4)
+    ctx.strokeStyle = wallC; ctx.lineWidth = 2; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(10, -24);
+    ctx.lineTo(10, -10); ctx.lineTo(0, -3); ctx.lineTo(-10, -10);
+    ctx.lineTo(-10, -24); ctx.closePath(); ctx.stroke();
+    // Cruz interior
+    ctx.lineWidth = 1.2; ctx.strokeStyle = wallC + "88";
+    ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(0, -3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-10, -20); ctx.lineTo(10, -20); ctx.stroke();
+    // Orbe central del escudo
+    ctx.fillStyle = wallC + "66"; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(0, -20, 3, 0, Math.PI * 2); ctx.fill();
+
+    // Almenas ×8 con pico DOBLE (distintivo N5)
+    ctx.fillStyle = wallC; ctx.strokeStyle = glow; ctx.lineWidth = 1.5; ctx.shadowBlur = 14;
+    for (let i = 0; i < 8; i++) {
+      const bx = -28 + i * 7.5, by = -60 + pulse * .5;
+      rrect(ctx, bx, by, 6.5, 13, 2); ctx.fill(); ctx.stroke();
+      // Pico doble
+      ctx.beginPath(); ctx.moveTo(bx + .5, by);
+      ctx.lineTo(bx + 2, by - 5); ctx.lineTo(bx + 3.25, by - 2);
+      ctx.lineTo(bx + 4.5, by - 6); ctx.lineTo(bx + 6, by);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+
+    // 6 torrecillas — 4 esquina + 2 centrales altas
+    const towers6 = [
+      [-35, -32], [35, -32], [-35, -8], [35, -8],  // esquinas
+      [-18, -38], [18, -38],                          // centrales (más altas)
+    ];
+    towers6.forEach(([tx, ty], idx) => {
+      const isCentral = idx >= 4;
+      const tw = isCentral ? 10 : 11;
+      const th = isCentral ? 32 : 28;
+      const tg = ctx.createLinearGradient(tx - tw, ty - th, tx + tw, ty + 8);
+      tg.addColorStop(0, "#3a0818"); tg.addColorStop(1, "#0a0208");
+      ctx.fillStyle = tg; ctx.strokeStyle = wallC; ctx.lineWidth = isCentral ? 1.5 : 1;
+      rrect(ctx, tx - tw, ty - th, tw * 2, th + 10, 3); ctx.fill(); ctx.stroke();
+      // Almenas de torrecilla
+      const nb = isCentral ? 3 : 3;
+      const step = (tw * 2) / nb;
+      for (let b = 0; b < nb; b++) {
+        const bx = tx - tw + b * step;
+        rrect(ctx, bx + 1, ty - th - 6 + pulse * .3, step - 2, 7, 1);
+        ctx.fill(); ctx.stroke();
+      }
+      // Ventana saetera en torres centrales
+      if (isCentral) {
+        ctx.fillStyle = "#050010"; ctx.strokeStyle = wallC + "66"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(tx - 2.5, ty - 8); ctx.lineTo(tx - 2.5, ty - 16);
+        ctx.arc(tx, ty - 16, 2.5, Math.PI, 0); ctx.lineTo(tx + 2.5, ty - 8);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = wallC; // restaurar para próxima almena
+      }
+    });
+
+    // Puerta ojival imperial (arco apuntado)
+    ctx.fillStyle = "#030008"; ctx.strokeStyle = glow + "cc"; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-13, 30); ctx.lineTo(-13, 2);
+    ctx.bezierCurveTo(-13, -14, 0, -18, 0, -18);
+    ctx.bezierCurveTo(0, -18, 13, -14, 13, 2);
+    ctx.lineTo(13, 30); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // Rejas ojivales
+    ctx.strokeStyle = glow + "44"; ctx.lineWidth = 1;
+    for (let g = -8; g <= 8; g += 8) {
+      ctx.beginPath(); ctx.moveTo(g, 30); ctx.lineTo(g, 4); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(-12, 10); ctx.lineTo(12, 10); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-12, 20); ctx.lineTo(12, 20); ctx.stroke();
+
+    // 5 banderas
+    _drawFlag(ctx, -18, -60, glow, pulse, t, hr);
+    _drawFlag(ctx,  -8, -62, glow, pulse, t, hr);
+    _drawFlag(ctx,   0, -64, glow, pulse, t, hr);
+    _drawFlag(ctx,   8, -62, glow, pulse, t, hr);
+    _drawFlag(ctx,  18, -60, glow, pulse, t, hr);
+
+    // Aura imperial intensa (doble capa)
+    ctx.save();
+    ctx.globalAlpha = .08 + Math.sin(t * .04) * .04;
+    const aura1 = ctx.createRadialGradient(0, -20, 10, 0, -20, 52);
+    aura1.addColorStop(0, wallC); aura1.addColorStop(1, "transparent");
+    ctx.fillStyle = aura1; ctx.beginPath(); ctx.arc(0, -20, 52, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = .12 + Math.sin(t * .06 + 1) * .05;
+    const aura2 = ctx.createRadialGradient(0, -20, 0, 0, -20, 25);
+    aura2.addColorStop(0, wallC + "aa"); aura2.addColorStop(1, "transparent");
+    ctx.fillStyle = aura2; ctx.beginPath(); ctx.arc(0, -20, 25, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function _drawFlag(ctx, fx, fy, glow, pulse, t, hr) {
+  const fw = Math.sin(t * .09) * 6;
+  ctx.strokeStyle=glow; ctx.lineWidth=1.5; ctx.shadowBlur=6; ctx.shadowColor=glow;
+  ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(fx,fy-22+pulse); ctx.stroke();
+  ctx.fillStyle=hr>.6?"#00ccff":hr>.3?"#ffcc00":"#ff3333";
+  ctx.shadowBlur=12; ctx.shadowColor=ctx.fillStyle;
+  ctx.beginPath(); ctx.moveTo(fx,fy-22+pulse); ctx.lineTo(fx+16+fw,fy-16+pulse);
+  ctx.lineTo(fx,fy-10+pulse); ctx.closePath(); ctx.fill();
+}
+
+    function drawSoldier(ctx,x,y,color,f){
+      ctx.save();ctx.translate(x,y);ctx.shadowBlur=10;ctx.shadowColor=color;
+      const wb=Math.sin(f*.4)*2,ls=Math.sin(f*.4)*5;
+      ctx.strokeStyle=color;ctx.lineWidth=2.8;ctx.lineCap="round";
+      ctx.beginPath();ctx.moveTo(-3,6);ctx.lineTo(-4+ls*.3,15+wb);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(3,6);ctx.lineTo(4-ls*.3,15-wb);ctx.stroke();
+      ctx.fillStyle=color;rrect(ctx,-5,-3,10,10,2);ctx.fill();
+      ctx.strokeStyle=color;ctx.lineWidth=2.2;
+      ctx.beginPath();ctx.moveTo(-5,1);ctx.lineTo(-11+ls*.2,6);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(5,1);ctx.lineTo(11-ls*.2,6);ctx.stroke();
+      ctx.fillStyle=color;ctx.shadowBlur=14;ctx.beginPath();ctx.arc(0,-8+wb*.3,5.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=lc(color,50);ctx.beginPath();ctx.ellipse(0,-11+wb*.3,6.5,3.5,0,Math.PI,0);ctx.fill();
+      ctx.strokeStyle=lc(color,60);ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(7,-3);ctx.lineTo(17,-9);ctx.stroke();
+      ctx.restore();
+    }
+    function drawTank(ctx,x,y,color,f,fr){
+      ctx.save();ctx.translate(x,y);const rb=Math.sin(f*.15)*1.5,tc=fr?"#88ddff":color;
+      ctx.shadowBlur=18;ctx.shadowColor=tc;ctx.fillStyle="#333344";ctx.strokeStyle="#555566";ctx.lineWidth=1;
+      rrect(ctx,-22,7+rb,44,9,3);ctx.fill();ctx.stroke();rrect(ctx,-22,-17+rb,44,9,3);ctx.fill();ctx.stroke();
+      const hg=ctx.createLinearGradient(-20,-7+rb,20,7+rb);hg.addColorStop(0,lc(tc,20));hg.addColorStop(1,tc);
+      ctx.fillStyle=hg;ctx.strokeStyle=tc;ctx.lineWidth=1.5;rrect(ctx,-20,-7+rb,40,14,3);ctx.fill();ctx.stroke();
+      ctx.lineWidth=5;ctx.strokeStyle=tc;ctx.shadowBlur=8;ctx.beginPath();ctx.moveTo(9,-9+rb);ctx.lineTo(26,-9+rb);ctx.stroke();
+      ctx.restore();
+    }
+    function drawCannon(ctx,x,y,color,f){
+      ctx.save();ctx.translate(x,y);const b=Math.sin(f*.3)*1.5;
+      ctx.shadowBlur=12;ctx.shadowColor=color;ctx.strokeStyle=color;ctx.lineWidth=2.5;
+      [-9,9].forEach(wx=>{ctx.beginPath();ctx.arc(wx,9+b,7,0,Math.PI*2);ctx.stroke();});
+      ctx.lineWidth=2.8;ctx.beginPath();ctx.moveTo(-9,9+b);ctx.lineTo(9,9+b);ctx.stroke();
+      ctx.fillStyle=color+"88";ctx.beginPath();ctx.arc(0,1+b,8,0,Math.PI*2);ctx.fill();
+      ctx.save();ctx.translate(0,1+b);ctx.rotate(-.5);rrect(ctx,-4,-19,8,20,2);ctx.fill();ctx.stroke();ctx.restore();
+      ctx.restore();
+    }
+    function drawPlane(ctx,x,y,color,f){
+      ctx.save();ctx.translate(x,y);const alt=Math.sin(f*.12)*4;
+      ctx.shadowBlur=16;ctx.shadowColor=color;ctx.fillStyle=color+"cc";ctx.strokeStyle=color;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(-3,alt);ctx.lineTo(-15,alt-11);ctx.lineTo(-19,alt-9);ctx.lineTo(-7,alt+4);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-3,alt);ctx.lineTo(-15,alt+11);ctx.lineTo(-19,alt+9);ctx.lineTo(-7,alt-4);ctx.closePath();ctx.fill();ctx.stroke();
+      const fg=ctx.createLinearGradient(-11,alt-4,7,alt+4);fg.addColorStop(0,lc(color,40));fg.addColorStop(1,color);
+      ctx.fillStyle=fg;ctx.strokeStyle=lc(color,60);ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(-11,alt);ctx.quadraticCurveTo(-3,alt-5,7,alt-3);ctx.lineTo(7,alt+3);ctx.quadraticCurveTo(-3,alt+5,-11,alt);ctx.closePath();ctx.fill();ctx.stroke();
+      const pa=f*.55;ctx.save();ctx.translate(-13,alt);ctx.strokeStyle=lc(color,70);ctx.lineWidth=2.2;
+      for(let p=0;p<3;p++){const a=pa+(p/3)*Math.PI*2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*8,Math.sin(a)*8);ctx.stroke();}
+      ctx.restore();ctx.restore();
+    }
+    function drawPU(ctx,item,t){
+      const{x,y,def,pulse}=item,p=Math.sin(t*.08+pulse),fy=y+p*5,sc=.9+p*.1;
+      ctx.save();ctx.translate(x,fy);ctx.scale(sc,sc);
+      ctx.shadowBlur=26;ctx.shadowColor=def.color;ctx.strokeStyle=def.color;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(0,0,21,0,Math.PI*2);ctx.stroke();
+      const ig=ctx.createRadialGradient(0,0,2,0,0,19);ig.addColorStop(0,def.color+"55");ig.addColorStop(1,def.color+"11");
+      ctx.fillStyle=ig;ctx.beginPath();ctx.arc(0,0,19,0,Math.PI*2);ctx.fill();
+      ctx.font="15px serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(def.glyph,0,0);
+      ctx.font="bold 6.5px 'Courier New'";ctx.fillStyle=def.color;ctx.shadowBlur=8;ctx.fillText(def.label,0,28);
+      ctx.restore();
+    }
+    function drawArrow(ctx,bx,by,vx,vy,type){
+      ctx.save();ctx.translate(bx,by);ctx.rotate(Math.atan2(vy,vx));
+      if(type==="laser"){
+        ctx.shadowBlur=18;ctx.shadowColor="#ff2244";ctx.strokeStyle="#ff5566";ctx.lineWidth=3.5;
+        ctx.beginPath();ctx.moveTo(-16,0);ctx.lineTo(8,0);ctx.stroke();
+        ctx.fillStyle="#ffaacc";ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(5,-3.5);ctx.lineTo(5,3.5);ctx.closePath();ctx.fill();
+      }else{
+        ctx.save();ctx.globalAlpha=.38;const tg=ctx.createLinearGradient(-20,0,0,0);tg.addColorStop(0,"transparent");tg.addColorStop(1,"#ffdd44");ctx.fillStyle=tg;ctx.fillRect(-20,-1.5,20,3);ctx.restore();
+        ctx.strokeStyle="#c8a040";ctx.lineWidth=2;ctx.shadowBlur=8;ctx.shadowColor="#ffdd44";ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(6,0);ctx.stroke();
+        ctx.fillStyle="#ffee88";ctx.beginPath();ctx.moveTo(11,0);ctx.lineTo(4,-3);ctx.lineTo(4,3);ctx.closePath();ctx.fill();
+        ctx.strokeStyle="#ff6644";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-9,0);ctx.lineTo(-14,-4);ctx.stroke();ctx.beginPath();ctx.moveTo(-9,0);ctx.lineTo(-14,4);ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    /* ═══ UI COMPONENTS ═══ */
+    function Toast({toast}) {
+      if(!toast) return null;
+      return(
+        <div style={{position:"absolute",top:10,left:10,right:10,background:toast.color+"22",border:`1px solid ${toast.color}`,borderRadius:6,padding:"10px 14px",fontSize:11,color:toast.color,textAlign:"center",letterSpacing:1,zIndex:9999,backdropFilter:"blur(4px)",boxShadow:`0 0 20px ${toast.color}44`,fontFamily:"'Courier New',monospace",pointerEvents:"none"}}>
+          {toast.text}
+        </div>
+      );
+    }
+    function useToast() {
+      const[toast,setToast]=useState(null);
+      const timerRef=useRef(null);
+      const showToast=useCallback((text,color=C.green)=>{
+        if(timerRef.current)clearTimeout(timerRef.current);
+        setToast({text,color});
+        timerRef.current=setTimeout(()=>setToast(null),3000);
+      },[]);
+      return{toast,showToast};
+    }
+    function Btn({children,onClick,color=C.gold,disabled=false,small=false,style={}}) {
+      const[hov,setHov]=useState(false);
+      return(
+        <button onClick={disabled?undefined:onClick} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+          style={{background:hov&&!disabled?color+"22":"transparent",border:`1px solid ${disabled?C.muted:color}`,color:disabled?C.muted:color,padding:small?"7px 16px":"12px 28px",fontSize:small?10:11,letterSpacing:small?2:4,cursor:disabled?"not-allowed":"pointer",fontFamily:"'Courier New',monospace",textShadow:disabled?"none":`0 0 8px ${color}`,transition:"all .2s",borderRadius:3,opacity:disabled?.5:1,...style}}>
+          {children}
+        </button>
+      );
+    }
+    function Modal({children,onClose,toast}) {
+      return(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",backdropFilter:"blur(6px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:500,padding:16}}>
+          <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:8,padding:"56px 28px 28px",width:"100%",maxWidth:360,position:"relative",boxShadow:`0 0 60px ${C.cyan}11`}}>
+            <Toast toast={toast}/>
+            {onClose&&<button onClick={onClose} style={{position:"absolute",top:10,right:14,background:"none",border:"none",color:C.muted,fontSize:18,cursor:"pointer",fontFamily:"inherit",zIndex:10}}>✕</button>}
+            {children}
+          </div>
+        </div>
+      );
+    }
+    function STitle({children,color=C.cyan}){return <div style={{fontSize:9,letterSpacing:5,color,marginBottom:14,fontFamily:"'Courier New',monospace",textTransform:"uppercase"}}>{children}</div>;}
+    function Divider({color=C.border}){return <div style={{height:1,background:`linear-gradient(90deg,transparent,${color},transparent)`,margin:"16px 0"}}/>;}
+    function StatBox({label,value,color}){return(<div style={{background:"#0a1020",border:`1px solid ${C.border}`,borderRadius:4,padding:"8px 10px"}}><div style={{fontSize:7,letterSpacing:2,color:C.muted,marginBottom:4}}>{label}</div><div style={{fontSize:15,fontWeight:900,color,textShadow:`0 0 8px ${color}`}}>{value}</div></div>);}
+    function Pill({children}){return <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:20,padding:"5px 12px",fontSize:9,color:C.muted,letterSpacing:1}}>{children}</div>;}
+    function MiniStat({label,value,color}){return(<div style={{textAlign:"center",background:"#0a1020",border:`1px solid ${C.border}`,borderRadius:4,padding:"8px 4px"}}><div style={{fontSize:7,letterSpacing:1,color:C.muted,marginBottom:3}}>{label}</div><div style={{fontSize:16,fontWeight:900,color,textShadow:`0 0 8px ${color}`}}>{value}</div></div>);}
+
+    function useLivesCountdown(profile) {
+      const[remaining,setRemaining]=useState(null);
+      useEffect(()=>{
+        if(!profile?.livesRestoredAt)return;
+        const tick=()=>{const diff=profile.livesRestoredAt-Date.now();if(diff<=0){setRemaining(null);return;}const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);setRemaining(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`);};
+        tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
+      },[profile]);
+      return remaining;
+    }
+
+    /* ═══ BUY LIVES MODAL — reutilizable ═══ */
+    function BuyLivesModal({profile,setProfile,onClose,onBought}) {
+      const{toast,showToast}=useToast();
+      const countdown=useLivesCountdown(profile);
+      const cost=getLivesCost(profile);
+      const CFT_COST=cost/CFT_TO_POINTS;
+      const canBuyPts=profile.points>=cost;
+      // Próximo costo (informativo)
+      const nextCount=(()=>{const c=profile.purchaseCount||0;const f=profile.firstPurchaseAt||null;return(f&&Date.now()-f>=LIVES_RESTORE_MS)?1:c+1;})();
+      const nextCost=LIVES_COST_TIERS[Math.min(nextCount,LIVES_COST_TIERS.length-1)];
+
+  
+const buyWithPoints = async () => {
+  const result = await castleSiege.vidas.comprar('points');
+  if (result?.exito) {
+    const updated = await loadProfile();
+    if (updated) { setProfile(updated); if (onBought) onBought(updated); }
+    onClose();
+  } else {
+    showToast(result?.mensaje || "Error al comprar", C.red);
+  }
+};
+
+const buyWithCFT = async () => {
+  const result = await castleSiege.vidas.comprar('cft');
+  if (result?.exito) {
+    const updated = await loadProfile();
+    if (updated) { setProfile(updated); if (onBought) onBought(updated); }
+    onClose();
+  } else {
+    showToast(result?.mensaje || "Error al comprar", C.red);
+  }
+};
+
+      return(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:600,padding:16}}>
+          <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:10,padding:"28px 24px",width:"100%",maxWidth:340,fontFamily:"'Courier New',monospace",position:"relative",boxShadow:`0 0 60px ${C.gold}22`}}>
+            <Toast toast={toast}/>
+            <button onClick={onClose} style={{position:"absolute",top:10,right:14,background:"none",border:"none",color:C.muted,fontSize:18,cursor:"pointer"}}>✕</button>
+
+            <div style={{textAlign:"center",marginBottom:20}}>
+              <div style={{fontSize:28,marginBottom:6}}>❤️❤️❤️</div>
+              <STitle color={C.gold}>COMPRAR 3 VIDAS</STitle>
+            </div>
+
+            {/* Costo actual */}
+            <div style={{background:"#0a1020",border:`1px solid ${C.border}`,borderRadius:6,padding:"12px 14px",marginBottom:16,textAlign:"center"}}>
+              <div style={{fontSize:8,letterSpacing:3,color:C.muted,marginBottom:6}}>COSTO ACTUAL</div>
+              <div style={{fontSize:22,fontWeight:900,color:C.gold,textShadow:`0 0 12px ${C.gold}`}}>
+                {cost.toLocaleString()} pts
+              </div>
+              <div style={{fontSize:9,color:C.muted,marginTop:4}}>equivalente a {CFT_COST} CFT</div>
+              {nextCost!==cost&&(
+                <div style={{fontSize:8,color:C.orange,marginTop:6}}>
+                  ⚠ Próxima compra: <b>{nextCost.toLocaleString()} pts</b>
+                </div>
+              )}
+              {countdown&&(
+                <div style={{fontSize:8,color:C.green,marginTop:4}}>
+                  ♻ Reset en: <b>{countdown}</b>
+                </div>
+              )}
+            </div>
+
+            {/* Opción 1: Puntos */}
+            <div style={{background:"#0a1020",border:`1px solid ${canBuyPts?C.gold+"44":C.border}`,borderRadius:6,padding:"12px 14px",marginBottom:10}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <div style={{fontSize:8,letterSpacing:2,color:canBuyPts?C.gold:C.muted}}>OPCIÓN 1 — PUNTOS</div>
+                <div style={{fontSize:9,color:canBuyPts?C.green:C.red}}>
+                  Balance: <b>{profile.points.toLocaleString()}</b> pts
+                </div>
+              </div>
+              {!canBuyPts&&(
+                <div style={{fontSize:9,color:C.red,marginBottom:8}}>
+                  Faltan <b>{(cost-profile.points).toLocaleString()}</b> pts
+                </div>
+              )}
+              <button onClick={buyWithPoints} disabled={!canBuyPts}
+                style={{width:"100%",padding:"10px",background:canBuyPts?"#1a1500":"transparent",border:`1px solid ${canBuyPts?C.gold:C.muted}`,color:canBuyPts?C.gold:C.muted,fontSize:10,letterSpacing:3,cursor:canBuyPts?"pointer":"not-allowed",fontFamily:"'Courier New',monospace",borderRadius:4,opacity:canBuyPts?1:0.45,textShadow:canBuyPts?`0 0 8px ${C.gold}`:"none",transition:"all .2s"}}>
+                💰 PAGAR CON PUNTOS
+              </button>
+            </div>
+
+            {/* Opción 2: CFT */}
+            <div style={{background:"#0a1020",border:`1px solid ${C.purple}44`,borderRadius:6,padding:"12px 14px",marginBottom:16}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <div style={{fontSize:8,letterSpacing:2,color:C.purple}}>OPCIÓN 2 — CFT</div>
+                <div style={{fontSize:9,color:C.muted}}>{CFT_COST} CFT</div>
+              </div>
+              <button onClick={buyWithCFT}
+                style={{width:"100%",padding:"10px",background:"#0d0020",border:`1px solid ${C.purple}`,color:C.purple,fontSize:10,letterSpacing:3,cursor:"pointer",fontFamily:"'Courier New',monospace",borderRadius:4,textShadow:`0 0 8px ${C.purple}`,transition:"all .2s"}}>
+                💎 PAGAR CON CFT
+              </button>
+            </div>
+
+            <button onClick={onClose}
+              style={{width:"100%",padding:"9px",background:"transparent",border:`1px solid ${C.muted}`,color:C.muted,fontSize:9,letterSpacing:3,cursor:"pointer",fontFamily:"'Courier New',monospace",borderRadius:4}}>
+              CANCELAR
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══ REGISTER ═══ */
+    function RegisterScreen({onDone}) {
+      const[name,setName]=useState("");
+      const{toast,showToast}=useToast();
+      const create=async()=>{
+        const n=name.trim();
+        if(n.length<2){showToast("Mínimo 2 caracteres",C.red);return;}
+        if(n.length>16){showToast("Máximo 16 caracteres",C.red);return;}
+        const profile={username:n,points:0,lives:MAX_LIVES,livesRestoredAt:null,totalGamesPlayed:0,bestScore:0,purchaseCount:0,firstPurchaseAt:null};
+        await saveProfile(profile);onDone(profile);
+      };
+      return(
+        <div className="scroll-screen" style={{display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Courier New',monospace",padding:20,background:C.bg}}>
+          <div style={{textAlign:"center",maxWidth:340,width:"100%"}}>
+            <div style={{fontSize:"min(48px,12vw)",fontWeight:900,color:C.gold,letterSpacing:8,textShadow:`0 0 30px ${C.orange}`,lineHeight:1.1,marginBottom:6}}>CASTLE<br/>SIEGE</div>
+            <div style={{fontSize:9,letterSpacing:6,color:C.gold+"66",marginBottom:32}}>CYBERPUNK DEFENSE</div>
+            <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:8,padding:"56px 28px 28px",position:"relative"}}>
+              <Toast toast={toast}/>
+              <STitle>CREAR PERFIL</STitle>
+              <input value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&create()} placeholder="Nombre de usuario"
+                style={{width:"100%",background:"#0a1020",border:`1px solid ${C.border}`,borderRadius:4,padding:"10px 14px",color:C.text,fontSize:13,fontFamily:"'Courier New',monospace",letterSpacing:2,boxSizing:"border-box",outline:"none",marginBottom:12}}/>
+              <Btn onClick={create} style={{width:"100%"}}>COMENZAR</Btn>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+/* ═══ HOME ═══ */
+function HomeScreen({profile, setProfile, onPlay, onRanking, onUpgrade}) {
+  const [modal, setModal]               = useState(null);
+  const [cftInput, setCftInput]         = useState("");
+  const [depositInput, setDepositInput] = useState("");
+  const [cftBalance, setCftBalance]     = useState(null);
+  const { toast: pageToast,  showToast: showPageToast  } = useToast();
+  const { toast: modalToast, showToast: showModalToast } = useToast();
+  const countdown = useLivesCountdown(profile);
+  const canPlay   = profile.lives > 0;
+
+  const closeModal = () => { setModal(null); setCftInput(""); setDepositInput(""); };
+
+  // Cargar balance CFT real al montar
+  useEffect(() => {
+    fetch("/play/castle/get-cft-balance.php", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => { if (d.success) setCftBalance(d.cft_balance); })
+      .catch(() => setCftBalance(0));
+  }, []);
+
+  const recargarCFT = () =>
+    fetch("/play/castle/get-cft-balance.php", { credentials: "include" })
+      .then(r => r.json()).then(d => { if (d.success) setCftBalance(d.cft_balance); });
+
+  const exchangeCFT = async () => {
+    const pts = parseInt(cftInput, 10);
+    if (isNaN(pts) || pts <= 0) { showModalToast("Ingresa un monto válido", C.red); return; }
+    const result = await castleSiege.transacciones.retirarPuntos(pts);
+    if (result?.exito) {
+      const updated = await loadProfile();
+      if (updated) setProfile(updated);
+      if (result.cft_balance !== undefined) setCftBalance(result.cft_balance);
+      else recargarCFT();
+      closeModal();
+      showPageToast(`Retiro de ${pts.toLocaleString()} pts (${result.cftAmount} CFT) procesado`, C.cyan);
+    } else {
+      showModalToast(result?.mensaje || "Error en retiro", C.red);
+    }
+  };
+
+  const depositCFT = async () => {
+    const cft = parseInt(depositInput, 10);
+    if (isNaN(cft) || cft <= 0) { showModalToast("Ingresa un monto válido", C.red); return; }
+    const result = await castleSiege.transacciones.depositarCFT(cft);
+    if (result?.exito) {
+      const updated = await loadProfile();
+      if (updated) setProfile(updated);
+      if (result.cft_balance !== undefined) setCftBalance(result.cft_balance);
+      else recargarCFT();
+      closeModal();
+      showPageToast(`Depositado: ${result.puntosRecibidos?.toLocaleString()} pts!`, C.green);
+    } else {
+      showModalToast(result?.mensaje || "Error en depósito", C.red);
+    }
+  };
+
+  return (
+    <div className="scroll-screen" style={{display:"flex",flexDirection:"column",alignItems:"center",fontFamily:"'Courier New',monospace",padding:"20px 16px",background:C.bg}}>
+      <div style={{textAlign:"center",marginBottom:20}}>
+        <div style={{fontSize:"min(40px,9vw)",fontWeight:900,color:C.gold,letterSpacing:6,textShadow:`0 0 24px ${C.orange}`,lineHeight:1}}>CASTLE SIEGE</div>
+        <div style={{fontSize:8,letterSpacing:5,color:C.gold+"55",marginTop:4}}>CYBERPUNK DEFENSE</div>
+      </div>
+
+      {pageToast && (
+        <div style={{background:pageToast.color+"22",border:`1px solid ${pageToast.color}`,borderRadius:4,padding:"8px 16px",fontSize:11,color:pageToast.color,marginBottom:12,textAlign:"center",maxWidth:380,width:"100%"}}>
+          {pageToast.text}
+        </div>
+      )}
+
+      <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:8,padding:"18px 20px",width:"100%",maxWidth:480,marginBottom:14}}>
+        {/* Header usuario */}
+        <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
+          <div style={{width:48,height:48,borderRadius:"50%",background:`linear-gradient(135deg,${C.cyan}33,${C.purple}33)`,border:`2px solid ${C.cyan}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🏰</div>
+          <div>
+            <div style={{fontSize:"min(18px,5vw)",fontWeight:900,color:C.text,letterSpacing:2}}>{profile.username}</div>
+            <div style={{fontSize:9,color:C.muted,letterSpacing:2}}>COMMANDER</div>
+          </div>
+        </div>
+        <Divider/>
+
+        {/* Stats — incluye balance CFT real */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+          <StatBox label="PUNTOS TOTALES" value={profile.points.toLocaleString()} color={C.gold}/>
+          <StatBox label="BALANCE CFT"    value={cftBalance === null ? "..." : cftBalance.toFixed(2)+" CFT"} color={C.purple}/>
+          <StatBox label="PARTIDAS"       value={profile.totalGamesPlayed} color={C.cyan}/>
+          <StatBox label="VIDAS"          value={`${profile.lives}/${MAX_LIVES}`} color={profile.lives > 0 ? C.green : C.red}/>
+        </div>
+
+        {/* Corazones */}
+        <div style={{marginBottom:14}}>
+          <div style={{fontSize:8,letterSpacing:3,color:C.muted,marginBottom:8}}>VIDAS</div>
+          <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+            {Array.from({length:MAX_LIVES}).map((_,i) => (
+              <div key={i} style={{fontSize:28,lineHeight:1,filter:i<profile.lives?`drop-shadow(0 0 8px ${C.red})`:"none",opacity:i<profile.lives?1:0.2,transition:"all .3s"}}>
+                {i < profile.lives ? "❤️" : "🖤"}
+              </div>
+            ))}
+            {countdown && <div style={{fontSize:9,color:C.orange,marginLeft:6}}>⏱ {countdown}</div>}
+          </div>
+        </div>
+
+        {/* Botones de acción */}
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <Btn small onClick={()=>setModal("exchange")} color={C.cyan}>↓ RETIRO</Btn>
+          <Btn small onClick={()=>setModal("deposit")}  color={C.purple}>↑ DEPOSIT CFT</Btn>
+          <Btn small onClick={()=>setModal("buy")} color={C.gold} disabled={profile.lives > 0}>💰 COMPRAR VIDAS</Btn>
+        </div>
+      </div>
+
+{/* Nav */}
+<div style={{display:"flex",gap:10,width:"100%",maxWidth:480,marginBottom:10}}>
+  <Btn onClick={canPlay?onPlay:undefined} disabled={!canPlay} style={{flex:1,padding:"14px 0",fontSize:"min(13px,4vw)",letterSpacing:4}}>{canPlay?"⚔ JUGAR":"SIN VIDAS"}</Btn>
+  <Btn onClick={onRanking} color={C.purple} style={{padding:"14px 20px"}}>🏆</Btn>
+  <Btn onClick={onUpgrade} color={C.gold}   style={{padding:"14px 20px"}}>🏰</Btn>
+  <Btn onClick={()=>window.open("https://chainfeed.space/juegos","_blank")} color={C.cyan} style={{padding:"14px 20px"}}>🎮</Btn>
+</div>
+
+{/* Botón Salir */}
+<div style={{width:"100%",maxWidth:480,marginBottom:20}}>
+  <Btn onClick={()=>window.location.href="https://chainfeed.space/juegos"} color={C.red} style={{width:"100%"}}>🚪 SALIR</Btn>
+</div>
+
+      {!canPlay && (
+        <div style={{fontSize:10,color:C.orange,textAlign:"center",marginBottom:10}}>
+          {countdown ? `Vidas en: ${countdown}` : "Vidas en 24h"}
+        </div>
+      )}
+
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center",maxWidth:480,marginBottom:20}}>
+        <Pill>1 CFT = 1,000 pts</Pill>
+        <Pill>3 vidas = 4,000 pts</Pill>
+        <Pill>Min depósito: 1 CFT</Pill>
+        <Pill>Min retiro: 500 CFT</Pill>
+      </div>
+
+      {/* Modal Retiro */}
+      {modal === "exchange" && (
+        <Modal onClose={closeModal} toast={modalToast}>
+          <STitle color={C.cyan}>RETIRO DE PUNTOS</STitle>
+          <div style={{fontSize:11,color:C.muted,marginBottom:4}}>Balance disponible:</div>
+          <div style={{fontSize:18,fontWeight:900,color:C.gold,textShadow:`0 0 8px ${C.gold}`,marginBottom:4}}>
+            {profile.points.toLocaleString()} pts
+          </div>
+          <div style={{fontSize:11,color:C.purple,marginBottom:12}}>
+            CFT: {cftBalance === null ? "..." : cftBalance.toFixed(2)} CFT
+          </div>
+          <div style={{fontSize:9,color:C.muted,marginBottom:8}}>1,000 pts = 1 CFT · Ingresa los puntos a retirar</div>
+          <input value={cftInput} onChange={e=>setCftInput(e.target.value)} type="number" min="1"
+            placeholder="Cantidad de puntos a retirar"
+            style={{width:"100%",background:"#0a1020",border:`1px solid ${parseInt(cftInput)>profile.points?C.red:C.border}`,borderRadius:4,padding:"10px 14px",color:C.text,fontSize:13,fontFamily:"'Courier New',monospace",boxSizing:"border-box",outline:"none",marginBottom:4}}/>
+          {cftInput && !isNaN(parseInt(cftInput)) && (() => {
+            const pts = parseInt(cftInput);
+            if (pts > profile.points) return <div style={{fontSize:10,color:C.red,marginBottom:8}}>⚠ Puntos insuficientes (faltan {(pts-profile.points).toLocaleString()})</div>;
+            return <div style={{fontSize:10,color:C.cyan,marginBottom:8}}>= {(pts/CFT_TO_POINTS).toFixed(3)} CFT a retirar ✓</div>;
+          })()}
+          <Btn onClick={exchangeCFT} style={{width:"100%",marginTop:8}} color={C.cyan}>CONFIRMAR RETIRO</Btn>
+        </Modal>
+      )}
+
+      {/* Modal Comprar vidas */}
+      {modal === "buy" && (
+        <BuyLivesModal
+          profile={profile}
+          setProfile={setProfile}
+          onClose={closeModal}
+          onBought={() => showPageToast("¡3 vidas restauradas!", C.green)}
+        />
+      )}
+
+      {/* Modal Depósito */}
+      {modal === "deposit" && (
+        <Modal onClose={closeModal} toast={modalToast}>
+          <STitle color={C.purple}>DEPOSIT CFT</STitle>
+          <div style={{fontSize:11,color:C.muted,marginBottom:4}}>Tu balance CFT:</div>
+          <div style={{fontSize:18,fontWeight:900,color:C.purple,textShadow:`0 0 8px ${C.purple}`,marginBottom:12}}>
+            {cftBalance === null ? "..." : cftBalance.toFixed(2)} CFT
+          </div>
+          <div style={{fontSize:11,color:C.muted,marginBottom:12}}>Mín: {(DEPOSIT_MIN_PTS/CFT_TO_POINTS).toLocaleString()} CFT</div>
+          <input value={depositInput} onChange={e=>setDepositInput(e.target.value)} type="number" min="1" placeholder="Cantidad CFT"
+            style={{width:"100%",background:"#0a1020",border:`1px solid ${C.border}`,borderRadius:4,padding:"10px 14px",color:C.text,fontSize:13,fontFamily:"'Courier New',monospace",boxSizing:"border-box",outline:"none",marginBottom:4}}/>
+          {depositInput && !isNaN(parseInt(depositInput)) && (
+            <div style={{fontSize:10,color:parseInt(depositInput)*CFT_TO_POINTS>=DEPOSIT_MIN_PTS?C.purple:C.red,marginBottom:12}}>
+              = {(parseInt(depositInput)*CFT_TO_POINTS).toLocaleString()} pts {parseInt(depositInput)*CFT_TO_POINTS < DEPOSIT_MIN_PTS ? "(bajo mínimo)" : "✓"}
+            </div>
+          )}
+          {depositInput && cftBalance !== null && parseInt(depositInput) > cftBalance && (
+            <div style={{fontSize:10,color:C.red,marginBottom:8}}>
+              ⚠ CFT insuficiente (tenés {cftBalance.toFixed(2)} CFT)
+            </div>
+          )}
+          <Btn onClick={depositCFT} style={{width:"100%",marginTop:8}} color={C.purple}>CONFIRMAR</Btn>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+    /* ═══ RANKING ═══ */
+    function RankingScreen({profile,onBack}) {
+      const[ranking,setRanking]=useState([]);
+      const[loading,setLoading]=useState(true);
+      const month=currentMonthKey();
+      useEffect(()=>{loadRanking().then(list=>{setRanking(list.filter(e=>e.month===month).sort((a,b)=>b.score-a.score));setLoading(false);});;},[]);
+      const pc=(i)=>i===0?C.gold:i===1?"#c0c0c0":i===2?"#cd7f32":C.muted;
+      const pl=(i)=>i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`;
+      return(
+        <div className="scroll-screen" style={{display:"flex",flexDirection:"column",alignItems:"center",fontFamily:"'Courier New',monospace",padding:"20px 16px",background:C.bg}}>
+          <div style={{textAlign:"center",marginBottom:20}}>
+            <div style={{fontSize:32,fontWeight:900,color:C.gold,letterSpacing:6,textShadow:`0 0 20px ${C.orange}`}}>RANKINGS</div>
+            <div style={{fontSize:8,letterSpacing:4,color:C.muted,marginTop:4}}>MES: {month}</div>
+          </div>
+          <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:8,padding:"14px 16px",width:"100%",maxWidth:480,marginBottom:14}}>
+            <STitle color={C.gold}>PREMIOS MENSUALES</STitle>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:8}}>
+              {[0,1,2].map(i=>(<div key={i} style={{textAlign:"center",background:"#0a1020",border:`1px solid ${pc(i)}44`,borderRadius:4,padding:"8px 4px"}}><div style={{fontSize:20,marginBottom:4}}>{pl(i)}</div><div style={{fontSize:12,fontWeight:900,color:pc(i)}}>{MONTHLY_PRIZES[i].toLocaleString()}</div><div style={{fontSize:7,color:C.muted}}>pts</div></div>))}
+            </div>
+            <div style={{fontSize:9,color:C.muted,textAlign:"center"}}>Pos. 4–10: 1,000 pts c/u</div>
+          </div>
+          <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:8,padding:"14px 16px",width:"100%",maxWidth:480}}>
+            <STitle color={C.cyan}>TABLA</STitle>
+            {loading&&<div style={{color:C.muted,fontSize:11,textAlign:"center",padding:20}}>Cargando...</div>}
+            {!loading&&ranking.length===0&&<div style={{color:C.muted,fontSize:11,textAlign:"center",padding:20}}>Sin puntajes aún — <span style={{color:C.cyan}}>¡sé el primero!</span></div>}
+            {ranking.map((entry,i)=>{
+              const isMe=entry.username===profile?.username;
+              return(<div key={entry.username+i} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 10px",borderRadius:4,background:isMe?`${C.cyan}0a`:"transparent",border:`1px solid ${isMe?C.cyan+"33":C.border}`,marginBottom:6}}>
+                <div style={{width:24,fontSize:13,textAlign:"center",color:pc(i),fontWeight:900}}>{pl(i)}</div>
+                <div style={{flex:1,fontSize:12,color:isMe?C.cyan:C.text,letterSpacing:1,fontWeight:isMe?900:400}}>{entry.username}{isMe&&" ← TÚ"}</div>
+                <div style={{fontSize:13,fontWeight:900,color:MONTHLY_PRIZES[i]>0?C.gold:C.muted}}>{entry.score.toLocaleString()}</div>
+                {MONTHLY_PRIZES[i]>0&&<div style={{fontSize:8,color:pc(i)}}>+{MONTHLY_PRIZES[i].toLocaleString()}</div>}
+              </div>);
+            })}
+          </div>
+          <div style={{marginTop:16,width:"100%",maxWidth:480,paddingBottom:20}}>
+            <Btn onClick={onBack} color={C.cyan} style={{width:"100%"}}>← VOLVER</Btn>
+          </div>
+        </div>
+      );
+    }
+
+    /* ═══ GAME SCREEN ═══ */
+    function GameScreen({profile,setProfile,onGameOver}) {
+      const canvasRef=useRef(null);
+      const castleLvl=profile.castleLevel||1;
+const baseHp=CASTLE_LEVELS[castleLvl]?.hp||15;
+const gameRef=useRef(createGameState(baseHp));
+      const rafRef=useRef(null);
+      const phaseRef=useRef("playing");
+      const holdRef=useRef(false);
+      const touchPosRef=useRef({x:window.innerWidth/2,y:window.innerHeight/2});
+      const autoFireRef=useRef(null);
+      const wrapRef=useRef(null);
+      const gwRef=useRef(BASE_W);
+      const ghRef=useRef(BASE_H);
+
+      const[ui,setUi]=useState({wave:1,xp:0,level:1,hp:15,maxHp:15,score:0,xpPct:0,gameOverData:null});
+      const[showBuyModal,setShowBuyModal]=useState(false);
+
+      useEffect(()=>{
+        const resize=()=>{
+          const c=canvasRef.current;if(!c)return;
+          const ww=window.innerWidth,wh=window.innerHeight;
+          c.width=ww;c.height=wh;c.style.width=ww+"px";c.style.height=wh+"px";
+          gwRef.current=ww;ghRef.current=wh;
+          gameRef.current._gw=ww;gameRef.current._gh=wh;
+        };
+        resize();
+        window.addEventListener("resize",resize);
+        window.addEventListener("orientationchange",()=>setTimeout(resize,150));
+        return()=>window.removeEventListener("resize",resize);
+      },[]);
+
+      const toCanvas=useCallback((cx,cy)=>({x:cx,y:cy}),[]);
+
+      const shoot=useCallback((mx,my)=>{
+        if(phaseRef.current!=="playing")return;
+        const gs=gameRef.current,now=Date.now();
+        const baseCd=Math.max(55,110-(gs.upgrades.speed||0)*20);
+        const isRapid=gs.activeBuffs.rapid&&gs.activeBuffs.rapid>now;
+        if(now-gs.lastShot<(isRapid?baseCd*.35:baseCd))return;
+        gs.lastShot=now;
+        const GW=gwRef.current,GH=ghRef.current;
+        const cx=GW/2,cy=GH/2+30;
+        const dx=mx-cx,dy=my-cy,dist=Math.hypot(dx,dy)||1,spd=11;
+        const vx=dx/dist*spd,vy=dy/dist*spd;
+        const isLaser=gs.activeBuffs.laser&&gs.activeBuffs.laser>now;
+        const isScatter=gs.activeBuffs.scatter&&gs.activeBuffs.scatter>now;
+        const isTriple=(gs.activeBuffs.triple&&gs.activeBuffs.triple>now)||gs.upgrades.multishot;
+        const fire=(angle,type="arrow")=>{
+          const cos=Math.cos(angle),sin=Math.sin(angle);
+          gs.bullets.push({x:cx,y:cy,vx:vx*cos-vy*sin,vy:vx*sin+vy*cos,life:type==="laser"?55:140,dmg:1+(gs.upgrades.dmg||0)+(type==="laser"?2:0),pierce:(gs.upgrades.pierce||0)+(type==="laser"?3:0),piercedCount:0,type});
+        };
+        if(isLaser){fire(0,"laser");fire(-.1,"laser");fire(.1,"laser");}
+        else if(isScatter){[-0.32,-0.16,0,0.16,0.32].forEach(a=>fire(a));}
+        else if(isTriple){fire(0);fire(-0.2);fire(0.2);}
+        else fire(0);
+      },[]);
+
+      useEffect(()=>{
+        const canvas=canvasRef.current;if(!canvas)return;
+        const start=(pos)=>{touchPosRef.current=pos;holdRef.current=true;shoot(pos.x,pos.y);clearInterval(autoFireRef.current);autoFireRef.current=setInterval(()=>{if(holdRef.current)shoot(touchPosRef.current.x,touchPosRef.current.y);},75);};
+        const move=(pos)=>{if(holdRef.current)touchPosRef.current=pos;};
+        const stop=()=>{holdRef.current=false;clearInterval(autoFireRef.current);};
+        const oMD=e=>start(toCanvas(e.clientX,e.clientY));
+        const oMM=e=>move(toCanvas(e.clientX,e.clientY));
+        const oMU=()=>stop();
+        const oTS=e=>{e.preventDefault();const t=e.touches[0];start(toCanvas(t.clientX,t.clientY));};
+        const oTM=e=>{e.preventDefault();const t=e.touches[0];move(toCanvas(t.clientX,t.clientY));};
+        const oTE=e=>{e.preventDefault();stop();};
+        canvas.addEventListener("mousedown",oMD);canvas.addEventListener("mousemove",oMM);canvas.addEventListener("mouseup",oMU);
+        canvas.addEventListener("touchstart",oTS,{passive:false});canvas.addEventListener("touchmove",oTM,{passive:false});canvas.addEventListener("touchend",oTE,{passive:false});
+        return()=>{canvas.removeEventListener("mousedown",oMD);canvas.removeEventListener("mousemove",oMM);canvas.removeEventListener("mouseup",oMU);canvas.removeEventListener("touchstart",oTS);canvas.removeEventListener("touchmove",oTM);canvas.removeEventListener("touchend",oTE);clearInterval(autoFireRef.current);};
+      },[shoot,toCanvas]);
+
+      function applyPowerup(gs,item){
+        const now=Date.now(),{type,def}=item;
+        if(def.duration>0)gs.activeBuffs[type]=now+def.duration;
+        else if(type==="bomb"){gs.enemies.forEach(e=>gs.particles.push(...spawnParts(e.x,e.y,e.color,14)));gs.enemies=[];}
+        else if(type==="heal")gs.hp=Math.min(gs.hp+3,gs.maxHp);
+      }
+
+      const update=useCallback((gs)=>{
+        gs.time++;
+        const GW=gs._gw||BASE_W,GH=gs._gh||BASE_H;
+        const cx=GW/2,cy=GH/2+30,now=Date.now();
+        const frozen=gs.activeBuffs.freeze&&gs.activeBuffs.freeze>now;
+        Object.keys(gs.activeBuffs).forEach(k=>{if(gs.activeBuffs[k]<now)delete gs.activeBuffs[k];});
+
+        if(!gs.waveActive){
+          gs.waveTimer++;
+          if(gs.waveTimer>120){gs.waveActive=true;gs.waveTimer=0;gs.enemiesLeft=waveEnemyCount(gs.wave);}
+        }else if(gs.enemiesLeft>0&&gs.enemies.length<14){
+          if(Math.random()<.042+gs.wave*.004){gs.enemies.push(spawnEnemyDyn(gs.wave,GW,GH));gs.enemiesLeft--;}
+        }
+
+        gs.powerupSpawnTimer++;
+        const spI=Math.max(240,480-gs.wave*15);
+        if(gs.powerupSpawnTimer>=spI&&gs.powerupItems.length<4){gs.powerupItems.push(spawnPUDyn(GW,GH));gs.powerupSpawnTimer=0;}
+        for(let i=gs.powerupItems.length-1;i>=0;i--){gs.powerupItems[i].life--;if(gs.powerupItems[i].life<=0)gs.powerupItems.splice(i,1);}
+
+        const shielded=gs.activeBuffs.shield&&gs.activeBuffs.shield>now;
+        for(let i=gs.enemies.length-1;i>=0;i--){
+          const e=gs.enemies[i],dx=cx-e.x,dy=cy-e.y,dist=Math.hypot(dx,dy);
+          e.x+=(dx/dist)*(frozen?e.speed*.18:e.speed);e.y+=(dy/dist)*(frozen?e.speed*.18:e.speed);e.frame++;
+          if(dist<(e.type==="tank"?18:e.type==="plane"?13:12)){
+            gs.particles.push(...spawnParts(e.x,e.y,e.color,10));gs.enemies.splice(i,1);
+            if(!shielded){gs.hp=Math.max(0,gs.hp-1);if(gs.hp<=0)return"gameover";}
+          }
+        }
+
+        for(let i=gs.bullets.length-1;i>=0;i--){
+          const b=gs.bullets[i];b.x+=b.vx;b.y+=b.vy;b.life--;
+          if(b.x<-80||b.x>GW+80||b.y<-80||b.y>GH+80||b.life<=0){gs.bullets.splice(i,1);continue;}
+          let dead=false;
+          for(let j=gs.enemies.length-1;j>=0;j--){
+            const e=gs.enemies[j];
+            if(Math.hypot(b.x-e.x,b.y-e.y)<(e.type==="tank"?20:14)){
+              e.hp-=b.dmg||1;gs.particles.push(...spawnParts(e.x,e.y,e.color,5));
+              b.piercedCount=(b.piercedCount||0)+1;
+              if(e.hp<=0){gs.score+=e.score*gs.wave;gs.xp++;gs.xpTotal++;gs.particles.push(...spawnParts(e.x,e.y,e.color,16));gs.enemies.splice(j,1);}
+              if(b.piercedCount>(b.pierce||0)){dead=true;break;}
+            }
+          }
+          if(dead)gs.bullets.splice(i,1);
+        }
+
+        for(let i=gs.powerupItems.length-1;i>=0;i--){
+          const item=gs.powerupItems[i];
+          if(gs.bullets.some(b=>Math.hypot(b.x-item.x,b.y-item.y)<24)){applyPowerup(gs,item);gs.particles.push(...spawnParts(item.x,item.y,item.def.color,22));gs.powerupItems.splice(i,1);}
+        }
+
+        gs.xpOrbs=[];
+        for(let i=gs.particles.length-1;i>=0;i--){
+          const p=gs.particles[i];p.x+=p.vx;p.y+=p.vy;p.vx*=.91;p.vy*=.91;p.life-=p.decay;
+          if(p.life<=0)gs.particles.splice(i,1);
+        }
+
+        if(gs.waveActive&&gs.enemiesLeft===0&&gs.enemies.length===0){
+          gs.waveActive=false;gs.level++;gs.xp=0;return{type:"waveclear"};
+        }
+        return null;
+      },[]);
+
+      const draw=useCallback((ctx,gs)=>{
+        const GW=gs._gw||BASE_W,GH=gs._gh||BASE_H;
+        const cx=GW/2,cy=GH/2+30,now=Date.now();
+        drawBG(ctx,gs,GW,GH);
+        gs.powerupItems.forEach(item=>drawPU(ctx,item,gs.time));
+        const frozen=!!(gs.activeBuffs.freeze&&gs.activeBuffs.freeze>now);
+        gs.enemies.forEach(e=>{
+          if(!e.flying){ctx.save();ctx.globalAlpha=.12;ctx.fillStyle="#000";ctx.beginPath();ctx.ellipse(e.x,e.y+e.size,e.size*.9,e.size*.25,0,0,Math.PI*2);ctx.fill();ctx.restore();}
+          if(e.type==="soldier")drawSoldier(ctx,e.x,e.y,e.color,e.frame);
+          else if(e.type==="tank")drawTank(ctx,e.x,e.y,e.color,e.frame,frozen);
+          else if(e.type==="cannon")drawCannon(ctx,e.x,e.y,e.color,e.frame);
+          else if(e.type==="plane")drawPlane(ctx,e.x,e.y,e.color,e.frame);
+          if(e.hp<e.maxHp){
+            const bw=e.type==="tank"?44:32,bx=e.x-bw/2,by=e.y-e.size-14,hr=e.hp/e.maxHp;
+            ctx.fillStyle="#fff1";ctx.fillRect(bx,by,bw,5);
+            ctx.fillStyle=hr>.5?"#44ff88":hr>.25?"#ffaa00":"#ff3333";ctx.fillRect(bx,by,bw*hr,5);
+          }
+        });
+drawCastle(ctx,cx,cy-20,gs.hp,gs.maxHp,gs.time,!!(gs.activeBuffs.shield&&gs.activeBuffs.shield>now),profile.castleLevel||1);
+        gs.bullets.forEach(b=>drawArrow(ctx,b.x,b.y,b.vx,b.vy,b.type));
+        gs.particles.forEach(p=>{ctx.save();ctx.globalAlpha=Math.max(0,p.life);ctx.shadowBlur=7;ctx.shadowColor=p.color;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);ctx.fill();ctx.restore();});
+        if(!gs.waveActive&&gs.waveTimer>0&&gs.waveTimer<120){
+          const a=Math.min(1,Math.sin((gs.waveTimer/120)*Math.PI));
+          ctx.save();ctx.globalAlpha=a;ctx.fillStyle=C.gold;ctx.shadowBlur=20;ctx.shadowColor=C.orange;
+          ctx.font="bold 18px 'Courier New',monospace";ctx.textAlign="center";
+          ctx.fillText(`⚔  WAVE ${gs.wave}  ⚔`,GW/2,52);ctx.restore();
+        }
+        if(gs.waveActive){
+          const total=waveEnemyCount(gs.wave),remaining=gs.enemiesLeft+gs.enemies.length,killed=total-remaining;
+          ctx.save();ctx.font="bold 12px 'Courier New',monospace";ctx.textAlign="right";ctx.fillStyle="#ffffff55";
+          ctx.fillText(`${killed}/${total}`,GW-10,GH-10);ctx.restore();
+        }
+        const bks=Object.keys(gs.activeBuffs).filter(k=>gs.activeBuffs[k]>now);
+        bks.forEach((k,i)=>{
+          const def=POWERUP_TYPES[k];if(!def||!def.duration)return;
+          const rem=(gs.activeBuffs[k]-now)/def.duration;
+          ctx.save();ctx.globalAlpha=.9;ctx.fillStyle=def.color+"1a";ctx.strokeStyle=def.color;ctx.lineWidth=1;
+          rrect(ctx,GW-96,10+i*30,86,22,3);ctx.fill();ctx.stroke();
+          ctx.fillStyle=def.color+"44";ctx.fillRect(GW-94,25+i*30,82*rem,5);
+          ctx.font="10px 'Courier New',monospace";ctx.fillStyle=def.color;ctx.textAlign="left";ctx.shadowBlur=6;ctx.shadowColor=def.color;
+          ctx.fillText(def.glyph+" "+def.label,GW-93,22+i*30);ctx.restore();
+        });
+      },[]);
+
+      const loop=useCallback(()=>{
+        if(phaseRef.current!=="playing")return;
+        const gs=gameRef.current,ctx=canvasRef.current?.getContext("2d");
+        if(!ctx)return;
+        const result=update(gs);
+        draw(ctx,gs);
+        const totalW=waveEnemyCount(gs.wave),remaining=gs.enemiesLeft+gs.enemies.length;
+        const wavePct=gs.waveActive?Math.min(1,(totalW-remaining)/totalW):1;
+        setUi(prev=>({...prev,wave:gs.wave,hp:gs.hp,maxHp:gs.maxHp,score:gs.score,xpPct:wavePct}));
+        if(result&&result.type==="waveclear"){
+          gs.wave++;gs.waveTimer=0;gs.waveActive=false;
+          rafRef.current=requestAnimationFrame(loop);
+        }else if(result==="gameover"){
+          phaseRef.current="gameover";
+          handleGameOver(gs);
+        }else{
+          rafRef.current=requestAnimationFrame(loop);
+        }
+      },[update,draw]);
+
+
+async function handleGameOver(gs) {
+  // Guardar partida: el backend deduce la vida, actualiza best_score,
+  // agrega puntos y actualiza el ranking mensual automáticamente.
+  await castleSiege.partida.guardar({
+    score:               gs.score,
+    wave_reached:        gs.wave,
+    level_reached:       gs.level,
+    duration_seconds:    Math.floor(gs.time / 60),
+    enemies_killed:      gs.xpTotal || 0,
+    powerups_collected:  0,
+  });
+
+  // Recargar perfil actualizado desde BD
+  const updated = await loadProfile();
+  if (updated) setProfile(updated);
+
+  setUi(prev => ({
+    ...prev,
+    gameOverData: {
+      score:          gs.score,
+      wave:           gs.wave,
+      level:          gs.level,
+      updatedProfile: updated || profile,
+    }
+  }));
+}
+
+      useEffect(()=>{
+        phaseRef.current="playing";
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current=requestAnimationFrame(loop);
+        return()=>cancelAnimationFrame(rafRef.current);
+      },[loop]);
+
+      const hpPct=Math.max(0,Math.min(1,ui.hp/(ui.maxHp||15)));
+      const xpPct=ui.xpPct??0;
+
+      // Usamos el profile actualizado del game over si está disponible
+      const currentProfile=ui.gameOverData?.updatedProfile||profile;
+      const noLives=currentProfile.lives===0;
+      const countdown=useLivesCountdown(currentProfile);
+
+      return(
+        <div ref={wrapRef} style={{width:"100%",height:"100%",background:"#000",overflow:"hidden",position:"relative",touchAction:"none"}}>
+          <canvas ref={canvasRef} width={BASE_W} height={BASE_H} style={{display:"block",imageRendering:"pixelated",touchAction:"none",cursor:"crosshair",position:"absolute",top:0,left:0}}/>
+
+          {/* HUD */}
+          <div style={{position:"absolute",top:0,left:0,right:0,background:"linear-gradient(180deg,#040610ee 70%,transparent)",padding:"10px 14px 16px",pointerEvents:"none",fontFamily:"'Courier New',monospace",zIndex:10}}>
+            <div style={{display:"flex",gap:12,marginBottom:6}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:"clamp(9px,2vw,13px)",letterSpacing:2,color:`${C.cyan}99`,marginBottom:3}}>🏰 CASTILLO</div>
+                <div style={{height:7,background:"#fff1",borderRadius:3,overflow:"hidden",marginBottom:2}}>
+                  <div style={{width:`${hpPct*100}%`,height:"100%",borderRadius:3,background:hpPct>.5?`linear-gradient(90deg,#0088cc,${C.cyan})`:hpPct>.25?`linear-gradient(90deg,#cc6600,${C.orange})`:`linear-gradient(90deg,#aa0000,${C.red})`,transition:"width .25s"}}/>
+                </div>
+                <div style={{fontSize:"clamp(9px,1.8vw,12px)",color:"#fff5"}}>{ui.hp}/{ui.maxHp} HP</div>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:"clamp(9px,2vw,13px)",letterSpacing:2,color:`${C.gold}99`,marginBottom:3}}>
+                  ⚔ WAVE <span style={{color:C.gold,fontWeight:900}}>{ui.wave}</span>
+                </div>
+                <div style={{height:7,background:"#fff1",borderRadius:3,overflow:"hidden",marginBottom:2}}>
+                  <div style={{width:`${xpPct*100}%`,height:"100%",borderRadius:3,background:`linear-gradient(90deg,#aa6600,${C.gold})`,transition:"width .1s"}}/>
+                </div>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:16}}>
+              <span style={{fontSize:"clamp(10px,2.2vw,14px)",color:"#fff5"}}>SCORE <b style={{color:C.green}}>{ui.score.toLocaleString()}</b></span>
+              <span style={{fontSize:"clamp(10px,2.2vw,14px)",color:"#fff5"}}>
+                {Array.from({length:MAX_LIVES}).map((_,i)=>(
+                  <span key={i} style={{opacity:i<profile.lives?1:0.2,filter:i<profile.lives?`drop-shadow(0 0 4px ${C.red})`:"none"}}>❤️</span>
+                ))}
+              </span>
+            </div>
+          </div>
+
+          {/* ─── ÚNICO GAME OVER OVERLAY ─── */}
+          {ui.gameOverData&&(
+            <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,.88)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,backdropFilter:"blur(8px)"}}>
+              <div style={{textAlign:"center",fontFamily:"'Courier New',monospace",padding:"0 24px",maxWidth:400,width:"100%"}}>
+
+                <div style={{fontSize:"clamp(40px,12vw,72px)",marginBottom:8,filter:"drop-shadow(0 0 20px #ff334488)"}}>💀</div>
+                <div style={{fontSize:"clamp(22px,6vw,36px)",fontWeight:900,color:C.red,letterSpacing:4,textShadow:`0 0 24px ${C.red}`,marginBottom:4}}>GAME OVER</div>
+                <div style={{fontSize:"clamp(9px,2vw,12px)",color:C.muted,letterSpacing:4,marginBottom:24}}>TU CASTILLO HA CAÍDO</div>
+
+                {/* Stats */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:20}}>
+                  {[
+                    {label:"PUNTAJE",value:ui.gameOverData.score.toLocaleString(),color:C.gold},
+                    {label:"WAVE",   value:ui.gameOverData.wave,color:C.cyan},
+                    {label:"NIVEL",  value:ui.gameOverData.level,color:C.purple},
+                  ].map(s=>(
+                    <div key={s.label} style={{background:"#0a1020",border:`1px solid ${C.border}`,borderRadius:6,padding:"10px 6px"}}>
+                      <div style={{fontSize:"clamp(7px,1.5vw,9px)",letterSpacing:2,color:C.muted,marginBottom:4}}>{s.label}</div>
+                      <div style={{fontSize:"clamp(14px,3.5vw,20px)",fontWeight:900,color:s.color,textShadow:`0 0 10px ${s.color}`}}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Lives */}
+                <div style={{display:"flex",justifyContent:"center",gap:10,marginBottom:16}}>
+                  {Array.from({length:MAX_LIVES}).map((_,i)=>(
+                    <div key={i} style={{fontSize:"clamp(24px,7vw,36px)",lineHeight:1,filter:i<currentProfile.lives?`drop-shadow(0 0 10px ${C.red})`:"none",opacity:i<currentProfile.lives?1:0.18}}>
+                      {i<currentProfile.lives?"❤️":"🖤"}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mensaje según vidas restantes */}
+                {noLives?(
+                  <div style={{background:C.red+"11",border:`1px solid ${C.red}33`,borderRadius:6,padding:"10px 14px",marginBottom:16,fontSize:"clamp(9px,2vw,11px)",color:C.red}}>
+                    ⚠ SIN VIDAS — compra más o espera {countdown?<b>{countdown}</b>:"24h"} para recuperarlas
+                  </div>
+                ):(
+                  <div style={{fontSize:"clamp(9px,2vw,11px)",color:C.muted,marginBottom:16}}>
+                    Te quedan <b style={{color:C.green}}>{currentProfile.lives}</b> vida{currentProfile.lives!==1?"s":""} restante{currentProfile.lives!==1?"s":""}
+                  </div>
+                )}
+
+                {/* Botón comprar vidas — visible solo cuando quedan 0 */}
+                {noLives&&(
+                  <button
+                    onClick={()=>setShowBuyModal(true)}
+                    style={{width:"100%",marginBottom:12,padding:"clamp(10px,2.5vw,14px)",background:"transparent",border:`2px solid ${C.gold}`,color:C.gold,fontSize:"clamp(10px,2.2vw,12px)",letterSpacing:3,cursor:"pointer",fontFamily:"'Courier New',monospace",textShadow:`0 0 10px ${C.gold}`,borderRadius:6,boxShadow:`0 0 20px ${C.gold}22`,transition:"all .2s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background=C.gold+"22"}
+                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                  >
+                    💰 COMPRAR VIDAS
+                  </button>
+                )}
+
+                {/* Volver al menú */}
+                <button
+                  onClick={()=>onGameOver(ui.gameOverData)}
+                  style={{width:"100%",padding:"clamp(12px,3vw,16px)",background:"transparent",border:`1px solid ${C.cyan}`,color:C.cyan,fontSize:"clamp(10px,2.2vw,13px)",letterSpacing:4,cursor:"pointer",fontFamily:"'Courier New',monospace",textShadow:`0 0 8px ${C.cyan}`,borderRadius:4,transition:"all .2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.background=C.cyan+"22"}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                >
+                  ← VOLVER AL MENÚ
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Modal comprar vidas (sobre el overlay) */}
+          {showBuyModal&&(
+            <BuyLivesModal
+              profile={currentProfile}
+              setProfile={(updated)=>{
+                setProfile(updated);
+                // actualizar gameOverData con el perfil nuevo
+                setUi(prev=>prev.gameOverData?{...prev,gameOverData:{...prev.gameOverData,updatedProfile:updated}}:prev);
+              }}
+              onClose={()=>setShowBuyModal(false)}
+            />
+          )}
+        </div>
+      );
+    }
+
+/* ═══ UPGRADE SCREEN ═══ */
+function UpgradeScreen({ profile, setProfile, onBack }) {
+  const [loading, setLoading]       = useState(false);
+  const [cftBalance, setCftBalance] = useState(null);
+  const { toast, showToast } = useToast();
+
+  const currentLvl   = parseInt(profile.castleLevel) || 1;
+  const maxLvl       = Object.keys(CASTLE_LEVELS).length;
+  const nextLvl      = currentLvl + 1;
+  const canUpgrade   = currentLvl < maxLvl;
+  const nextDef      = canUpgrade ? CASTLE_LEVELS[nextLvl] : null;
+  const cost_pts     = nextDef ? nextDef.cost : 0;
+  const cost_cft     = cost_pts / CFT_TO_POINTS;
+  const canAffordPts = parseInt(profile.points) >= cost_pts;
+  const canAffordCft = cftBalance !== null && cftBalance >= cost_cft;
+
+  // Cargar balance CFT real al montar
+  useEffect(() => {
+    fetch("/play/castle/get-cft-balance.php", { credentials: "include" })
+      .then(r => r.json())
+      .then(d => { if (d.success) setCftBalance(d.cft_balance); })
+      .catch(() => setCftBalance(0));
+  }, []);
+
+  const doUpgrade = async (metodo) => {
+    if (!canUpgrade || loading) return;
+    if (metodo === "points" && !canAffordPts) return;
+    if (metodo === "cft"    && !canAffordCft) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/play/castle/upgrade-castle.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level: nextLvl, metodo }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        const updated = await loadProfile();
+        if (updated) setProfile(updated);
+        if (data.cft_balance !== undefined) setCftBalance(data.cft_balance);
+        showToast(`¡Castillo mejorado a ${CASTLE_LEVELS[nextLvl].label}!`, C.green);
+      } else {
+        showToast(data.message || data.error || "Error al mejorar", C.red);
+      }
+    } catch (e) {
+      showToast("Error de conexión", C.red);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="scroll-screen" style={{ display: "flex", flexDirection: "column", alignItems: "center", fontFamily: "'Courier New',monospace", padding: "20px 16px", background: C.bg }}>
+      <Toast toast={toast} />
+
+      {/* Título */}
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <div style={{ fontSize: 32, fontWeight: 900, color: C.gold, letterSpacing: 6, textShadow: `0 0 20px ${C.orange}` }}>🏰 CASTILLO</div>
+        <div style={{ fontSize: 8, letterSpacing: 4, color: C.muted, marginTop: 4 }}>MEJORAS Y NIVELES</div>
+      </div>
+
+      {/* Grid de niveles */}
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: 8, padding: "18px 20px", width: "100%", maxWidth: 480, marginBottom: 14 }}>
+        <STitle color={C.cyan}>NIVEL ACTUAL</STitle>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          {Object.entries(CASTLE_LEVELS).map(([lvl, def]) => {
+            const lvlNum    = parseInt(lvl);
+            const isActive  = lvlNum === currentLvl;
+            const isUnlocked = lvlNum <= currentLvl;
+            return (
+              <div key={lvl} style={{ background: isActive ? `${def.color}11` : "#0a1020", border: `1px solid ${isActive ? def.color : isUnlocked ? def.color + "44" : C.border}`, borderRadius: 6, padding: "12px 14px", position: "relative", opacity: isUnlocked ? 1 : 0.45 }}>
+                {isActive && (
+                  <div style={{ position: "absolute", top: -8, right: 8, background: def.color, color: "#000", fontSize: 7, letterSpacing: 2, padding: "2px 6px", borderRadius: 10, fontWeight: 900 }}>ACTUAL</div>
+                )}
+                <div style={{ fontSize: 8, letterSpacing: 2, color: C.muted, marginBottom: 4 }}>NIVEL {lvl}</div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: def.color, textShadow: `0 0 8px ${def.color}`, marginBottom: 4 }}>{def.label}</div>
+                <div style={{ fontSize: 10, color: C.text }}>❤️ {def.hp} HP</div>
+                {lvlNum > 1 && (
+                  <div style={{ fontSize: 9, color: C.muted, marginTop: 4 }}>
+                    {isUnlocked ? "✓ Desbloqueado" : `🔒 ${def.cost.toLocaleString()} pts`}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Barra HP actual */}
+        <div>
+          <div style={{ fontSize: 8, letterSpacing: 2, color: C.muted, marginBottom: 6 }}>HP DEL CASTILLO ACTUAL</div>
+          <div style={{ height: 8, background: "#fff1", borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ width: "100%", height: "100%", borderRadius: 4, background: `linear-gradient(90deg,${CASTLE_LEVELS[currentLvl].color}88,${CASTLE_LEVELS[currentLvl].color})` }} />
+          </div>
+          <div style={{ fontSize: 10, color: CASTLE_LEVELS[currentLvl].color, marginTop: 4 }}>
+            {CASTLE_LEVELS[currentLvl].hp} HP máx · {CASTLE_LEVELS[currentLvl].label}
+          </div>
+        </div>
+      </div>
+
+      {/* Panel de mejora */}
+      {canUpgrade ? (
+        <div style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: 8, padding: "18px 20px", width: "100%", maxWidth: 480, marginBottom: 14 }}>
+          <STitle color={nextDef.color}>PRÓXIMA MEJORA — NIVEL {nextLvl}: {nextDef.label}</STitle>
+
+          {/* Stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+            <MiniStat label="HP NUEVO"  value={`${nextDef.hp} HP`}            color={C.green} />
+            <MiniStat label="NUEVO NIVEL" value={nextDef.label}               color={nextDef.color} />
+            <MiniStat label="COSTO PTS" value={`${cost_pts.toLocaleString()} pts`} color={canAffordPts ? C.gold : C.red} />
+            <MiniStat label="COSTO CFT" value={`${cost_cft} CFT`}             color={canAffordCft ? C.gold : C.red} />
+          </div>
+
+          {/* Opción 1 — Puntos */}
+          <div style={{ background: "#0a1020", border: `1px solid ${canAffordPts ? C.gold + "55" : C.border}`, borderRadius: 6, padding: "12px 14px", marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <div style={{ fontSize: 8, letterSpacing: 2, color: C.gold }}>OPCIÓN 1 — PUNTOS</div>
+              <div style={{ fontSize: 9, color: canAffordPts ? C.green : C.red }}>
+                Balance: <b>{parseInt(profile.points).toLocaleString()}</b> pts
+              </div>
+            </div>
+            {!canAffordPts && (
+              <div style={{ fontSize: 9, color: C.red, marginBottom: 8 }}>
+                Faltan <b>{(cost_pts - parseInt(profile.points)).toLocaleString()}</b> pts
+              </div>
+            )}
+            <button onClick={() => doUpgrade("points")} disabled={!canAffordPts || loading}
+              style={{ width: "100%", padding: "10px", background: canAffordPts ? "#1a1500" : "transparent", border: `1px solid ${canAffordPts ? C.gold : C.muted}`, color: canAffordPts ? C.gold : C.muted, fontSize: 10, letterSpacing: 3, cursor: canAffordPts && !loading ? "pointer" : "not-allowed", fontFamily: "'Courier New',monospace", borderRadius: 4, opacity: canAffordPts ? 1 : 0.45, transition: "all .2s" }}>
+              {loading ? "MEJORANDO..." : `💰 PAGAR ${cost_pts.toLocaleString()} PTS`}
+            </button>
+          </div>
+
+          {/* Opción 2 — CFT */}
+          <div style={{ background: "#0a1020", border: `1px solid ${canAffordCft ? C.purple + "55" : C.border}`, borderRadius: 6, padding: "12px 14px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <div style={{ fontSize: 8, letterSpacing: 2, color: C.purple }}>OPCIÓN 2 — CFT</div>
+              <div style={{ fontSize: 9, color: canAffordCft ? C.green : C.red }}>
+                Balance: <b>{cftBalance === null ? "..." : cftBalance.toFixed(2)}</b> CFT
+              </div>
+            </div>
+            {cftBalance !== null && !canAffordCft && (
+              <div style={{ fontSize: 9, color: C.red, marginBottom: 8 }}>
+                Faltan <b>{Math.max(0, cost_cft - cftBalance).toFixed(2)}</b> CFT
+              </div>
+            )}
+            <button onClick={() => doUpgrade("cft")} disabled={!canAffordCft || loading}
+              style={{ width: "100%", padding: "10px", background: canAffordCft ? "#0d0020" : "transparent", border: `1px solid ${canAffordCft ? C.purple : C.muted}`, color: canAffordCft ? C.purple : C.muted, fontSize: 10, letterSpacing: 3, cursor: canAffordCft && !loading ? "pointer" : "not-allowed", fontFamily: "'Courier New',monospace", borderRadius: 4, opacity: canAffordCft ? 1 : 0.45, transition: "all .2s" }}>
+              {loading ? "MEJORANDO..." : `💎 PAGAR ${cost_cft} CFT`}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ background: C.panel, border: `1px solid ${C.gold}44`, borderRadius: 8, padding: "24px 20px", width: "100%", maxWidth: 480, marginBottom: 14, textAlign: "center" }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>👑</div>
+          <div style={{ fontSize: 13, fontWeight: 900, color: C.gold, letterSpacing: 3, textShadow: `0 0 12px ${C.gold}` }}>NIVEL MÁXIMO</div>
+          <div style={{ fontSize: 10, color: C.muted, marginTop: 6 }}>Has alcanzado la CIUDADELA — el castillo más poderoso</div>
+        </div>
+      )}
+
+      {/* Beneficios */}
+      <div style={{ background: C.panel, border: `1px solid ${C.border}`, borderRadius: 8, padding: "14px 16px", width: "100%", maxWidth: 480, marginBottom: 20 }}>
+        <STitle color={C.muted}>BENEFICIOS DE MEJORAR</STitle>
+        <div style={{ fontSize: 10, color: C.text, lineHeight: 1.8 }}>
+          🛡 Mayor HP máximo al iniciar cada partida<br />
+          🏰 Diseño visual del castillo más elaborado<br />
+          ⚔ Mayor resistencia ante oleadas difíciles
+        </div>
+      </div>
+
+      <div style={{ width: "100%", maxWidth: 480, paddingBottom: 20 }}>
+        <Btn onClick={onBack} color={C.cyan} style={{ width: "100%" }}>← VOLVER</Btn>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading]  = useState(true);
+  const [screen, setScreen]    = useState("home");
+
+  useEffect(() => {
+    (async () => {
+      const p = await loadProfile();
+      // Si null → la API ya redirigió a chainfeed.space
+      if (p) setProfile(p);
+      setLoading(false);
+    })();
+  }, []);
+
+  // Restaurar vidas si el timer expiró (poll cada 30s)
+  useEffect(() => {
+    const id = setInterval(async () => {
+      if (!profile) return;
+      if (profile.livesRestoredAt && Date.now() >= profile.livesRestoredAt && profile.lives === 0) {
+        const updated = await loadProfile();
+        if (updated) setProfile(updated);
+      }
+    }, 30000);
+    return () => clearInterval(id);
+  }, [profile]);
+
+  if (loading) return (
+    <div style={{width:"100%",height:"100%",background:C.bg,display:"flex",alignItems:"center",
+      justifyContent:"center",fontFamily:"'Courier New',monospace",color:C.cyan,fontSize:13,letterSpacing:4}}>
+      CARGANDO...
+    </div>
+  );
+
+  // Sin perfil = API redirigió, no renderizar nada
+  if (!profile) return null;
+
+  if (screen === "home")    return <HomeScreen profile={profile} setProfile={setProfile} onPlay={()=>setScreen("game")} onRanking={()=>setScreen("ranking")} onUpgrade={()=>setScreen("upgrade")}/>;
+  if (screen === "game")    return <GameScreen profile={profile} setProfile={setProfile} onGameOver={() => setScreen("home")} />;
+if(screen==="ranking")return<RankingScreen profile={profile} onBack={()=>setScreen("home")}/>;
+if(screen==="upgrade")return<UpgradeScreen profile={profile} setProfile={setProfile} onBack={()=>setScreen("home")}/>;
+return null;
+    return null;
+}
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

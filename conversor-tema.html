@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor: Modo Oscuro → Claro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
+        .converted textarea {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-copy {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-download {
+            background: #3b82f6;
+            color: white;
+            margin-left: 0.5rem;
+        }
+
+        .btn-reset {
+            background: #ef4444;
+            color: white;
+        }
+
+        .center {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid;
+        }
+
+        .stat-card.green {
+            background: #f0fdf4;
+            border-color: #10b981;
+        }
+
+        .stat-card.blue {
+            background: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .stat-card.yellow {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .instructions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            line-height: 1.8;
+        }
+
+        .alert {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fef3c7;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .download-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .download-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .file-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        .badge-html {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-css {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-js {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .download-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                🌙 Conversor de Tema 🌞
+            </h1>
+            <p style="font-size: 1.1rem; opacity: 0.9;">
+                Convierte automáticamente tu red social de modo oscuro a claro
+            </p>
+        </div>
+
+        <!-- Área de trabajo -->
+        <div class="grid" id="mainGrid">
+            <!-- Input original -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>📤 Código Original (Modo Oscuro)</h3>
+                    <button class="btn-reset hidden" id="resetBtn" onclick="reset()">
+                        🔄 Limpiar
+                    </button>
+                </div>
+                <textarea 
+                    id="originalCode" 
+                    placeholder="Pega aquí tu código HTML/CSS/JS..."
+                ></textarea>
+            </div>
+
+            <!-- Output convertido -->
+            <div class="card converted hidden" id="convertedCard">
+                <div class="card-header">
+                    <h3>✨ Código Convertido (Modo Claro)</h3>
+                    <div>
+                        <button class="btn-copy" onclick="copyToClipboard()">
+                            📋 Copiar Todo
+                        </button>
+                    </div>
+                </div>
+                <textarea 
+                    id="convertedCode" 
+                    readonly
+                ></textarea>
+            </div>
+        </div>
+
+        <!-- Botón de conversión -->
+        <div class="center" id="convertSection">
+            <button class="btn-primary" id="convertBtn" onclick="convertColors()">
+                🚀 Convertir a Modo Claro
+            </button>
+        </div>
+
+        <!-- Sección de descargas por tipo -->
+        <div class="download-section hidden" id="downloadSection">
+            <h3>💾 Descargar Archivos Separados</h3>
+            <p style="margin: 0.5rem 0; opacity: 0.7;">
+                Descarga cada tipo de archivo con las modificaciones aplicadas
+            </p>
+            <div class="download-buttons" id="downloadButtons">
+                <!-- Se llenan dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="card hidden" id="statsCard">
+            <h3>📊 Estadísticas de Conversión</h3>
+            <div class="stats">
+                <div class="stat-card green">
+                    <div class="stat-value" id="replacements">0</div>
+                    <div class="stat-label">Colores reemplazados</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-value" id="filesDetected">0</div>
+                    <div class="stat-label">Archivos detectados</div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-value" id="totalSize">0 KB</div>
+                    <div class="stat-label">Tamaño total</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div class="instructions">
+            <h3>📖 Instrucciones de Uso</h3>
+            <ol>
+                <li><strong>Pega tu código</strong> HTML/CSS/JS en el área de texto</li>
+                <li><strong>Click en "Convertir"</strong> para procesar automáticamente</li>
+                <li><strong>Descarga archivos separados</strong> (HTML, CSS, JS) según detectados</li>
+                <li><strong>Reemplaza</strong> los archivos originales en tu proyecto</li>
+                <li><strong>El sistema de toggle</strong> se incluye automáticamente</li>
+            </ol>
+            
+            <div class="alert">
+                <strong>💡 Características:</strong>
+                <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                    <li>Detecta automáticamente HTML, CSS y JavaScript</li>
+                    <li>Genera archivos separados listos para usar</li>
+                    <li>Incluye CSS variables y sistema de toggle</li>
+                    <li>Mantiene la estructura original del código</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mapeo de colores
+        const colorMap = {
+            '#0f0f14': '#ffffff',
+            '#1a1a24': '#f5f5f5',
+            '#252532': '#e8e8e8',
+            '#1a1a36': '#f0f0f0',
+            'rgb(15, 15, 20)': 'rgb(255, 255, 255)',
+            'rgb(26, 26, 36)': 'rgb(245, 245, 245)',
+            'rgba(15, 15, 20': 'rgba(255, 255, 255',
+            'rgba(26, 26, 36': 'rgba(245, 245, 245',
+            'rgba(37, 37, 50': 'rgba(240, 240, 240',
+            '#ffffff': '#1a1a1a',
+            '#fff': '#1a1a1a',
+            'rgb(255, 255, 255)': 'rgb(26, 26, 26)',
+            'white': '#1a1a1a',
+            '#a0a0b8': '#5a5a68',
+            '#b0b0b8': '#4a4a58',
+            'rgba(255, 255, 255, 0.7)': 'rgba(0, 0, 0, 0.7)',
+            'rgba(255, 255, 255, 0.8)': 'rgba(0, 0, 0, 0.8)',
+            'rgba(255, 255, 255, 0.9)': 'rgba(0, 0, 0, 0.9)',
+            'rgba(255, 255, 255, 0.1)': 'rgba(0, 0, 0, 0.1)',
+            'rgba(255, 255, 255, 0.05)': 'rgba(0, 0, 0, 0.05)',
+            'rgba(255, 255, 255, 0.2)': 'rgba(0, 0, 0, 0.2)',
+        };
+
+        let processedFiles = {
+            html: null,
+            css: null,
+            js: null
+        };
+
+        function detectFileType(code) {
+            const hasHTMLTags = /<\/?[a-z][\s\S]*>/i.test(code);
+            const hasStyleTag = /<style[\s\S]*?<\/style>/i.test(code);
+            const hasScriptTag = /<script[\s\S]*?<\/script>/i.test(code);
+            const hasCSSRules = /[\w\-\.#\[:\]]+\s*\{[^}]+\}/g.test(code);
+            const hasJSCode = /(function|const|let|var|=>|\bif\b|\bfor\b)/g.test(code);
+
+            return {
+                isHTML: hasHTMLTags,
+                hasStyle: hasStyleTag,
+                hasScript: hasScriptTag,
+                isCSS: !hasHTMLTags && hasCSSRules,
+                isJS: !hasHTMLTags && !hasCSSRules && hasJSCode
+            };
+        }
+
+        function extractAndConvertCode(original) {
+            const detection = detectFileType(original);
+            let converted = original;
+            let replacements = 0;
+
+            // Reemplazar colores
+            Object.entries(colorMap).forEach(([dark, light]) => {
+                const regex = new RegExp(dark.replace(/[()]/g, '\\$&'), 'gi');
+                const matches = converted.match(regex);
+                if (matches) {
+                    replacements += matches.length;
+                    converted = converted.replace(regex, light);
+                }
+            });
+
+            // CSS Variables
+            const cssVars = `/* ============================================ */
+/* SISTEMA DE MODO CLARO/OSCURO AUTOMÁTICO */
+/* ============================================ */
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #e8e8e8;
+  --text-primary: #1a1a1a;
+  --text-secondary: #5a5a68;
+  --border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f0f14;
+  --bg-secondary: #1a1a24;
+  --bg-tertiary: #252532;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b8;
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+`;
+
+            // JavaScript Toggle
+            const jsToggle = `// Sistema de toggle modo claro/oscuro
+const currentTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const newTheme = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+}
+
+updateThemeIcon(currentTheme);`;
+
+            // Botón HTML
+            const htmlButton = `<!-- Botón para cambiar tema (agregar al navbar) -->
+<button 
+  id="themeToggle" 
+  class="nav-btn" 
+  onclick="toggleTheme()"
+  title="Cambiar tema"
+>
+  🌙
+</button>`;
+
+            // Procesar según el tipo detectado
+            if (detection.isHTML) {
+                // Es un archivo HTML completo
+                let htmlContent = converted;
+                
+                // Insertar CSS en el <head> o antes de </style>
+                if (detection.hasStyle) {
+                    htmlContent = htmlContent.replace(/<style([^>]*)>/, `<style$1>\n${cssVars}`);
+                } else if (htmlContent.includes('</head>')) {
+                    htmlContent = htmlContent.replace('</head>', `<style>\n${cssVars}\n</style>\n</head>`);
+                }
+
+                // Insertar JS antes de </body> o después de otros scripts
+                if (htmlContent.includes('</body>')) {
+                    const scriptTag = `<script>${jsToggle}<\/script>`;
+                    htmlContent = htmlContent.replace('</body>', `${scriptTag}\n${htmlButton}\n</body>`);
+                }
+
+                processedFiles.html = htmlContent;
+
+            } else if (detection.isCSS) {
+                // Es un archivo CSS puro
+                processedFiles.css = cssVars + '\n' + converted;
+
+            } else if (detection.isJS) {
+                // Es un archivo JavaScript puro
+                processedFiles.js = jsToggle + '\n\n' + converted;
+            }
+
+            return {
+                converted: converted,
+                replacements: replacements,
+                detection: detection
+            };
+        }
+
+        function convertColors() {
+            const original = document.getElementById('originalCode').value;
+            
+            if (!original.trim()) {
+                alert('⚠️ Por favor pega tu código primero');
+                return;
+            }
+
+            document.getElementById('convertBtn').disabled = true;
+            document.getElementById('convertBtn').textContent = '⏳ Procesando...';
+
+            setTimeout(() => {
+                const result = extractAndConvertCode(original);
+                
+                // Mostrar resultado combinado
+                let displayCode = '';
+                let fileCount = 0;
+
+                if (processedFiles.html) {
+                    displayCode = processedFiles.html;
+                    fileCount++;
+                }
+                if (processedFiles.css) {
+                    displayCode += '\n\n/* ========== CSS SEPARADO ========== */\n\n' + processedFiles.css;
+                    fileCount++;
+                }
+                if (processedFiles.js) {
+                    displayCode += '\n\n/* ========== JAVASCRIPT SEPARADO ========== */\n\n' + processedFiles.js;
+                    fileCount++;
+                }
+
+                document.getElementById('convertedCode').value = displayCode;
+                document.getElementById('convertedCard').classList.remove('hidden');
+                document.getElementById('convertSection').classList.add('hidden');
+                document.getElementById('statsCard').classList.remove('hidden');
+                document.getElementById('downloadSection').classList.remove('hidden');
+                document.getElementById('resetBtn').classList.remove('hidden');
+
+                // Actualizar stats
+                document.getElementById('replacements').textContent = result.replacements;
+                document.getElementById('filesDetected').textContent = fileCount;
+                document.getElementById('totalSize').textContent = (displayCode.length / 1000).toFixed(1) + ' KB';
+
+                // Generar botones de descarga
+                generateDownloadButtons();
+
+                document.getElementById('convertBtn').disabled = false;
+                document.getElementById('convertBtn').textContent = '🚀 Convertir a Modo Claro';
+            }, 500);
+        }
+
+        function generateDownloadButtons() {
+            const container = document.getElementById('downloadButtons');
+            container.innerHTML = '';
+
+            if (processedFiles.html) {
+                const btn = createDownloadButton('HTML', 'html', processedFiles.html, 'badge-html');
+                container.appendChild(btn);
+            }
+
+            if (processedFiles.css) {
+                const btn = createDownloadButton('CSS', 'css', processedFiles.css, 'badge-css');
+                container.appendChild(btn);
+            }
+
+            if (processedFiles.js) {
+                const btn = createDownloadButton('JavaScript', 'js', processedFiles.js, 'badge-js');
+                container.appendChild(btn);
+            }
+        }
+
+        function createDownloadButton(label, extension, content, badgeClass) {
+            const btn = document.createElement('button');
+            btn.className = 'btn-download';
+            btn.innerHTML = `💾 Descargar ${label} <span class="file-type-badge ${badgeClass}">.${extension}</span>`;
+            btn.onclick = () => downloadSpecificFile(content, extension);
+            return btn;
+        }
+
+        function downloadSpecificFile(content, extension) {
+            const mimeTypes = {
+                'html': 'text/html',
+                'css': 'text/css',
+                'js': 'text/javascript'
+            };
+
+            const blob = new Blob([content], { type: mimeTypes[extension] });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `theme-light.${extension}`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert(`✅ Archivo theme-light.${extension} descargado`);
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('convertedCode').value;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Código completo copiado al portapapeles');
+            });
+        }
+
+        function reset() {
+            document.getElementById('originalCode').value = '';
+            document.getElementById('convertedCode').value = '';
+            document.getElementById('convertedCard').classList.add('hidden');
+            document.getElementById('convertSection').classList.remove('hidden');
+            document.getElementById('statsCard').classList.add('hidden');
+            document.getElementById('downloadSection').classList.add('hidden');
+            document.getElementById('resetBtn').classList.add('hidden');
+            
+            processedFiles = {
+                html: null,
+                css: null,
+                js: null
+            };
+        }
+
+        // Mostrar/ocultar botón reset
+        document.getElementById('originalCode').addEventListener('input', (e) => {
+            const btn = document.getElementById('resetBtn');
+            if (e.target.value.trim()) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

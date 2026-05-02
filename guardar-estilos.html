@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Style Saver - Solo Cambios Reales</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .bookmarklet-box {
+            background: #f8f9fa;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .bookmarklet-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: move;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .bookmarklet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .instruction {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .instruction h3 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        
+        .step {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .feature-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: start;
+            margin: 15px 0;
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            min-width: 30px;
+        }
+        
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .code-example {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .code-example .selector { color: #a6e22e; }
+        .code-example .property { color: #66d9ef; }
+        .code-example .value { color: #e6db74; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 CSS Style Saver Pro</h1>
+        <p class="subtitle">Guarda SOLO los estilos que realmente modificaste</p>
+        
+        <div class="bookmarklet-box">
+            <p style="margin-bottom: 20px; font-size: 16px;">
+                <strong>Arrastra este botón a tu barra de favoritos:</strong>
+            </p>
+            <a href="javascript:(function(){if(window.cssSaver)return;window.cssSaver={styles:[],selectedEl:null,originalStyles:{}};const panel=document.createElement('div');panel.id='css-saver-panel';panel.innerHTML='<div style=%22background:linear-gradient(135deg,%23667eea,rgb(118,75,162));color:white;padding:12px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;border-radius:8px%208px%200%200%22><span>🎨%20CSS%20Saver%20Pro</span><button id=%22css-close%22 style=%22background:rgba(255,255,255,0.2);border:none;color:white;padding:5px%2010px;border-radius:4px;cursor:pointer%22>✕</button></div><div style=%22padding:15px%22><div style=%22margin-bottom:10px;font-size:13px;color:%23666%22>👆%20Haz%20clic%20en%20un%20elemento</div><div id=%22css-selector%22 style=%22background:%23f8f9fa;padding:10px;border-radius:4px;margin-bottom:10px;min-height:30px;font-family:monospace;font-size:12px;color:%23333%22>Ningún%20elemento%20seleccionado</div><button id=%22css-capture%22 style=%22width:100%25;background:%234caf50;color:white;border:none;padding:12px;border-radius:6px;font-weight:bold;cursor:pointer;margin-bottom:8px%22 disabled>➕%20Guardar%20Cambios%20CSS</button><div id=%22css-preview%22 style=%22background:%23f8f9fa;padding:8px;border-radius:4px;margin-bottom:10px;font-family:monospace;font-size:11px;color:%23666;max-height:120px;overflow-y:auto;display:none%22></div><div id=%22css-count%22 style=%22text-align:center;font-size:12px;color:%23666;margin-bottom:10px%22>0%20estilos%20guardados</div><button id=%22css-download%22 style=%22width:100%25;background:%23667eea;color:white;border:none;padding:12px;border-radius:6px;font-weight:bold;cursor:pointer;margin-bottom:8px%22>💾%20Descargar%20CSS</button><button id=%22css-clear%22 style=%22width:100%25;background:%23dc3545;color:white;border:none;padding:8px;border-radius:6px;font-size:12px;cursor:pointer%22>🗑️%20Limpiar%20Todo</button></div>';panel.style.cssText='position:fixed;top:20px;right:20px;width:320px;background:white;border-radius:8px;box-shadow:0%208px%2032px%20rgba(0,0,0,0.3);z-index:2147483647;font-family:sans-serif';document.body.appendChild(panel);let overlay=null;document.addEventListener('mouseover',e=>{if(e.target.closest('%23css-saver-panel'))return;if(overlay)overlay.remove();overlay=document.createElement('div');const rect=e.target.getBoundingClientRect();overlay.style.cssText=`position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;height:${rect.height}px;border:2px%20solid%20%23667eea;background:rgba(102,126,234,0.1);pointer-events:none;z-index:2147483646`;document.body.appendChild(overlay)},true);document.addEventListener('click',e=>{if(e.target.closest('%23css-saver-panel'))return;e.preventDefault();e.stopPropagation();const el=e.target;window.cssSaver.selectedEl=el;let sel='';if(el.id)sel='%23'+el.id;else if(el.className&&typeof el.className==='string')sel='.'+el.className.split('%20').filter(c=>c)[0];else sel=el.tagName.toLowerCase();document.getElementById('css-selector').textContent=sel;const inline=el.getAttribute('style')||'';const preview=document.getElementById('css-preview');if(inline){preview.style.display='block';preview.textContent=sel+'%20{%20'+inline+'%20}'}else{preview.style.display='none'}document.getElementById('css-capture').disabled=false;if(overlay)overlay.remove()},true);document.getElementById('css-capture').onclick=()=>{const el=window.cssSaver.selectedEl;if(!el)return;let sel='';if(el.id)sel='%23'+el.id;else if(el.className&&typeof el.className==='string')sel='.'+el.className.split('%20').filter(c=>c)[0];else sel=el.tagName.toLowerCase();const inline=el.getAttribute('style');if(!inline||inline.trim()===''){alert('❌%20No%20hay%20estilos%20inline%20en%20este%20elemento.%5Cn%5CnPara%20guardar%20cambios:%5Cn1.%20Modifica%20el%20elemento%20en%20el%20inspector%5Cn2.%20Copia%20las%20propiedades%20que%20cambiaste%5Cn3.%20Agrégalas%20como%20style=%22...%22%20en%20el%20HTML');return}let css=sel+'%20{%5Cn';const props=inline.split(';').filter(p=>p.trim());props.forEach(prop=>{const p=prop.trim();if(p)css+=`%20%20${p};%5Cn`});css+='}%5Cn';window.cssSaver.styles.push(css);document.getElementById('css-count').textContent=window.cssSaver.styles.length+'%20estilos%20guardados';const msg=document.createElement('div');msg.textContent='✅%20Estilo%20guardado!';msg.style.cssText='position:fixed;top:20px;left:50%25;transform:translateX(-50%25);background:%234caf50;color:white;padding:12px%2024px;border-radius:6px;z-index:2147483648;box-shadow:0%204px%2015px%20rgba(0,0,0,0.2)';document.body.appendChild(msg);setTimeout(()=>msg.remove(),2000)};document.getElementById('css-download').onclick=()=>{if(window.cssSaver.styles.length===0){alert('❌%20No%20hay%20estilos%20guardados');return}const css='/*%20Estilos%20modificados%20-%20'+new Date().toLocaleString()+'%20*/%5Cn%5Cn'+window.cssSaver.styles.join('%5Cn');const blob=new Blob([css],{type:'text/css'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='cambios-css-'+new Date().toISOString().slice(0,10)+'.css';a.click();URL.revokeObjectURL(url);const msg=document.createElement('div');msg.textContent='✅%20CSS%20descargado!';msg.style.cssText='position:fixed;top:20px;left:50%25;transform:translateX(-50%25);background:%23667eea;color:white;padding:12px%2024px;border-radius:6px;z-index:2147483648;box-shadow:0%204px%2015px%20rgba(0,0,0,0.2)';document.body.appendChild(msg);setTimeout(()=>msg.remove(),2000)};document.getElementById('css-clear').onclick=()=>{if(confirm('¿Limpiar%20todos%20los%20estilos%20guardados?')){window.cssSaver.styles=[];document.getElementById('css-count').textContent='0%20estilos%20guardados'}};document.getElementById('css-close').onclick=()=>{panel.remove();if(overlay)overlay.remove();delete window.cssSaver}})();" class="bookmarklet-btn">
+                🎨 CSS Saver Pro
+            </a>
+            <p style="margin-top: 20px; color: #666; font-size: 14px;">
+                ⬆️ Arrastra el botón a tu barra de favoritos
+            </p>
+        </div>
+
+        <div class="warning">
+            <h3 style="margin-top: 0;">⚠️ IMPORTANTE - Cómo aplicar tus cambios:</h3>
+            <p>Para que el bookmarklet capture tus modificaciones, debes <strong>agregar los estilos como atributo inline</strong> en el elemento HTML:</p>
+            
+            <div style="margin: 15px 0;">
+                <strong>Método correcto:</strong>
+                <ol style="margin: 10px 0; padding-left: 20px;">
+                    <li>Haz clic en el elemento con el bookmarklet</li>
+                    <li>En el inspector, ve a la pestaña "Elements" (o "Elementos")</li>
+                    <li>En el HTML del elemento, agrega o edita el atributo <code>style=""</code></li>
+                    <li>Escribe tus propiedades CSS dentro del <code>style</code></li>
+                    <li>Haz clic en "Guardar Cambios CSS" en el panel</li>
+                </ol>
+            </div>
+
+            <div class="code-example">
+<span class="selector">&lt;div class="chat-timestamp"</span> <span class="property">style</span>=<span class="value">"color: #666676 !important; font-size: 0.8rem;"</span><span class="selector">&gt;</span>
+</div>
+        </div>
+        
+        <div class="success">
+            <h3 style="margin-top: 0;">✅ Resultado esperado:</h3>
+            <p>Con este método, el archivo descargado contendrá:</p>
+            <div class="code-example">
+<span class="selector">.chat-timestamp</span> {
+  <span class="property">color</span>: <span class="value">#666676 !important</span>;
+  <span class="property">font-size</span>: <span class="value">0.8rem</span>;
+}
+            </div>
+        </div>
+        
+        <div class="instruction">
+            <h3>📋 Flujo de trabajo completo:</h3>
+            <div class="step">Activa el bookmarklet (aparece el panel)</div>
+            <div class="step">Haz clic en el elemento que quieres modificar</div>
+            <div class="step">En el inspector, localiza el elemento en el HTML</div>
+            <div class="step">Agrega o edita el atributo <code>style=""</code> con tus cambios</div>
+            <div class="step">El panel mostrará una vista previa de los estilos</div>
+            <div class="step">Haz clic en "➕ Guardar Cambios CSS"</div>
+            <div class="step">Repite con otros elementos</div>
+            <div class="step">Descarga tu archivo CSS con solo tus cambios</div>
+        </div>
+
+        <div class="feature-box">
+            <h3 style="margin-top: 0;">💡 Tips profesionales:</h3>
+            <div class="feature-item">
+                <div class="feature-icon">🎯</div>
+                <div>Experimenta con cambios en el panel "Styles" del inspector, luego cópialos al atributo <code>style</code></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📝</div>
+                <div>Usa <code>!important</code> cuando necesites sobrescribir otros estilos</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔍</div>
+                <div>El panel te muestra una vista previa antes de guardar</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💾</div>
+                <div>Guarda frecuentemente para no perder tus cambios</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

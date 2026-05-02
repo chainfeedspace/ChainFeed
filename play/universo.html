@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Nexus - Open World Mining</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #0D1117;
+            color: #C9D1D9;
+            font-family: 'Segoe UI', monospace;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        canvas {
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            cursor: crosshair;
+        }
+        
+        .hud-panel {
+            position: absolute;
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid #30363D;
+            border-radius: 8px;
+            padding: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .hud-top-left { top: 20px; left: 20px; width: 240px; }
+        .hud-top-right { top: 20px; right: 20px; width: 240px; }
+        .hud-bottom-left { bottom: 20px; left: 20px; width: 250px; }
+        .hud-bottom-center { bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+        
+        .panel-title {
+            color: #58A6FF;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #21262D;
+            padding-bottom: 4px;
+        }
+        
+        .resource-bar {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 13px;
+        }
+        
+        .value { 
+            font-weight: bold; 
+            margin-left: auto;
+            font-family: 'Courier New', monospace;
+            color: #F78166;
+        }
+        
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(145deg, #21262D, #161B22);
+            border: 2px solid #30363D;
+            border-radius: 12px;
+            color: #C9D1D9;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+        
+        .action-btn:hover {
+            border-color: #58A6FF;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #connection-status {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background: rgba(163, 113, 247, 0.2);
+            color: #A371F7;
+            border: 1px solid #A371F7;
+        }
+        
+        #notifications {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notification {
+            background: rgba(13, 17, 23, 0.95);
+            border-left: 4px solid #58A6FF;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 0 8px 8px 0;
+            animation: slideIn 0.3s ease;
+            font-size: 13px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification.success { border-left-color: #3FB950; }
+        .notification.error { border-left-color: #F85149; }
+        .notification.warning { border-left-color: #F78166; }
+        .notification.info { border-left-color: #A371F7; }
+        
+        .planet-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(13, 17, 23, 0.98);
+            border: 2px solid #58A6FF;
+            border-radius: 12px;
+            padding: 24px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .planet-panel.active { display: block; }
+        
+        .mission-card {
+            background: #161B22;
+            border: 1px solid #30363D;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .mission-card:hover {
+            border-color: #58A6FF;
+            background: rgba(88, 166, 255, 0.05);
+        }
+        
+        .mission-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .mission-card.disabled:hover {
+            border-color: #30363D;
+            background: #161B22;
+        }
+
+        .mission-card.locked {
+            background: rgba(248, 81, 73, 0.05);
+            border-color: #F85149;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-size: 12px;
+            color: #8B949E;
+        }
+
+        .minimap {
+            width: 100%;
+            height: 150px;
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid #30363D;
+            border-radius: 6px;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #21262D;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #58A6FF, #A371F7);
+            transition: width 0.3s;
+        }
+
+        .planet-info {
+            background: #161B22;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .planet-icon {
+            font-size: 48px;
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .upgrade-card {
+            background: #161B22;
+            border: 1px solid #30363D;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+
+        .upgrade-btn {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(145deg, #3FB950, #2EA043);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+
+        .upgrade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(63, 185, 80, 0.3);
+        }
+
+        .upgrade-btn:disabled {
+            background: #30363D;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alien-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(248, 81, 73, 0.2);
+            border: 1px solid #F85149;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #F85149;
+            margin-top: 8px;
+        }
+
+        .requirement-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(163, 113, 247, 0.2);
+            border: 1px solid #A371F7;
+            border-radius: 4px;
+            font-size: 11px;
+            margin: 4px 4px 4px 0;
+        }
+
+        .requirement-badge.met {
+            background: rgba(63, 185, 80, 0.2);
+            border-color: #3FB950;
+            color: #3FB950;
+        }
+
+        .requirement-badge.not-met {
+            background: rgba(248, 81, 73, 0.2);
+            border-color: #F85149;
+            color: #F85149;
+        }
+
+        .metal-indicator {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin: 2px;
+            font-weight: bold;
+        }
+
+        .metal-common { background: rgba(139, 148, 158, 0.3); color: #8B949E; }
+        .metal-rare { background: rgba(88, 166, 255, 0.3); color: #58A6FF; }
+        .metal-epic { background: rgba(163, 113, 247, 0.3); color: #A371F7; }
+        .metal-legendary { background: rgba(247, 129, 102, 0.3); color: #F78166; }
+
+        .ship-health-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262D;
+            border-radius: 3px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .ship-health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F85149, #F78166);
+            transition: width 0.3s;
+        }
+
+        .ship-health-fill.healthy {
+            background: linear-gradient(90deg, #3FB950, #7EE787);
+        }
+
+        .ship-health-fill.damaged {
+            background: linear-gradient(90deg, #F78166, #F85149);
+        }
+
+        .ship-health-fill.critical {
+            background: linear-gradient(90deg, #F85149, #DA3633);
+        }
+
+        .success-chance {
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 8px 0;
+            text-align: center;
+        }
+
+        .success-chance.high {
+            background: rgba(63, 185, 80, 0.2);
+            border: 1px solid #3FB950;
+            color: #3FB950;
+        }
+
+        .success-chance.medium {
+            background: rgba(247, 129, 102, 0.2);
+            border: 1px solid #F78166;
+            color: #F78166;
+        }
+
+        .success-chance.low {
+            background: rgba(248, 81, 73, 0.2);
+            border: 1px solid #F85149;
+            color: #F85149;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="connection-status">Mundo Minero</div>
+        
+        <div class="hud-panel hud-top-left">
+            <div class="panel-title">Nave & Tripulación</div>
+            <div style="font-size: 16px; font-weight: bold; color: #58A6FF;" id="player-name">Capitán Nova</div>
+            
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #21262D;">
+                <div class="stat-row">
+                    <span>🚀 Nivel de Nave:</span>
+                    <span style="color: #58A6FF;" id="ship-level">1</span>
+                </div>
+                <div class="stat-row">
+                    <span>⛏️ Poder de Minado:</span>
+                    <span style="color: #F78166;" id="mining-power">1</span>
+                </div>
+                <div class="stat-row">
+                    <span>👥 Tripulantes:</span>
+                    <span style="color: #3FB950;" id="crew-count">5</span>
+                </div>
+                <div class="stat-row">
+                    <span>⚔️ Poder de Combate:</span>
+                    <span style="color: #F85149;" id="combat-power">10</span>
+                </div>
+                <div style="margin-top: 8px;">
+                    <div style="font-size: 11px; color: #8B949E; display: flex; justify-content: space-between;">
+                        <span>💚 Salud de Nave:</span>
+                        <span id="ship-health-text" style="color: #3FB950;">100%</span>
+                    </div>
+                    <div class="ship-health-bar">
+                        <div class="ship-health-fill healthy" id="ship-health-bar" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262D;">
+                <div class="stat-row">
+                    <span>📍 Posición:</span>
+                    <span style="color: #58A6FF; font-size: 11px;" id="position">X:0 Y:0</span>
+                </div>
+                <div class="stat-row">
+                    <span>⚡ Velocidad:</span>
+                    <span style="color: #58A6FF;" id="speed-level">3.0</span>
+                </div>
+            </div>
+            <div class="minimap" id="minimap"></div>
+        </div>
+        
+        <div class="hud-panel hud-top-right">
+            <div class="panel-title">Recursos</div>
+            <div class="resource-bar">
+                <span>⛽ FUEL</span>
+                <span class="value" id="fuel-balance">1,000</span>
+            </div>
+            <div class="resource-bar" style="margin-top: 8px;">
+                <span>💎 NEXUS</span>
+                <span class="value" id="nexus-balance">100</span>
+            </div>
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #21262D;">
+                <div style="font-size: 10px; color: #8B949E; margin-bottom: 4px;">METALES PRECIOSOS:</div>
+                <div class="resource-bar" style="margin: 4px 0;">
+                    <span style="font-size: 11px;">⚪ Hierro</span>
+                    <span class="value" style="font-size: 11px;" id="iron-balance">0</span>
+                </div>
+                <div class="resource-bar" style="margin: 4px 0;">
+                    <span style="font-size: 11px;">🔵 Titanio</span>
+                    <span class="value" style="font-size: 11px;" id="titanium-balance">0</span>
+                </div>
+                <div class="resource-bar" style="margin: 4px 0;">
+                    <span style="font-size: 11px;">🟣 Platino</span>
+                    <span class="value" style="font-size: 11px;" id="platinum-balance">0</span>
+                </div>
+                <div class="resource-bar" style="margin: 4px 0;">
+                    <span style="font-size: 11px;">🟠 Quantum</span>
+                    <span class="value" style="font-size: 11px;" id="quantum-balance">0</span>
+                </div>
+            </div>
+<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #21262D;">
+    <div class="resource-bar">
+        <span>🌟 NIVEL</span>
+        <span class="value" style="color: #A371F7;" id="player-level">1</span>
+    </div>
+    <div class="resource-bar" style="margin-top: 4px;">
+        <span>⭐ XP</span>
+        <span class="value" id="xp-balance">0</span>
+    </div>
+</div>
+<div class="progress-bar">
+    <div class="progress-fill" id="xp-progress" style="width: 0%"></div>
+</div>
+<div style="text-align: center; font-size: 10px; color: #8B949E; margin-top: 4px;" id="xp-needed">
+    0 / 100 XP
+</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="xp-progress" style="width: 0%"></div>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #21262D;">
+                <div class="stat-row">
+                    <span>🌍 Planetas visitados:</span>
+                    <span style="color: #3FB950;" id="planets-visited">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>✅ Misiones completadas:</span>
+                    <span style="color: #A371F7;" id="missions-completed">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>👽 Aliens eliminados:</span>
+                    <span style="color: #F85149;" id="aliens-killed">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>💀 Tripulantes perdidos:</span>
+                    <span style="color: #8B949E;" id="crew-deaths">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>❌ Misiones fallidas:</span>
+                    <span style="color: #F85149;" id="missions-failed">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-panel hud-bottom-left">
+            <div class="panel-title">Proximidad</div>
+            <div id="nearby-objects" style="font-size: 12px; color: #8B949E;">
+                <div>Escaneando espacio...</div>
+            </div>
+        </div>
+        
+        <div class="hud-panel hud-bottom-center">
+            <button class="action-btn" onclick="game.openMarketPanel()" id="btn-market">
+    <span style="font-size: 20px;">🏪</span>
+    <span>Mercado</span>
+    <span style="font-size: 9px;">M</span>
+</button>
+            <button class="action-btn" onclick="game.openUpgradePanel()" id="btn-upgrade">
+                <span style="font-size: 20px;">⚙️</span>
+                <span>Mejoras</span>
+                <span style="font-size: 9px;">U</span>
+            </button>
+            <button class="action-btn" onclick="game.toggleHelp()" id="btn-help">
+                <span style="font-size: 20px;">❓</span>
+                <span>Ayuda</span>
+                <span style="font-size: 9px;">H</span>
+            </button>
+            <button class="action-btn" onclick="game.centerCamera()" id="btn-center">
+                <span style="font-size: 20px;">🎯</span>
+                <span>Centrar</span>
+                <span style="font-size: 9px;">C</span>
+            </button>
+        </div>
+        
+        <div id="notifications"></div>
+        
+        <div id="planet-panel" class="planet-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="color: #58A6FF; font-size: 20px;" id="planet-title">Planeta</h2>
+                <button onclick="game.closePlanetPanel()" style="background: none; border: none; color: #8B949E; cursor: pointer; font-size: 24px;">✕</button>
+            </div>
+            
+            <div class="planet-icon" id="planet-icon">🌍</div>
+            
+            <div class="planet-info">
+                <div style="font-size: 14px; font-weight: bold; color: #58A6FF; margin-bottom: 8px;" id="planet-name">Nombre del Planeta</div>
+                <div style="font-size: 12px; color: #8B949E;" id="planet-description">Descripción del planeta</div>
+                <div style="margin-top: 8px; font-size: 11px; color: #F78166;" id="planet-type">Tipo: Desconocido</div>
+                <div id="planet-aliens" style="margin-top: 8px;"></div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <div class="panel-title">Misiones Disponibles</div>
+            </div>
+            
+            <div id="planet-missions">
+                <!-- Las misiones se generan dinámicamente -->
+            </div>
+        </div>
+
+        <div id="upgrade-panel" class="planet-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="color: #58A6FF; font-size: 20px;">⚙️ Mejoras de Nave</h2>
+                <button onclick="game.closeUpgradePanel()" style="background: none; border: none; color: #8B949E; cursor: pointer; font-size: 24px;">✕</button>
+            </div>
+            
+            <div class="upgrade-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; color: #58A6FF;">🚀 Mejorar Nave</div>
+                        <div style="font-size: 11px; color: #8B949E; margin-top: 4px;">
+                            Nivel actual: <span id="upgrade-ship-level">1</span> → <span id="upgrade-ship-next">2</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #8B949E; margin-top: 8px;">
+                    +1 Poder de minado, +10% velocidad, +20% salud máxima
+                </div>
+                <div id="upgrade-ship-materials" style="margin-top: 8px; font-size: 11px;"></div>
+                <button class="upgrade-btn" onclick="game.upgradeShip()" id="btn-upgrade-ship">
+                    Mejorar Nave
+                </button>
+            </div>
+
+            <div class="upgrade-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; color: #3FB950;">👥 Contratar Tripulante</div>
+                        <div style="font-size: 11px; color: #8B949E; margin-top: 4px;">
+                            Tripulación actual: <span id="upgrade-crew-count">5</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #F78166; font-weight: bold;" id="upgrade-crew-cost">200 NEXUS</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #8B949E; margin-top: 8px;">
+                    +1 Tripulante, +2 Poder de combate
+                </div>
+                <button class="upgrade-btn" onclick="game.hireCrew()" id="btn-hire-crew">
+                    Contratar Tripulante
+                </button>
+            </div>
+
+            <div class="upgrade-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; color: #F85149;">⚔️ Mejorar Armas</div>
+                        <div style="font-size: 11px; color: #8B949E; margin-top: 4px;">
+                            Poder de combate: <span id="upgrade-combat-power">10</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #8B949E; margin-top: 8px;">
+                    +5 Poder de combate
+                </div>
+                <div id="upgrade-weapon-materials" style="margin-top: 8px; font-size: 11px;"></div>
+                <button class="upgrade-btn" onclick="game.upgradeWeapons()" id="btn-upgrade-weapons">
+                    Mejorar Armas
+                </button>
+            </div>
+
+            <div class="upgrade-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; color: #3FB950;">🔧 Reparar Nave</div>
+                        <div style="font-size: 11px; color: #8B949E; margin-top: 4px;">
+                            Salud: <span id="repair-health">100%</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #F78166; font-weight: bold;">⚪ 50 Hierro</div>
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #8B949E; margin-top: 8px;">
+                    Restaura 50% de salud de la nave
+                </div>
+                <button class="upgrade-btn" onclick="game.repairShip()" id="btn-repair-ship">
+                    Reparar Nave
+                </button>
+            </div>
+
+            <div style="margin-top: 16px; padding: 12px; background: rgba(88, 166, 255, 0.1); border-radius: 8px;">
+                <div style="font-size: 11px; color: #8B949E;">
+                    💡 <strong>Consejo:</strong> Mejora tu nave y tripulación para acceder a planetas de mayor nivel con mejores recompensas.
+                </div>
+            </div>
+        </div>
+
+        <div id="help-panel" class="planet-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="color: #58A6FF; font-size: 20px;">Ayuda - Controles</h2>
+                <button onclick="game.toggleHelp()" style="background: none; border: none; color: #8B949E; cursor: pointer; font-size: 24px;">✕</button>
+            </div>
+            
+            <div style="background: #161B22; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <h3 style="color: #58A6FF; margin-bottom: 8px;">🎮 Controles</h3>
+                <div class="stat-row"><span>Click Izquierdo:</span><span>Mover nave</span></div>
+                <div class="stat-row"><span>U:</span><span>Panel de mejoras</span></div>
+                <div class="stat-row"><span>H:</span><span>Ayuda</span></div>
+                <div class="stat-row"><span>C:</span><span>Centrar cámara</span></div>
+                <div class="stat-row"><span>ESC:</span><span>Cerrar paneles</span></div>
+            </div>
+
+            <div style="background: #161B22; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <h3 style="color: #3FB950; margin-bottom: 8px;">🚀 Objetivo del Juego</h3>
+                <p style="font-size: 13px; color: #8B949E; line-height: 1.6;">
+                    Explora el universo y mina planetas. Cada planeta tiene un <strong>nivel de minado requerido</strong> y cantidad de <strong>extraterrestres</strong> que debes derrotar.
+                    Mejora tu nave y contrata tripulantes para acceder a planetas más difíciles con mejores recompensas.
+                </p>
+            </div>
+
+            <div style="background: #161B22; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                <h3 style="color: #F78166; margin-bottom: 8px;">⛏️ Sistema de Minado</h3>
+                <ul style="font-size: 13px; color: #8B949E; line-height: 1.6; margin-left: 20px;">
+                    <li><strong>Nivel de Nave:</strong> Determina qué planetas puedes minar</li>
+                    <li><strong>Tripulación:</strong> Mayor tripulación = más poder de combate</li>
+                    <li><strong>Extraterrestres:</strong> Debes tener suficiente poder de combate para derrotarlos</li>
+                    <li><strong>Mejoras:</strong> Usa NEXUS para mejorar tu nave y equipo</li>
+                </ul>
+            </div>
+
+            <div style="background: #161B22; padding: 16px; border-radius: 8px;">
+                <h3 style="color: #A371F7; margin-bottom: 8px;">💡 Consejos</h3>
+                <ul style="font-size: 13px; color: #8B949E; line-height: 1.6; margin-left: 20px;">
+                    <li>Los planetas de nivel alto tienen más extraterrestres pero dan mejores recompensas</li>
+                    <li>Mejora tu nave regularmente para acceder a nuevos planetas</li>
+                    <li>Contrata tripulantes para aumentar tu poder de combate</li>
+                    <li>Tu progreso se guarda automáticamente</li>
+                </ul>
+            </div>
+        </div>
+        <div id="market-panel" class="planet-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="color: #58A6FF; font-size: 20px;">🏪 Mercado de Tripulación</h2>
+                <button onclick="game.closeMarketPanel()" style="background: none; border: none; color: #8B949E; cursor: pointer; font-size: 24px;">✕</button>
+            </div>
+            
+            <div style="background: #161B22; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                <div class="stat-row">
+                    <span>💰 Tu NEXUS:</span>
+                    <span style="color: #F78166; font-weight: bold;" id="market-nexus">100</span>
+                </div>
+                <div class="stat-row">
+                    <span>👥 Tripulantes actuales:</span>
+                    <span style="color: #3FB950; font-weight: bold;" id="market-crew">5</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <h3 style="color: #3FB950; margin-bottom: 8px;">📥 Contratar Tripulantes</h3>
+                <div id="market-buy-list"></div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <h3 style="color: #F78166; margin-bottom: 8px;">📤 Vender Tripulantes</h3>
+                <div id="market-sell-list"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        class StellarNexusOpenWorld {
+constructor() {
+    this.canvas = document.getElementById('game-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    
+    // Camera
+    this.camera = { x: 0, y: 0 };
+    
+    // World size - MUY GRANDE PERO FINITO
+    this.worldSize = 50000; // Cambiado de Infinity a número finito
+    this.chunkSize = 3000; // Chunks medianos = buena densidad
+    this.loadedChunks = new Set();
+    this.planetsPerChunk = 3;
+    
+this.player = {
+    x: 5000,
+    y: 5000,
+    targetX: 5000,
+    targetY: 5000,
+        speed: 3,
+        angle: 0,
+        moving: false
+    };
+    
+    // Ship & Crew stats
+    this.shipLevel = 1;
+    this.miningPower = 1;
+    this.crewCount = 5;
+    this.combatPower = 10;
+    this.shipHealth = 100;
+    this.shipMaxHealth = 100;
+    
+    // Precious metals
+    this.iron = 0;
+    this.titanium = 0;
+    this.platinum = 0;
+    this.quantum = 0;
+    
+    // Game state
+    this.fuel = 1000;
+    this.nexus = 100;
+    this.xp = 0;
+    this.level = 1;
+    this.planetsVisited = new Set();
+    this.missionsCompleted = 0;
+    this.missionsFailed = 0;
+    this.aliensKilled = 0;
+    this.crewDeaths = 0;
+
+    this.missionCooldowns = {};
+    this.crewMarket = [];
+    this.generateCrewMarket();
+
+    this.missionActive = false;
+    this.missionProgress = 0;
+    this.currentMission = null;
+    this.currentPlanet = null;
+
+    this.lastChunkGeneration = 0;
+    
+    // World elements
+    this.stars = [];
+    this.planets = [];
+    this.asteroids = [];
+this.comets = [];  // AGREGAR ESTA LÍNEA
+this.asteroidBelts = [];  // AGREGAR ESTA LÍNEA
+    
+    // Setup y start
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+    
+    this.setupInput();
+    this.generateUniverse();
+
+// Generar chunks iniciales alrededor del jugador
+this.generateNearbyChunks();
+console.log("🎮 Juego inicializado - Planetas iniciales:", this.planets.length);
+    
+    // Auto-save
+    this.loadGame();
+    setInterval(() => this.saveGame(), 5000);
+    
+    this.startGameLoop();
+    
+    this.showNotification('¡Bienvenido al universo minero!', 'success');
+    this.showNotification('Mejora tu nave para acceder a planetas más valiosos (Presiona H para ayuda)', 'info');
+    
+    console.log("Juego inicializado - Player en:", this.player.x, this.player.y);
+}
+            
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            generateUniverse() {
+// Generate background stars - FIJAS EN EL MUNDO
+for (let i = 0; i < 8000; i++) {  // MUCHAS MÁS ESTRELLAS
+    this.stars.push({
+        x: (Math.random() - 0.5) * this.worldSize,
+        y: (Math.random() - 0.5) * this.worldSize,
+        size: Math.random() * 2.5 + 0.5,
+        alpha: Math.random() * 0.8 + 0.2,
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        layer: Math.random(),
+        color: this.getStarColor()
+    });
+}
+console.log("⭐ Estrellas generadas:", this.stars.length);
+    
+// NUEVO: Generate comets (cometas) - MÁS COMETAS
+this.comets = [];
+for (let i = 0; i < 4; i++) {  // 4 cometas
+    this.comets.push({
+        x: (Math.random() - 0.5) * this.worldSize,
+        y: (Math.random() - 0.5) * this.worldSize,
+        vx: (Math.random() - 0.5) * 3,
+        vy: (Math.random() - 0.5) * 3,
+        size: Math.random() * 4 + 2,
+        tailLength: Math.random() * 60 + 40
+    });
+}
+    
+    // Generate planets - REDUCIDO DE 30 A 15
+    const planetTypes = [
+        { emoji: '🌍', name: 'Terrestre', color: '#3FB950', missions: ['exploration', 'research'], minLevel: 1 },
+        { emoji: '🔴', name: 'Desértico', color: '#F85149', missions: ['mining', 'excavation'], minLevel: 1 },
+        { emoji: '🔵', name: 'Oceánico', color: '#58A6FF', missions: ['exploration', 'research'], minLevel: 2 },
+        { emoji: '🟣', name: 'Gaseoso', color: '#A371F7', missions: ['research', 'collection'], minLevel: 2 },
+        { emoji: '⚫', name: 'Oscuro', color: '#8B949E', missions: ['combat', 'defense'], minLevel: 3 },
+        { emoji: '🟡', name: 'Estelar', color: '#F78166', missions: ['energy', 'collection'], minLevel: 3 },
+        { emoji: '🟢', name: 'Selvático', color: '#3FB950', missions: ['exploration', 'collection'], minLevel: 4 },
+        { emoji: '🟠', name: 'Volcánico', color: '#F78166', missions: ['mining', 'excavation'], minLevel: 4 },
+        { emoji: '💎', name: 'Cristalino', color: '#58A6FF', missions: ['mining', 'collection'], minLevel: 5 },
+        { emoji: '🌑', name: 'Sombrío', color: '#8B949E', missions: ['combat', 'defense'], minLevel: 5 }
+    ];
+    
+// Generar planetas en anillos alrededor del jugador
+// NO generar planetas iniciales en anillos
+// Solo usar generación procedural para uniformidad
+console.log("🌌 Universo base generado (sin planetas iniciales)");
+console.log("📍 Los planetas se generarán proceduralmente al explorar");
+    
+    // NUEVO: Generate asteroid belts (cinturones de asteroides)
+// NUEVO: Generate asteroid belts (cinturones de asteroides)
+this.asteroidBelts = [];
+this.asteroids = [];
+
+// Generar 6 cinturones de asteroides alrededor del jugador
+for (let belt = 0; belt < 6; belt++) {
+    const beltAngle = (belt / 6) * Math.PI * 2;
+    const beltRadius = 1500 + belt * 2000; // Cinturones a diferentes distancias
+    const asteroidCount = 150; // Más asteroides por cinturón
+    
+    for (let i = 0; i < asteroidCount; i++) {
+        const angle = (i / asteroidCount) * Math.PI * 2;
+        const offset = (Math.random() - 0.5) * 400;
+        const x = this.player.x + Math.cos(beltAngle + angle) * (beltRadius + offset);
+        const y = this.player.y + Math.sin(beltAngle + angle) * (beltRadius + offset);
+        
+        this.asteroids.push({
+            x: x,
+            y: y,
+            size: Math.random() * 20 + 8,
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.03,
+            orbitAngle: beltAngle + angle,
+            orbitRadius: beltRadius + offset,
+            orbitCenter: { x: this.player.x, y: this.player.y },
+            orbitSpeed: 0.0002
+        });
+    }
+}
+
+console.log("☄️ Asteroides generados:", this.asteroids.length);
+}
+ 
+getStarColor() {
+    const colors = [
+        '#FFFFFF',  // Blanco
+        '#FFFACD',  // Amarillo pálido
+        '#87CEEB',  // Azul cielo
+        '#FFB6C1',  // Rosa claro
+        '#E0E0E0'   // Gris claro
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+generateNearbyChunks() {
+    const chunkX = Math.floor(this.player.x / this.chunkSize);
+    const chunkY = Math.floor(this.player.y / this.chunkSize);
+    
+    // Generar chunks en un radio de 2 (más área)
+for (let dx = -3; dx <= 3; dx++) {
+    for (let dy = -3; dy <= 3; dy++) {
+            const chunkKey = `${chunkX + dx}_${chunkY + dy}`;
+            if (!this.loadedChunks.has(chunkKey)) {
+                this.generateChunk(chunkX + dx, chunkY + dy);
+                this.loadedChunks.add(chunkKey);
+                console.log(`✨ Nuevo chunk generado: ${chunkKey}`);
+            }
+        }
+    }
+    
+    // Limpiar chunks lejanos
+    this.cleanDistantChunks(chunkX, chunkY);
+}
+
+generateChunk(chunkX, chunkY) {
+    const baseX = chunkX * this.chunkSize;
+    const baseY = chunkY * this.chunkSize;
+    
+    // Usar seed basado en coordenadas para generación consistente
+    const seed = chunkX * 1000 + chunkY;
+    const random = this.seededRandom(seed);
+    
+    const planetTypes = [
+        { emoji: '🌍', name: 'Terrestre', color: '#3FB950', missions: ['exploration', 'research'], minLevel: 1 },
+        { emoji: '🔴', name: 'Desértico', color: '#F85149', missions: ['mining', 'excavation'], minLevel: 1 },
+        { emoji: '🔵', name: 'Oceánico', color: '#58A6FF', missions: ['exploration', 'research'], minLevel: 2 },
+        { emoji: '🟣', name: 'Gaseoso', color: '#A371F7', missions: ['research', 'collection'], minLevel: 2 },
+        { emoji: '⚫', name: 'Oscuro', color: '#8B949E', missions: ['combat', 'defense'], minLevel: 3 },
+        { emoji: '🟡', name: 'Estelar', color: '#F78166', missions: ['energy', 'collection'], minLevel: 3 },
+        { emoji: '🟢', name: 'Selvático', color: '#3FB950', missions: ['exploration', 'collection'], minLevel: 4 },
+        { emoji: '🟠', name: 'Volcánico', color: '#F78166', missions: ['mining', 'excavation'], minLevel: 4 },
+        { emoji: '💎', name: 'Cristalino', color: '#58A6FF', missions: ['mining', 'collection'], minLevel: 5 },
+        { emoji: '🌑', name: 'Sombrío', color: '#8B949E', missions: ['combat', 'defense'], minLevel: 5 }
+    ];
+    
+// 2-3 planetas por chunk (más densidad uniforme)
+const planetsInChunk = 2 + Math.floor(random() * 2);
+    
+    for (let i = 0; i < planetsInChunk; i++) {
+        const type = planetTypes[Math.floor(random() * planetTypes.length)];
+const miningLevel = this.generatePlanetLevelForPlayer(random);
+const alienCount = Math.floor(random() * 3) + 1;
+        const requiredCombat = Math.floor(alienCount * 1.5);
+        
+// Separar planetas dentro del chunk para evitar superposición
+        const sectorW = this.chunkSize / 2;
+        const sectorH = this.chunkSize / 2;
+        const sectorX = i % 2;
+        const sectorY = Math.floor(i / 2);
+        this.planets.push({
+            x: baseX + sectorX * sectorW + random() * (sectorW - 120) + 60,
+            y: baseY + sectorY * sectorH + random() * (sectorH - 120) + 60,
+            size: random() * 40 + 60,
+            type: type,
+            name: this.generatePlanetName(),
+            discovered: false,
+            rotation: random() * Math.PI * 2,
+            rotationSpeed: (random() - 0.5) * 0.005,
+            miningLevel: miningLevel,
+            alienCount: alienCount,
+            requiredCombatPower: alienCount * miningLevel,
+            explorationXP: miningLevel * 100,
+            chunkKey: `${chunkX}_${chunkY}`
+        });
+    }
+}
+
+generatePlanetLevelForPlayer(random) {
+    const base = this.miningPower; // Usar miningPower, NO level
+    const roll = random();
+    if (roll < 0.70) return base;                          // 70% igual a ti
+    else if (roll < 0.90) return Math.max(1, base - 1);   // 20% más fácil
+    else return base + 1;                                   // 10% más difícil
+}
+
+seededRandom(seed) {
+    let value = seed;
+    return function() {
+        value = (value * 9301 + 49297) % 233280;
+        return value / 233280;
+    };
+}
+
+cleanDistantChunks(centerChunkX, centerChunkY) {
+    const maxDistance = 6;
+    
+    // Filtrar planetas sin type (corruptos) PRIMERO
+    this.planets = this.planets.filter(p => p.type);
+    
+    // Luego filtrar planetas lejanos
+    const planetsToKeep = [];
+    const chunksToRemove = new Set();
+    
+    this.planets.forEach(planet => {
+        if (!planet.chunkKey) {
+            planetsToKeep.push(planet);
+            return;
+        }
+        
+        const [chunkX, chunkY] = planet.chunkKey.split('_').map(Number);
+        const distance = Math.max(Math.abs(chunkX - centerChunkX), Math.abs(chunkY - centerChunkY));
+        
+        if (distance <= maxDistance) {
+            planetsToKeep.push(planet);
+        } else {
+            chunksToRemove.add(planet.chunkKey);
+        }
+    });
+    
+    // Remover chunks de la lista de cargados
+    chunksToRemove.forEach(key => this.loadedChunks.delete(key));
+    
+    this.planets = planetsToKeep;
+    
+    console.log(`🗑️ Limpieza: ${this.planets.length} planetas activos, ${this.loadedChunks.size} chunks cargados`);
+}
+
+            generatePlanetName() {
+                const prefixes = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Theta', 'Omega', 'Sigma', 'Kappa'];
+                const suffixes = ['Prime', 'Nova', 'Centauri', 'Majoris', 'Minoris', 'Proxima', 'Secundus', 'Tertius'];
+                const numbers = Math.floor(Math.random() * 999) + 1;
+                
+                if (Math.random() > 0.5) {
+                    return prefixes[Math.floor(Math.random() * prefixes.length)] + '-' + numbers;
+                } else {
+                    return prefixes[Math.floor(Math.random() * prefixes.length)] + ' ' + 
+                           suffixes[Math.floor(Math.random() * suffixes.length)];
+                }
+            }
+            
+setupInput() {
+    this.canvas.addEventListener('click', (e) => {
+        if (this.missionActive) {
+            this.showNotification('No puedes moverte durante una misión', 'warning');
+            return;
+        }
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        
+        // Convertir a coordenadas del mundo
+        const worldX = this.camera.x + clickX;
+        const worldY = this.camera.y + clickY;
+        
+        // Verificar si clickeó en un planeta cercano
+        let clickedPlanet = null;
+        this.planets.forEach((planet, index) => {
+            const dx = planet.x - worldX;
+            const dy = planet.y - worldY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < planet.size) {
+                const playerDist = Math.sqrt(
+                    (planet.x - this.player.x) ** 2 + 
+                    (planet.y - this.player.y) ** 2
+                );
+                
+                if (playerDist < planet.size + 50) {
+                    clickedPlanet = { ...planet, index };
+                }
+            }
+        });
+        
+        if (clickedPlanet) {
+            console.log("Planeta clickeado:", clickedPlanet);
+            this.openPlanetPanel(clickedPlanet);
+        } else {
+            // Mover la nave
+            this.player.targetX = worldX;
+            this.player.targetY = worldY;
+            this.player.moving = true;
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'h' || e.key === 'H') this.toggleHelp();
+        if (e.key === 'c' || e.key === 'C') this.centerCamera();
+        if (e.key === 'u' || e.key === 'U') this.openUpgradePanel();
+        if (e.key === 'm' || e.key === 'M') this.openMarketPanel();
+        if (e.key === 'Escape') {
+            this.closePlanetPanel();
+            this.closeUpgradePanel();
+            this.closeMarketPanel();
+            this.toggleHelp(false);
+        }
+    });
+}
+            
+            startGameLoop() {
+                this.renderLoop();
+                setInterval(() => this.updateGame(), 1000 / 60);
+            }
+            
+            updateGame() {
+if (this.player.moving && !this.missionActive) {
+    const dx = this.player.targetX - this.player.x;
+    const dy = this.player.targetY - this.player.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance > 2) {
+        this.player.angle = Math.atan2(dy, dx);
+        this.player.x += (dx / distance) * this.player.speed;
+        this.player.y += (dy / distance) * this.player.speed;
+        
+        this.fuel -= 0.01;
+        if (this.fuel < 0) {
+            this.fuel = 0;
+            this.player.moving = false;
+            this.showNotification('¡Sin combustible! Busca un planeta para recargar', 'error');
+        }
+} else {
+        this.player.moving = false;
+        this.player.x = this.player.targetX;
+        this.player.y = this.player.targetY;
+    }
+}
+                
+const targetCameraX = this.player.x - this.canvas.width / 2;
+const targetCameraY = this.player.y - this.canvas.height / 2;
+if (this.player.moving) {
+    this.camera.x += (targetCameraX - this.camera.x) * 0.08;
+    this.camera.y += (targetCameraY - this.camera.y) * 0.08;
+} else {
+    this.camera.x += (targetCameraX - this.camera.x) * 0.15;
+    this.camera.y += (targetCameraY - this.camera.y) * 0.15;
+    if (Math.abs(this.camera.x - targetCameraX) < 0.5) this.camera.x = targetCameraX;
+    if (Math.abs(this.camera.y - targetCameraY) < 0.5) this.camera.y = targetCameraY;
+}
+
+// DESACTIVADO: Limpieza muy agresiva
+// this.generateNearbyChunks();
+
+// Generar chunks más agresivamente
+const chunkX = Math.floor(this.player.x / this.chunkSize);
+const chunkY = Math.floor(this.player.y / this.chunkSize);
+
+// Generar chunks cada cierto tiempo (no solo al cambiar de chunk)
+if (!this.lastChunkGeneration || Date.now() - this.lastChunkGeneration > 2000) {
+    this.generateNearbyChunks();
+    this.lastChunkGeneration = Date.now();
+}
+                
+                this.planets.forEach(planet => {
+                    planet.rotation += planet.rotationSpeed;
+                });
+                
+                this.updateProximityDisplay();
+                this.updateUI();
+            }
+            
+            updateProximityDisplay() {
+                const nearbyObjects = document.getElementById('nearby-objects');
+                const detectionRange = 400;
+                
+                let nearbyPlanets = [];
+                this.planets.forEach((planet, index) => {
+                    const dx = planet.x - this.player.x;
+                    const dy = planet.y - this.player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < detectionRange) {
+                        nearbyPlanets.push({ planet, distance, index });
+                        
+if (!planet.discovered && distance < 200) {
+    planet.discovered = true;
+    this.planetsVisited.add(index);
+    
+    // NUEVO: Sistema de XP por exploración
+    const explorationXP = planet.explorationXP || (planet.miningLevel * 100);
+    this.xp += explorationXP;
+    
+    this.showNotification(`¡Planeta descubierto! ${planet.name} [Nivel ${planet.miningLevel}]`, 'success');
+    this.showNotification(`+${explorationXP} XP por exploración`, 'info');
+    this.fuel += 50;
+    
+    // Verificar subida de nivel inmediatamente
+    this.checkLevelUp();
+}
+                        
+if (distance < planet.size + 50 && !this.missionActive) {
+    this.currentPlanet = { ...planet, index };
+}
+                    }
+                });
+                
+                if (nearbyPlanets.length > 0) {
+                    nearbyObjects.innerHTML = nearbyPlanets
+                        .sort((a, b) => a.distance - b.distance)
+.map(({ planet, distance }) => {
+    // Validar que planet.type existe
+    if (!planet.type) return '';
+    
+    const canAccess = this.miningPower >= planet.miningLevel && this.combatPower >= planet.requiredCombatPower;
+    return `
+        <div style="margin: 4px 0; padding: 6px; background: ${canAccess ? 'rgba(88, 166, 255, 0.1)' : 'rgba(248, 81, 73, 0.1)'}; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>${planet.type.emoji} ${planet.name}</span>
+                <span style="color: #58A6FF; font-size: 11px;">${Math.floor(distance)}m</span>
+            </div>
+            <div style="font-size: 10px; color: #8B949E; margin-top: 2px;">
+                ⛏️ Nivel ${planet.miningLevel} | 👽 ${planet.alienCount} aliens
+            </div>
+            ${distance < planet.size + 50 ? 
+                (canAccess ? 
+                    '<div style="color: #3FB950; font-size: 11px; margin-top: 2px;">✓ Click para aterrizar</div>' : 
+                    '<div style="color: #F85149; font-size: 11px; margin-top: 2px;">✗ Requiere mejoras</div>') 
+                : ''}
+        </div>
+    `;
+})
+.filter(html => html !== '') // Filtrar planetas corruptos
+.join('');
+                } else {
+                    nearbyObjects.innerHTML = '<div>No hay objetos cercanos</div>';
+                }
+            }
+            
+            updateUI() {
+                document.getElementById('fuel-balance').textContent = Math.floor(this.fuel).toLocaleString();
+                document.getElementById('nexus-balance').textContent = this.nexus;
+                document.getElementById('xp-balance').textContent = this.xp;
+                document.getElementById('player-level').textContent = this.level;
+// Calcular XP necesario para siguiente nivel
+const xpNeeded = Math.floor(100 * Math.pow(1.5, this.level - 1));
+document.getElementById('xp-needed').textContent = `${this.xp} / ${xpNeeded} XP`;
+                document.getElementById('ship-level').textContent = this.shipLevel;
+                document.getElementById('mining-power').textContent = this.miningPower;
+                document.getElementById('crew-count').textContent = this.crewCount;
+                document.getElementById('combat-power').textContent = this.combatPower;
+                document.getElementById('speed-level').textContent = this.player.speed.toFixed(1);
+                document.getElementById('planets-visited').textContent = this.planetsVisited.size;
+                document.getElementById('missions-completed').textContent = this.missionsCompleted;
+                document.getElementById('missions-failed').textContent = this.missionsFailed;
+                document.getElementById('aliens-killed').textContent = this.aliensKilled;
+                document.getElementById('crew-deaths').textContent = this.crewDeaths;
+                
+                // Metals
+                document.getElementById('iron-balance').textContent = this.iron;
+                document.getElementById('titanium-balance').textContent = this.titanium;
+                document.getElementById('platinum-balance').textContent = this.platinum;
+                document.getElementById('quantum-balance').textContent = this.quantum;
+                
+                // Ship health
+                const healthPercent = (this.shipHealth / this.shipMaxHealth * 100).toFixed(0);
+                document.getElementById('ship-health-text').textContent = healthPercent + '%';
+                document.getElementById('ship-health-bar').style.width = healthPercent + '%';
+                
+                const healthBar = document.getElementById('ship-health-bar');
+                healthBar.className = 'ship-health-fill';
+                if (this.shipHealth >= this.shipMaxHealth * 0.7) {
+                    healthBar.classList.add('healthy');
+                } else if (this.shipHealth >= this.shipMaxHealth * 0.4) {
+                    healthBar.classList.add('damaged');
+                } else {
+                    healthBar.classList.add('critical');
+                }
+                
+                const healthText = document.getElementById('ship-health-text');
+                if (this.shipHealth >= this.shipMaxHealth * 0.7) {
+                    healthText.style.color = '#3FB950';
+                } else if (this.shipHealth >= this.shipMaxHealth * 0.4) {
+                    healthText.style.color = '#F78166';
+                } else {
+                    healthText.style.color = '#F85149';
+                }
+                
+                const xpProgress = (this.xp / (this.level * 500)) * 100;
+                document.getElementById('xp-progress').style.width = xpProgress + '%';
+                
+                document.getElementById('position').textContent = 
+                    `X:${Math.floor(this.player.x)} Y:${Math.floor(this.player.y)}`;
+                
+                this.updateMinimap();
+                this.updateUpgradePanelUI();
+            }
+            
+            updateUpgradePanelUI() {
+                document.getElementById('upgrade-ship-level').textContent = this.shipLevel;
+                document.getElementById('upgrade-ship-next').textContent = this.shipLevel + 1;
+                
+                document.getElementById('upgrade-crew-count').textContent = this.crewCount;
+                document.getElementById('upgrade-crew-cost').textContent = (this.crewCount * 40) + ' NEXUS';
+                
+                document.getElementById('upgrade-combat-power').textContent = this.combatPower;
+                
+                document.getElementById('repair-health').textContent = (this.shipHealth / this.shipMaxHealth * 100).toFixed(0) + '%';
+                
+                // Ship upgrade materials
+                const shipMaterials = this.getShipUpgradeCost();
+                const shipMatDiv = document.getElementById('upgrade-ship-materials');
+                shipMatDiv.innerHTML = `
+                    <div style="color: ${this.iron >= shipMaterials.iron ? '#3FB950' : '#F85149'};">⚪ ${shipMaterials.iron} Hierro (Tienes: ${this.iron})</div>
+                    <div style="color: ${this.titanium >= shipMaterials.titanium ? '#3FB950' : '#F85149'};">🔵 ${shipMaterials.titanium} Titanio (Tienes: ${this.titanium})</div>
+                    ${this.shipLevel >= 3 ? `<div style="color: ${this.platinum >= shipMaterials.platinum ? '#3FB950' : '#F85149'};">🟣 ${shipMaterials.platinum} Platino (Tienes: ${this.platinum})</div>` : ''}
+                    ${this.shipLevel >= 5 ? `<div style="color: ${this.quantum >= shipMaterials.quantum ? '#3FB950' : '#F85149'};">🟠 ${shipMaterials.quantum} Quantum (Tienes: ${this.quantum})</div>` : ''}
+                `;
+                
+                // Weapon upgrade materials
+                const weaponMaterials = this.getWeaponUpgradeCost();
+                const weaponMatDiv = document.getElementById('upgrade-weapon-materials');
+                weaponMatDiv.innerHTML = `
+                    <div style="color: ${this.titanium >= weaponMaterials.titanium ? '#3FB950' : '#F85149'};">🔵 ${weaponMaterials.titanium} Titanio (Tienes: ${this.titanium})</div>
+                    ${this.combatPower >= 20 ? `<div style="color: ${this.platinum >= weaponMaterials.platinum ? '#3FB950' : '#F85149'};">🟣 ${weaponMaterials.platinum} Platino (Tienes: ${this.platinum})</div>` : ''}
+                `;
+                
+                const crewCost = this.crewCount * 40;
+                
+                const canUpgradeShip = this.iron >= shipMaterials.iron && 
+                                      this.titanium >= shipMaterials.titanium &&
+                                      (this.shipLevel < 3 || this.platinum >= shipMaterials.platinum) &&
+                                      (this.shipLevel < 5 || this.quantum >= shipMaterials.quantum);
+                
+                const canUpgradeWeapon = this.titanium >= weaponMaterials.titanium &&
+                                        (this.combatPower < 20 || this.platinum >= weaponMaterials.platinum);
+                
+                document.getElementById('btn-upgrade-ship').disabled = !canUpgradeShip;
+                document.getElementById('btn-hire-crew').disabled = this.nexus < crewCost || this.crewCount >= 50;
+                document.getElementById('btn-upgrade-weapons').disabled = !canUpgradeWeapon;
+                document.getElementById('btn-repair-ship').disabled = this.iron < 50 || this.shipHealth >= this.shipMaxHealth * 0.95;
+            }
+            
+            getShipUpgradeCost() {
+                const level = this.shipLevel;
+                return {
+                    iron: level * 100,
+                    titanium: level * 50,
+                    platinum: level >= 3 ? (level - 2) * 30 : 0,
+                    quantum: level >= 5 ? (level - 4) * 20 : 0
+                };
+            }
+            
+            getWeaponUpgradeCost() {
+                const tier = Math.floor(this.combatPower / 10);
+                return {
+                    titanium: (tier + 1) * 30,
+                    platinum: tier >= 2 ? tier * 20 : 0
+                };
+            }
+            
+updateMinimap() {
+    const minimap = document.getElementById('minimap');
+    const viewRange = 1000;
+    minimap.innerHTML = '';
+
+    // Canvas para dibujar en el minimap
+    let mc = minimap.querySelector('canvas');
+    if (!mc) {
+        mc = document.createElement('canvas');
+        mc.style.position = 'absolute';
+        mc.style.top = '0'; mc.style.left = '0';
+        mc.style.width = '100%'; mc.style.height = '100%';
+        minimap.appendChild(mc);
+    }
+    mc.width = minimap.offsetWidth || 220;
+    mc.height = minimap.offsetHeight || 150;
+    const mctx = mc.getContext('2d');
+    const mw = mc.width;
+    const mh = mc.height;
+
+    mctx.clearRect(0, 0, mw, mh);
+
+    // Fondo
+    mctx.fillStyle = 'rgba(13,17,23,0.9)';
+    mctx.fillRect(0, 0, mw, mh);
+
+    // Planetas
+    let closestPlanet = null;
+    let closestDist = Infinity;
+
+this.planets.forEach(planet => {
+        if (!planet.type) return;
+        const dx = planet.x - this.player.x;
+        const dy = planet.y - this.player.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        // Solo apuntar a planetas NO descubiertos
+        if (!planet.discovered && dist < closestDist) {
+            closestDist = dist;
+            closestPlanet = planet;
+        }
+
+        if (Math.abs(dx) < viewRange && Math.abs(dy) < viewRange) {
+            const px = (dx / viewRange) * (mw/2) + mw/2;
+            const py = (dy / viewRange) * (mh/2) + mh/2;
+            const canAccess = this.miningPower >= planet.miningLevel && this.combatPower >= planet.requiredCombatPower;
+
+            mctx.beginPath();
+            mctx.arc(px, py, planet.discovered ? 4 : 2, 0, Math.PI*2);
+            mctx.fillStyle = canAccess ? (planet.type.color || '#58A6FF') : '#F85149';
+            mctx.fill();
+
+            if (planet.discovered) {
+                mctx.font = '8px monospace';
+                mctx.fillStyle = canAccess ? '#8B949E' : '#F85149';
+                mctx.textAlign = 'center';
+                mctx.fillText(planet.name, px, py - 6);
+            }
+        }
+    });
+
+    // Flecha hacia planeta más cercano (fuera del rango visible)
+    if (closestPlanet) {
+        const dx = closestPlanet.x - this.player.x;
+        const dy = closestPlanet.y - this.player.y;
+        const angle = Math.atan2(dy, dx);
+        const arrowR = Math.min(mw, mh) / 2 - 12;
+        const ax = mw/2 + Math.cos(angle) * arrowR;
+        const ay = mh/2 + Math.sin(angle) * arrowR;
+        const canAccess = this.miningPower >= closestPlanet.miningLevel && this.combatPower >= closestPlanet.requiredCombatPower;
+
+        // Línea punteada hacia planeta más cercano
+        mctx.setLineDash([3, 3]);
+        mctx.strokeStyle = canAccess ? '#58A6FF' : '#F85149';
+        mctx.lineWidth = 1;
+        mctx.beginPath();
+        mctx.moveTo(mw/2, mh/2);
+        mctx.lineTo(ax, ay);
+        mctx.stroke();
+        mctx.setLineDash([]);
+
+        // Triángulo flecha
+        mctx.save();
+        mctx.translate(ax, ay);
+        mctx.rotate(angle);
+        mctx.beginPath();
+        mctx.moveTo(8, 0);
+        mctx.lineTo(-4, -4);
+        mctx.lineTo(-4, 4);
+        mctx.closePath();
+        mctx.fillStyle = canAccess ? '#58A6FF' : '#F85149';
+        mctx.fill();
+        mctx.restore();
+
+        // Label del planeta más cercano
+        mctx.font = 'bold 9px monospace';
+        mctx.fillStyle = canAccess ? '#58A6FF' : '#F85149';
+        mctx.textAlign = 'center';
+        mctx.fillText(`► ${closestPlanet.name} (${Math.floor(closestDist)}m)`, mw/2, mh - 4);
+    }
+
+    // Indicador de dirección de movimiento
+    if (this.player.moving) {
+        const moveAngle = this.player.angle;
+        const dirR = 18;
+        const dirX = mw/2 + Math.cos(moveAngle) * dirR;
+        const dirY = mh/2 + Math.sin(moveAngle) * dirR;
+
+        mctx.save();
+        mctx.translate(dirX, dirY);
+        mctx.rotate(moveAngle);
+        mctx.beginPath();
+        mctx.moveTo(6, 0);
+        mctx.lineTo(-3, -3);
+        mctx.lineTo(-3, 3);
+        mctx.closePath();
+        mctx.fillStyle = '#F78166';
+        mctx.shadowBlur = 6;
+        mctx.shadowColor = '#F78166';
+        mctx.fill();
+        mctx.restore();
+    }
+
+    // Jugador (centro)
+    mctx.beginPath();
+    mctx.arc(mw/2, mh/2, 4, 0, Math.PI*2);
+    mctx.fillStyle = '#58A6FF';
+    mctx.shadowBlur = 8;
+    mctx.shadowColor = '#58A6FF';
+    mctx.fill();
+    mctx.shadowBlur = 0;
+
+    // Borde
+    mctx.strokeStyle = '#30363D';
+    mctx.lineWidth = 1;
+    mctx.strokeRect(0, 0, mw, mh);
+}
+            
+            centerCamera() {
+                this.player.moving = false;
+                this.showNotification('Cámara centrada', 'info');
+            }
+            
+            toggleHelp(show) {
+                const panel = document.getElementById('help-panel');
+                const shouldShow = typeof show === 'boolean' ? show : !panel.classList.contains('active');
+                panel.classList.toggle('active', shouldShow);
+            }
+            
+            openUpgradePanel() {
+                document.getElementById('upgrade-panel').classList.add('active');
+            }
+            
+            closeUpgradePanel() {
+                document.getElementById('upgrade-panel').classList.remove('active');
+            }
+            
+            closePlanetPanel() {
+                document.getElementById('planet-panel').classList.remove('active');
+                this.currentPlanet = null;
+            }
+            
+            upgradeShip() {
+                const cost = this.getShipUpgradeCost();
+                
+                if (this.iron >= cost.iron && 
+                    this.titanium >= cost.titanium &&
+                    (this.shipLevel < 3 || this.platinum >= cost.platinum) &&
+                    (this.shipLevel < 5 || this.quantum >= cost.quantum)) {
+                    
+                    this.iron -= cost.iron;
+                    this.titanium -= cost.titanium;
+                    if (this.shipLevel >= 3) this.platinum -= cost.platinum;
+                    if (this.shipLevel >= 5) this.quantum -= cost.quantum;
+                    
+                    this.shipLevel++;
+                    this.miningPower++;
+                    this.player.speed += 0.3;
+                    this.shipMaxHealth += 20;
+                    this.shipHealth = this.shipMaxHealth; // Full heal on upgrade
+                    
+                    this.showNotification(`¡Nave mejorada a nivel ${this.shipLevel}! +1 Minado, +20 Salud máxima`, 'success');
+                } else {
+                    this.showNotification('No tienes suficientes metales preciosos', 'error');
+                }
+            }
+            
+            hireCrew() {
+                const cost = this.crewCount * 40;
+                if (this.nexus >= cost) {
+                    this.nexus -= cost;
+                    this.crewCount++;
+                    this.combatPower += 2;
+                    this.showNotification(`¡Tripulante contratado! Total: ${this.crewCount} | +2 Combate`, 'success');
+                } else {
+                    this.showNotification('No tienes suficiente NEXUS', 'error');
+                }
+            }
+            
+            upgradeWeapons() {
+                const cost = this.getWeaponUpgradeCost();
+                
+                if (this.titanium >= cost.titanium &&
+                    (this.combatPower < 20 || this.platinum >= cost.platinum)) {
+                    
+                    this.titanium -= cost.titanium;
+                    if (this.combatPower >= 20) this.platinum -= cost.platinum;
+                    
+                    this.combatPower += 5;
+                    this.showNotification(`¡Armas mejoradas! Poder de combate: ${this.combatPower}`, 'success');
+                } else {
+                    this.showNotification('No tienes suficientes metales preciosos', 'error');
+                }
+            }
+            
+            openMarketPanel() {
+    this.generateCrewMarket();
+    this.updateMarketUI();
+    document.getElementById('market-panel').classList.add('active');
+}
+
+closeMarketPanel() {
+    document.getElementById('market-panel').classList.remove('active');
+}
+
+generateCrewMarket() {
+    this.crewMarket = [];
+    
+    // Generar 5 tripulantes disponibles para comprar
+    for (let i = 0; i < 5; i++) {
+        const level = Math.max(1, this.shipLevel + Math.floor(Math.random() * 3) - 1);
+        const combatBonus = level * 2 + Math.floor(Math.random() * 3);
+        const price = level * 50 + combatBonus * 10;
+        
+        this.crewMarket.push({
+            id: Date.now() + i,
+            name: this.generateCrewName(),
+            level: level,
+            combatBonus: combatBonus,
+            price: price
+        });
+    }
+}
+
+generateCrewName() {
+    const names = ['Nova', 'Rex', 'Luna', 'Orion', 'Stella', 'Atlas', 'Phoenix', 'Vega', 'Titan', 'Nebula'];
+    const surnames = ['Storm', 'Steel', 'Void', 'Star', 'Blaze', 'Shadow', 'Frost', 'Thunder'];
+    return names[Math.floor(Math.random() * names.length)] + ' ' + 
+           surnames[Math.floor(Math.random() * surnames.length)];
+}
+
+updateMarketUI() {
+    document.getElementById('market-nexus').textContent = this.nexus;
+    document.getElementById('market-crew').textContent = this.crewCount;
+    
+    // Lista de compra
+    const buyList = document.getElementById('market-buy-list');
+    buyList.innerHTML = this.crewMarket.map(crew => `
+        <div class="mission-card" style="margin: 8px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: bold; color: #58A6FF;">👤 ${crew.name}</div>
+                    <div style="font-size: 11px; color: #8B949E; margin-top: 4px;">
+                        Nivel: ${crew.level} | +${crew.combatBonus} Combate
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: #F78166; font-weight: bold; margin-bottom: 4px;">💎 ${crew.price}</div>
+                    <button class="upgrade-btn" style="padding: 4px 12px; margin: 0;" 
+                            onclick="game.buyCrew(${crew.id})" 
+                            ${this.nexus < crew.price ? 'disabled' : ''}>
+                        Contratar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Lista de venta
+    const sellList = document.getElementById('market-sell-list');
+    if (this.crewCount <= 1) {
+        sellList.innerHTML = '<div style="color: #8B949E; text-align: center; padding: 16px;">Necesitas al menos 1 tripulante</div>';
+    } else {
+        const sellPrice = Math.floor(this.shipLevel * 30 + this.combatPower * 2);
+        sellList.innerHTML = `
+            <div class="mission-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; color: #F78166;">Vender 1 Tripulante</div>
+                        <div style="font-size: 11px; color: #8B949E; margin-top: 4px;">
+                            -2 Poder de combate
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #3FB950; font-weight: bold; margin-bottom: 4px;">+💎 ${sellPrice}</div>
+                        <button class="upgrade-btn" style="padding: 4px 12px; margin: 0; background: linear-gradient(145deg, #F85149, #DA3633);" 
+                                onclick="game.sellCrew()">
+                            Vender
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+buyCrew(crewId) {
+    const crew = this.crewMarket.find(c => c.id === crewId);
+    if (!crew) return;
+    
+    if (this.nexus >= crew.price) {
+        this.nexus -= crew.price;
+        this.crewCount++;
+        this.combatPower += crew.combatBonus;
+        
+        this.showNotification(`¡${crew.name} se unió a tu tripulación! +${crew.combatBonus} Combate`, 'success');
+        
+        // Remover del mercado
+        this.crewMarket = this.crewMarket.filter(c => c.id !== crewId);
+        
+        this.updateMarketUI();
+    } else {
+        this.showNotification('No tienes suficiente NEXUS', 'error');
+    }
+}
+
+sellCrew() {
+    if (this.crewCount <= 1) {
+        this.showNotification('Necesitas al menos 1 tripulante', 'error');
+        return;
+    }
+    
+    const sellPrice = Math.floor(this.shipLevel * 30 + this.combatPower * 2);
+    
+    this.crewCount--;
+    this.combatPower = Math.max(5, this.combatPower - 2);
+    this.nexus += sellPrice;
+    
+    this.showNotification(`Tripulante vendido por ${sellPrice} NEXUS. -2 Combate`, 'warning');
+    this.updateMarketUI();
+}
+
+            repairShip() {
+                if (this.iron >= 50) {
+                    if (this.shipHealth >= this.shipMaxHealth * 0.95) {
+                        this.showNotification('Tu nave ya está en buen estado', 'warning');
+                        return;
+                    }
+                    
+                    this.iron -= 50;
+                    this.shipHealth = Math.min(this.shipMaxHealth, this.shipHealth + this.shipMaxHealth * 0.5);
+                    this.showNotification('¡Nave reparada! +50% de salud', 'success');
+                } else {
+                    this.showNotification('Necesitas 50 de Hierro para reparar', 'error');
+                }
+            }
+            
+openPlanetPanel(planet) {
+    // VALIDACIÓN: Verificar que planet existe
+    if (!planet || !planet.type) {
+        console.error("Planet es null o inválido:", planet);
+        this.showNotification('Error al cargar planeta', 'error');
+        return;
+    }
+    
+    const panel = document.getElementById('planet-panel');
+    
+    document.getElementById('planet-title').textContent = planet.name;
+    document.getElementById('planet-icon').textContent = planet.type.emoji;
+    document.getElementById('planet-name').textContent = planet.name;
+    document.getElementById('planet-type').textContent = `Tipo: Planeta ${planet.type.name} | Nivel ${planet.miningLevel}`;
+    document.getElementById('planet-description').textContent = 
+        `Un planeta ${planet.type.name.toLowerCase()} de nivel ${planet.miningLevel} habitado por ${planet.alienCount} extraterrestres hostiles.`;
+    
+    const aliensDiv = document.getElementById('planet-aliens');
+    aliensDiv.innerHTML = `
+        <div class="alien-indicator">
+            👽 ${planet.alienCount} Extraterrestres | Requiere ${planet.requiredCombatPower} poder de combate
+        </div>
+    `;
+    
+    const canAccess = this.miningPower >= planet.miningLevel && this.combatPower >= planet.requiredCombatPower;
+    const missionsDiv = document.getElementById('planet-missions');
+    const missionTemplates = this.getMissionTemplates(planet.type, planet.miningLevel);
+    
+    missionsDiv.innerHTML = missionTemplates.map(mission => {
+        // Verificar cooldown
+        const cooldownCheck = this.checkMissionCooldown(planet.index, mission.id);
+        const canDoMission = canAccess && this.fuel >= mission.cost && !cooldownCheck.onCooldown;
+        const successChance = this.calculateSuccessChance(planet);
+        const chanceClass = successChance >= 70 ? 'high' : successChance >= 40 ? 'medium' : 'low';
+        
+        const requirements = [];
+        
+        if (this.miningPower < planet.miningLevel) {
+            requirements.push(`<span class="requirement-badge not-met">⛏️ Requiere nivel ${planet.miningLevel}</span>`);
+        } else {
+            requirements.push(`<span class="requirement-badge met">⛏️ Nivel ${planet.miningLevel} ✓</span>`);
+        }
+        
+        if (this.combatPower < planet.requiredCombatPower) {
+            requirements.push(`<span class="requirement-badge not-met">⚔️ Requiere ${planet.requiredCombatPower} combate</span>`);
+        } else {
+            requirements.push(`<span class="requirement-badge met">⚔️ Combate ${planet.requiredCombatPower} ✓</span>`);
+        }
+        
+        return `
+            <div class="mission-card ${!canDoMission ? 'disabled' : ''} ${!canAccess ? 'locked' : ''}" 
+                 onclick="${canDoMission ? `game.startMission('${mission.id}', ${mission.cost}, ${mission.reward}, ${mission.duration}, ${mission.xp}, ${planet.index}, ${planet.alienCount}, ${planet.miningLevel})` : ''}">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3 style="color: #58A6FF;">${mission.icon} ${mission.name}</h3>
+                    <span style="color: #3FB950; font-weight: bold;">+${mission.reward} FUEL</span>
+                </div>
+                <p style="color: #8B949E; font-size: 12px; margin-top: 8px;">
+                    ${mission.description}
+                </p>
+                ${canAccess ? `
+                    <div class="success-chance ${chanceClass}">
+                        🎯 Probabilidad de éxito: ${successChance}%
+                    </div>
+                ` : ''}
+                <div style="margin-top: 8px; font-size: 11px;">
+                    <div style="color: #A371F7;">Recompensas de metales: ${mission.metals}</div>
+                </div>
+                <div style="margin-top: 8px;">
+                    ${requirements.join('')}
+                </div>
+                ${cooldownCheck.onCooldown ? `
+                    <div style="background: rgba(248, 81, 73, 0.2); padding: 6px; border-radius: 4px; margin-top: 8px; text-align: center;">
+                        ⏰ Disponible en: ${this.formatCooldownTime(cooldownCheck.remaining)}
+                    </div>
+                ` : ''}
+                <div style="margin-top: 8px; display: flex; justify-content: space-between; font-size: 11px;">
+                    <span style="color: #F78166;">Costo: ${mission.cost} FUEL</span>
+                    <span style="color: #A371F7;">⏱️ ${mission.duration}s | +${mission.xp} XP | +${mission.nexus} 💎</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    panel.classList.add('active');
+}
+            
+            calculateSuccessChance(planet) {
+                // Base chance
+                let chance = 50;
+                
+                // Mining level advantage
+                const miningAdvantage = this.miningPower - planet.miningLevel;
+                chance += miningAdvantage * 10;
+                
+                // Combat power advantage
+                const combatRatio = this.combatPower / planet.requiredCombatPower;
+                if (combatRatio >= 1.5) chance += 20;
+                else if (combatRatio >= 1.2) chance += 10;
+                else if (combatRatio >= 1.0) chance += 0;
+                else chance -= 20;
+                
+                // Crew count bonus
+                const crewBonus = Math.min(20, this.crewCount * 2);
+                chance += crewBonus;
+                
+                // Ship health penalty
+                const healthRatio = this.shipHealth / this.shipMaxHealth;
+                if (healthRatio < 0.5) chance -= 15;
+                else if (healthRatio < 0.7) chance -= 5;
+                
+                return Math.max(10, Math.min(95, Math.round(chance)));
+            }
+            
+            getMissionTemplates(planetType, miningLevel) {
+                const multiplier = miningLevel;
+                
+                // Verificar cooldowns
+const checkCooldown = (planetIndex, missionId) => {
+    const cooldownKey = `${planetIndex}_${missionId}`;
+    if (this.missionCooldowns[cooldownKey]) {
+        const remaining = this.missionCooldowns[cooldownKey] - Date.now();
+        if (remaining > 0) {
+            return { onCooldown: true, remaining };
+        } else {
+            delete this.missionCooldowns[cooldownKey];
+        }
+    }
+    return { onCooldown: false };
+};
+
+                // Metal rewards based on level
+                const getMetalRewards = (level) => {
+                    const metals = [];
+                    metals.push(`<span class="metal-indicator metal-common">⚪ ${level * 10}-${level * 20} Hierro</span>`);
+                    if (level >= 2) metals.push(`<span class="metal-indicator metal-rare">🔵 ${level * 5}-${level * 10} Titanio</span>`);
+                    if (level >= 4) metals.push(`<span class="metal-indicator metal-epic">🟣 ${level * 2}-${level * 5} Platino</span>`);
+                    if (level >= 5) metals.push(`<span class="metal-indicator metal-legendary">🟠 ${level}-${level * 2} Quantum</span>`);
+                    return metals.join(' ');
+                };
+                
+                const baseTemplates = {
+                    exploration: [
+                        { id: 'scan', icon: '🔭', name: 'Escaneo Planetario', description: 'Escanea la superficie en busca de recursos', cost: 30 * multiplier, reward: 100 * multiplier, duration: 8, xp: 40 * multiplier, nexus: 5 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'map', icon: '🗺️', name: 'Cartografía', description: 'Mapea regiones desconocidas', cost: 50 * multiplier, reward: 150 * multiplier, duration: 12, xp: 60 * multiplier, nexus: 8 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ],
+                    research: [
+                        { id: 'sample', icon: '🧪', name: 'Recolección de Muestras', description: 'Recolecta muestras científicas', cost: 40 * multiplier, reward: 120 * multiplier, duration: 10, xp: 50 * multiplier, nexus: 6 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'analysis', icon: '📊', name: 'Análisis Profundo', description: 'Realiza análisis detallados', cost: 80 * multiplier, reward: 250 * multiplier, duration: 15, xp: 100 * multiplier, nexus: 12 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ],
+                    mining: [
+                        { id: 'extract', icon: '⛏️', name: 'Extracción de Recursos', description: 'Extrae minerales valiosos', cost: 60 * multiplier, reward: 200 * multiplier, duration: 12, xp: 70 * multiplier, nexus: 10 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'deepmine', icon: '💎', name: 'Minería Profunda', description: 'Extrae recursos raros del núcleo', cost: 120 * multiplier, reward: 400 * multiplier, duration: 20, xp: 150 * multiplier, nexus: 20 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ],
+                    excavation: [
+                        { id: 'dig', icon: '🏗️', name: 'Excavación', description: 'Excava en busca de artefactos', cost: 50 * multiplier, reward: 180 * multiplier, duration: 10, xp: 60 * multiplier, nexus: 9 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'ruins', icon: '🏛️', name: 'Exploración de Ruinas', description: 'Explora ruinas antiguas', cost: 100 * multiplier, reward: 350 * multiplier, duration: 18, xp: 120 * multiplier, nexus: 18 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ],
+                    collection: [
+                        { id: 'gather', icon: '🌾', name: 'Recolección', description: 'Recolecta recursos naturales', cost: 35 * multiplier, reward: 110 * multiplier, duration: 8, xp: 45 * multiplier, nexus: 7 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'harvest', icon: '🍃', name: 'Cosecha Avanzada', description: 'Cosecha recursos especiales', cost: 70 * multiplier, reward: 230 * multiplier, duration: 14, xp: 90 * multiplier, nexus: 11 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ],
+                    combat: [
+                        { id: 'patrol', icon: '🛡️', name: 'Patrulla', description: 'Patrulla el perímetro planetario', cost: 80 * multiplier, reward: 280 * multiplier, duration: 15, xp: 110 * multiplier, nexus: 14 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'defend', icon: '⚔️', name: 'Defensa Activa', description: 'Defiende de amenazas hostiles', cost: 150 * multiplier, reward: 550 * multiplier, duration: 25, xp: 200 * multiplier, nexus: 25 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ],
+                    defense: [
+                        { id: 'secure', icon: '🔒', name: 'Asegurar Zona', description: 'Asegura áreas críticas', cost: 90 * multiplier, reward: 300 * multiplier, duration: 16, xp: 120 * multiplier, nexus: 15 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'fortify', icon: '🏰', name: 'Fortificación', description: 'Fortifica posiciones defensivas', cost: 130 * multiplier, reward: 450 * multiplier, duration: 22, xp: 180 * multiplier, nexus: 22 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ],
+                    energy: [
+                        { id: 'collect', icon: '⚡', name: 'Recolección de Energía', description: 'Captura energía estelar', cost: 70 * multiplier, reward: 240 * multiplier, duration: 13, xp: 85 * multiplier, nexus: 13 * multiplier, metals: getMetalRewards(miningLevel) },
+                        { id: 'harness', icon: '🔋', name: 'Aprovechamiento Total', description: 'Aprovecha toda la energía disponible', cost: 140 * multiplier, reward: 500 * multiplier, duration: 24, xp: 190 * multiplier, nexus: 24 * multiplier, metals: getMetalRewards(miningLevel) }
+                    ]
+                };
+                
+                let missions = [];
+                planetType.missions.forEach(type => {
+                    if (baseTemplates[type]) {
+                        missions = missions.concat(baseTemplates[type]);
+                    }
+                });
+                
+                return missions;
+            }
+            
+            checkMissionCooldown(planetIndex, missionId) {
+    const cooldownKey = `${planetIndex}_${missionId}`;
+    if (this.missionCooldowns[cooldownKey]) {
+        const remaining = this.missionCooldowns[cooldownKey] - Date.now();
+        if (remaining > 0) {
+            return { onCooldown: true, remaining };
+        } else {
+            delete this.missionCooldowns[cooldownKey];
+        }
+    }
+    return { onCooldown: false, remaining: 0 };
+}
+
+formatCooldownTime(ms) {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
+}
+
+            startMission(type, cost, reward, duration, xpReward, planetIndex, alienCount, miningLevel) {
+                if (this.missionActive) return;
+                if (this.fuel < cost) {
+                    this.showNotification('No tienes suficiente FUEL', 'error');
+                    return;
+                }
+                
+                const planet = this.planets[planetIndex];
+                const successChance = this.calculateSuccessChance(planet);
+                
+                this.fuel -= cost;
+                this.missionActive = true;
+                this.missionProgress = 0;
+                this.currentMission = { 
+                    type, 
+                    reward, 
+                    duration, 
+                    xpReward, 
+                    startTime: Date.now(), 
+                    planetIndex, 
+                    alienCount, 
+                    miningLevel,
+                    successChance 
+                };
+                
+                this.showNotification(`¡Misión ${type} iniciada! Combatiendo ${alienCount} aliens... (${successChance}% éxito)`, 'info');
+                this.closePlanetPanel();
+                
+                // Registrar cooldown de 24 horas
+const cooldownKey = `${planetIndex}_${type}`;
+this.missionCooldowns[cooldownKey] = Date.now() + (24 * 60 * 60 * 1000); // 24 horas
+
+                const progressInterval = setInterval(() => {
+                    if (!this.missionActive) {
+                        clearInterval(progressInterval);
+                        return;
+                    }
+                    
+                    this.missionProgress = Math.min(100, (Date.now() - this.currentMission.startTime) / (duration * 1000) * 100);
+                    
+                    if (this.missionProgress >= 100) {
+                        clearInterval(progressInterval);
+                        this.resolveMission();
+                    }
+                }, 100);
+            }
+            
+            resolveMission() {
+                if (!this.currentMission) return;
+                
+                const planet = this.planets[this.currentMission.planetIndex];
+                const successRoll = Math.random() * 100;
+                const success = successRoll <= this.currentMission.successChance;
+                
+                if (success) {
+                    this.completeMission();
+                } else {
+                    this.failMission();
+                }
+            }
+            
+            completeMission() {
+                if (!this.currentMission) return;
+                
+                const planet = this.planets[this.currentMission.planetIndex];
+                const level = this.currentMission.miningLevel;
+                const nexusReward = Math.floor(level * 5 * (1 + Math.random()));
+                
+                // Calculate metal rewards
+                const ironReward = Math.floor(level * 10 + Math.random() * level * 10);
+                const titaniumReward = level >= 2 ? Math.floor(level * 5 + Math.random() * level * 5) : 0;
+                const platinumReward = level >= 4 ? Math.floor(level * 2 + Math.random() * level * 3) : 0;
+                const quantumReward = level >= 5 ? Math.floor(level + Math.random() * level) : 0;
+                
+                this.fuel += this.currentMission.reward;
+                this.xp += this.currentMission.xpReward;
+                this.nexus += nexusReward;
+                this.aliensKilled += this.currentMission.alienCount;
+                this.missionsCompleted++;
+                
+                // Add metals
+                this.iron += ironReward;
+                this.titanium += titaniumReward;
+                this.platinum += platinumReward;
+                this.quantum += quantumReward;
+                
+                // Small ship damage on success (lower on easier missions)
+                const damagePercent = Math.max(2, 15 - (this.currentMission.successChance / 10));
+                const damage = Math.floor(this.shipMaxHealth * (damagePercent / 100));
+                this.shipHealth = Math.max(1, this.shipHealth - damage);
+                
+                let metalText = `⚪${ironReward} Hierro`;
+                if (titaniumReward > 0) metalText += `, 🔵${titaniumReward} Titanio`;
+                if (platinumReward > 0) metalText += `, 🟣${platinumReward} Platino`;
+                if (quantumReward > 0) metalText += `, 🟠${quantumReward} Quantum`;
+                
+                this.showNotification(`✅ ¡MISIÓN EXITOSA! +${this.currentMission.reward} FUEL, +${this.currentMission.xpReward} XP`, 'success');
+                this.showNotification(`Metales obtenidos: ${metalText}`, 'success');
+                this.showNotification(`💥 Nave dañada: -${damagePercent}% salud | Derrotaste ${this.currentMission.alienCount} aliens`, 'warning');
+                
+                this.checkLevelUp();
+                this.missionActive = false;
+                this.currentMission = null;
+                this.missionProgress = 0;
+            }
+            
+            failMission() {
+                if (!this.currentMission) return;
+                
+                const planet = this.planets[this.currentMission.planetIndex];
+                
+                // Heavy ship damage on failure
+                const damagePercent = 20 + Math.floor(Math.random() * 20);
+                const damage = Math.floor(this.shipMaxHealth * (damagePercent / 100));
+                this.shipHealth = Math.max(1, this.shipHealth - damage);
+                
+                // Crew casualties
+                const crewLoss = Math.min(this.crewCount - 1, Math.floor(1 + Math.random() * 3));
+                this.crewCount = Math.max(1, this.crewCount - crewLoss);
+                this.combatPower = Math.max(5, this.combatPower - crewLoss * 2);
+                this.crewDeaths += crewLoss;
+                
+                this.missionsFailed++;
+                
+                // Small consolation rewards
+                const partialFuel = Math.floor(this.currentMission.reward * 0.2);
+                const partialIron = Math.floor(this.currentMission.miningLevel * 3);
+                this.fuel += partialFuel;
+                this.iron += partialIron;
+                
+                this.showNotification(`❌ ¡MISIÓN FALLIDA! Los aliens eran demasiado fuertes`, 'error');
+                this.showNotification(`💀 ${crewLoss} tripulantes perdidos | 💥 -${damagePercent}% salud de nave`, 'error');
+                this.showNotification(`Recursos parciales: +${partialFuel} FUEL, +${partialIron} Hierro`, 'warning');
+                
+                if (this.crewCount <= 2) {
+                    this.showNotification('⚠️ ¡ALERTA! Tripulación crítica. Contrata más tripulantes', 'error');
+                }
+                
+                if (this.shipHealth < this.shipMaxHealth * 0.3) {
+                    this.showNotification('⚠️ ¡ALERTA! Nave gravemente dañada. Repara urgente', 'error');
+                }
+                
+                this.missionActive = false;
+                this.currentMission = null;
+                this.missionProgress = 0;
+            }
+            
+checkLevelUp() {
+    const xpNeeded = Math.floor(100 * Math.pow(1.5, this.level - 1));
+    if (this.xp >= xpNeeded) {
+        this.level++;
+        this.xp -= xpNeeded;
+        
+        // MEJORAS POR NIVEL
+        this.player.speed += 0.5;
+        this.fuel += 200;
+        this.nexus += 50;
+        this.shipMaxHealth += 10;
+        this.shipHealth = this.shipMaxHealth; // Curación completa al subir nivel
+        
+        this.showNotification(`🎉 ¡NIVEL ${this.level}! +0.5 velocidad, +200 FUEL, +50 NEXUS`, 'success');
+// Regenerar chunks para mostrar planetas de nuevo nivel
+this.loadedChunks.clear();
+this.planets = this.planets.filter(p => p.discovered && p.type); // Mantener solo descubiertos Y válidos
+this.generateNearbyChunks();
+
+        this.showNotification(`💚 Nave completamente reparada`, 'success');
+        
+        // Bonus cada 5 niveles
+        if (this.level % 5 === 0) {
+            this.miningPower++;
+            this.showNotification(`⭐ ¡Nivel ${this.level}! +1 Poder de Minado EXTRA`, 'success');
+        }
+    }
+}
+            
+            showNotification(text, type) {
+                const container = document.getElementById('notifications');
+                const notif = document.createElement('div');
+                notif.className = 'notification ' + (type || 'info');
+                notif.textContent = text;
+                container.appendChild(notif);
+                
+                setTimeout(() => {
+                    notif.style.opacity = '0';
+                    setTimeout(() => notif.remove(), 300);
+                }, 5000);
+            }
+            
+            saveGame() {
+                const saveData = {
+                    fuel: this.fuel,
+                    nexus: this.nexus,
+                    xp: this.xp,
+                    level: this.level,
+                    shipLevel: this.shipLevel,
+                    miningPower: this.miningPower,
+                    crewCount: this.crewCount,
+                    combatPower: this.combatPower,
+                    shipHealth: this.shipHealth,
+                    shipMaxHealth: this.shipMaxHealth,
+                    iron: this.iron,
+                    titanium: this.titanium,
+                    platinum: this.platinum,
+                    quantum: this.quantum,
+                    playerX: this.player.x,
+                    playerY: this.player.y,
+                    playerSpeed: this.player.speed,
+                    planetsVisited: Array.from(this.planetsVisited),
+                    missionsCompleted: this.missionsCompleted,
+                    missionsFailed: this.missionsFailed,
+                    aliensKilled: this.aliensKilled,
+                    crewDeaths: this.crewDeaths,
+                    discoveredPlanets: this.planets.map(p => p.discovered),
+missionCooldowns: this.missionCooldowns,
+loadedChunks: Array.from(this.loadedChunks)
+
+                };
+                localStorage.setItem('stellarNexusMining', JSON.stringify(saveData));
+            }
+            
+            loadGame() {
+                const saved = localStorage.getItem('stellarNexusMining');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.fuel = data.fuel || 1000;
+                    this.nexus = data.nexus || 100;
+                    this.xp = data.xp || 0;
+                    this.level = data.level || 1;
+                    this.shipLevel = data.shipLevel || 1;
+                    this.miningPower = data.miningPower || 1;
+                    this.crewCount = data.crewCount || 5;
+                    this.combatPower = data.combatPower || 10;
+                    this.shipHealth = data.shipHealth || 100;
+                    this.shipMaxHealth = data.shipMaxHealth || 100;
+                    this.iron = data.iron || 0;
+                    this.titanium = data.titanium || 0;
+                    this.platinum = data.platinum || 0;
+                    this.quantum = data.quantum || 0;
+this.player.x = (data.playerX != null && !isNaN(data.playerX)) ? data.playerX : 5000;
+this.player.y = (data.playerY != null && !isNaN(data.playerY)) ? data.playerY : 5000;
+this.player.targetX = this.player.x;
+this.player.targetY = this.player.y;
+this.player.moving = false;
+                    this.player.speed = data.playerSpeed || 3;
+                    this.planetsVisited = new Set(data.planetsVisited || []);
+                    this.missionsCompleted = data.missionsCompleted || 0;
+                    this.missionsFailed = data.missionsFailed || 0;
+                    this.aliensKilled = data.aliensKilled || 0;
+                    this.crewDeaths = data.crewDeaths || 0;
+                    this.missionCooldowns = data.missionCooldowns || {};
+this.loadedChunks = new Set(); // NO restaurar del save - fuerza regeneración
+                    
+                    if (data.discoveredPlanets) {
+                        this.planets.forEach((p, i) => {
+                            if (data.discoveredPlanets[i]) p.discovered = true;
+                        });
+                    }
+                }
+            }
+            
+            renderLoop() {
+                this.ctx.fillStyle = '#0D1117';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw stars with parallax
+// Draw stars with parallax - CON COLORES
+this.stars.forEach(star => {
+    const parallaxX = star.x - this.camera.x * (0.5 + star.layer * 0.5);
+    const parallaxY = star.y - this.camera.y * (0.5 + star.layer * 0.5);
+    
+    if (parallaxX > -100 && parallaxX < this.canvas.width + 100 &&
+        parallaxY > -100 && parallaxY < this.canvas.height + 100) {
+        
+        star.alpha += star.twinkleSpeed;
+        if (star.alpha > 0.8 || star.alpha < 0.3) star.twinkleSpeed *= -1;
+        
+        this.ctx.globalAlpha = star.alpha;
+        this.ctx.fillStyle = star.color;  // USAR COLOR
+        this.ctx.beginPath();
+        this.ctx.arc(parallaxX, parallaxY, star.size, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+});
+this.ctx.globalAlpha = 1;
+
+// NUEVO: Draw comets (DESPUÉS DE LAS ESTRELLAS)
+if (this.comets) {
+    this.comets.forEach(comet => {
+        // Actualizar posición
+        comet.x += comet.vx;
+        comet.y += comet.vy;
+        
+        // Wrap around world
+        if (comet.x < 0) comet.x = this.worldSize;
+        if (comet.x > this.worldSize) comet.x = 0;
+        if (comet.y < 0) comet.y = this.worldSize;
+        if (comet.y > this.worldSize) comet.y = 0;
+        
+        const screenX = comet.x - this.camera.x;
+        const screenY = comet.y - this.camera.y;
+        
+        if (screenX > -200 && screenX < this.canvas.width + 200 &&
+            screenY > -200 && screenY < this.canvas.height + 200) {
+            
+            // Dibujar cola del cometa
+            const gradient = this.ctx.createLinearGradient(
+                screenX, screenY,
+                screenX - comet.vx * comet.tailLength, 
+                screenY - comet.vy * comet.tailLength
+            );
+            gradient.addColorStop(0, 'rgba(88, 166, 255, 0.8)');
+            gradient.addColorStop(1, 'rgba(88, 166, 255, 0)');
+            
+            this.ctx.strokeStyle = gradient;
+            this.ctx.lineWidth = comet.size;
+            this.ctx.beginPath();
+            this.ctx.moveTo(screenX, screenY);
+            this.ctx.lineTo(
+                screenX - comet.vx * comet.tailLength, 
+                screenY - comet.vy * comet.tailLength
+            );
+            this.ctx.stroke();
+            
+            // Dibujar núcleo del cometa
+            this.ctx.fillStyle = '#FFFFFF';
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = '#58A6FF';
+            this.ctx.beginPath();
+            this.ctx.arc(screenX, screenY, comet.size, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.shadowBlur = 0;
+        }
+    });
+}
+                this.ctx.globalAlpha = 1;
+                
+// Draw asteroids - CON ÓRBITAS
+this.asteroids.forEach(asteroid => {
+    // Si tiene órbita, actualizar posición
+    if (asteroid.orbitCenter) {
+        asteroid.orbitAngle += asteroid.orbitSpeed;
+        asteroid.x = asteroid.orbitCenter.x + Math.cos(asteroid.orbitAngle) * asteroid.orbitRadius;
+        asteroid.y = asteroid.orbitCenter.y + Math.sin(asteroid.orbitAngle) * asteroid.orbitRadius;
+    }
+    
+    const screenX = asteroid.x - this.camera.x;
+    const screenY = asteroid.y - this.camera.y;
+    
+    if (screenX > -100 && screenX < this.canvas.width + 100 &&
+        screenY > -100 && screenY < this.canvas.height + 100) {
+        
+        asteroid.rotation += asteroid.rotationSpeed;
+        
+        this.ctx.save();
+        this.ctx.translate(screenX, screenY);
+        this.ctx.rotate(asteroid.rotation);
+        
+        this.ctx.fillStyle = '#4A5568';
+        this.ctx.strokeStyle = '#2D3748';
+        this.ctx.lineWidth = 2;
+        
+        this.ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const radius = asteroid.size * (0.8 + Math.sin(i) * 0.2);
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            if (i === 0) this.ctx.moveTo(x, y);
+            else this.ctx.lineTo(x, y);
+        }
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        this.ctx.restore();
+    }
+});
+                
+                // Draw planets
+                this.planets.forEach((planet, index) => {
+                    const screenX = planet.x - this.camera.x;
+                    const screenY = planet.y - this.camera.y;
+                    
+                    if (screenX > -200 && screenX < this.canvas.width + 200 &&
+                        screenY > -200 && screenY < this.canvas.height + 200) {
+                        
+                        const dx = planet.x - this.player.x;
+                        const dy = planet.y - this.player.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const isNear = distance < planet.size + 50;
+                        
+                        this.ctx.save();
+                        this.ctx.translate(screenX, screenY);
+                        
+if (planet.discovered && planet.type) {
+    this.ctx.shadowBlur = 30;
+    this.ctx.shadowColor = planet.type.color;
+}
+                        
+                        this.ctx.rotate(planet.rotation);
+                        
+                        const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, planet.size);
+if (!planet.type) return; // Saltar planetas corruptos
+
+gradient.addColorStop(0, planet.type.color);
+gradient.addColorStop(1, this.darkenColor(planet.type.color));
+                        
+                        this.ctx.fillStyle = gradient;
+                        this.ctx.beginPath();
+                        this.ctx.arc(0, 0, planet.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                        for (let i = 0; i < 3; i++) {
+                            const angle = (planet.rotation + i * 2) % (Math.PI * 2);
+                            const cx = Math.cos(angle) * planet.size * 0.4;
+                            const cy = Math.sin(angle) * planet.size * 0.4;
+                            this.ctx.beginPath();
+                            this.ctx.arc(cx, cy, planet.size * 0.2, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                        
+                        this.ctx.restore();
+                        
+                        if (isNear && !this.missionActive) {
+                            const canAccess = this.miningPower >= planet.miningLevel && this.combatPower >= planet.requiredCombatPower;
+                            const pulse = Math.sin(Date.now() / 300) * 0.3 + 0.7;
+                            this.ctx.strokeStyle = canAccess ? `rgba(88, 166, 255, ${pulse})` : `rgba(248, 81, 73, ${pulse})`;
+                            this.ctx.lineWidth = 3;
+                            this.ctx.beginPath();
+                            this.ctx.arc(screenX, screenY, planet.size + 15, 0, Math.PI * 2);
+                            this.ctx.stroke();
+                            
+                            this.ctx.fillStyle = canAccess ? '#58A6FF' : '#F85149';
+                            this.ctx.font = 'bold 14px monospace';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText(canAccess ? 'CLICK PARA ATERRIZAR' : 'REQUIERE MEJORAS', screenX, screenY - planet.size - 30);
+                        }
+                        
+if (planet.discovered && planet.type) {
+    this.ctx.fillStyle = planet.type.color;
+                            this.ctx.font = 'bold 12px monospace';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText(planet.name, screenX, screenY + planet.size + 20);
+                            
+                            // Show level and aliens
+                            this.ctx.fillStyle = this.miningPower >= planet.miningLevel ? '#3FB950' : '#F85149';
+                            this.ctx.font = '10px monospace';
+                            this.ctx.fillText(`⛏️${planet.miningLevel} 👽${planet.alienCount}`, screenX, screenY + planet.size + 35);
+                        }
+                    }
+                });
+                
+                // Draw player ship
+                const playerScreenX = this.player.x - this.camera.x;
+                const playerScreenY = this.player.y - this.camera.y;
+                
+                this.ctx.save();
+                this.ctx.translate(playerScreenX, playerScreenY);
+                this.ctx.rotate(this.player.angle + Math.PI / 2);
+                
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = '#58A6FF';
+                
+                this.ctx.fillStyle = '#58A6FF';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, -15);
+                this.ctx.lineTo(-10, 10);
+                this.ctx.lineTo(0, 5);
+                this.ctx.lineTo(10, 10);
+                this.ctx.closePath();
+                this.ctx.fill();
+                
+                if (this.player.moving) {
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.shadowColor = '#F78166';
+                    this.ctx.fillStyle = '#F78166';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-5, 10);
+                    this.ctx.lineTo(0, 20 + Math.random() * 10);
+                    this.ctx.lineTo(5, 10);
+                    this.ctx.fill();
+                }
+                
+                this.ctx.restore();
+                
+                if (this.missionActive) {
+                    const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7;
+                    this.ctx.strokeStyle = `rgba(63, 185, 80, ${pulse})`;
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(playerScreenX, playerScreenY, 30, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    
+                    this.ctx.strokeStyle = '#3FB950';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.beginPath();
+                    this.ctx.arc(
+                        playerScreenX,
+                        playerScreenY,
+                        35,
+                        -Math.PI / 2,
+                        -Math.PI / 2 + (this.missionProgress / 100) * Math.PI * 2
+                    );
+                    this.ctx.stroke();
+                }
+                
+                requestAnimationFrame(() => this.renderLoop());
+            }
+            
+            darkenColor(color) {
+                const hex = color.replace('#', '');
+                const r = Math.max(0, parseInt(hex.substr(0, 2), 16) - 40);
+                const g = Math.max(0, parseInt(hex.substr(2, 2), 16) - 40);
+                const b = Math.max(0, parseInt(hex.substr(4, 2), 16) - 40);
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+        }
+        
+        const game = new StellarNexusOpenWorld();
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "stellar-nexus",
+  "version": "1.0.0",
+  "description": "MMO Espacial Persistent",
+  "main": "server/game-server.js",
+  "scripts": {
+    "start": "node server/game-server.js",
+    "dev": "nodemon server/game-server.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

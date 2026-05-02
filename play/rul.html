@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scale=no">
+    <title>ChainWheel - Ruleta CFT</title>
+    <link rel="stylesheet" href="rul/rul.css">
+</head>
+<body>
+    <!-- Canvas para la ruleta -->
+    <canvas id="wheelCanvas"></canvas>
+    
+    <!-- Partículas de fondo -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- ==========================================
+         HEADER PERSISTENTE (Igual que SMA)
+         ========================================== -->
+    <div class="game-header">
+        <div class="balance-display" id="balanceHeader" title="Click para transferir a ChainFeed">
+            <span class="balance-icon">💎</span>
+            <div class="balance-info">
+                <span class="balance-label">Balance CFT</span>
+                <span class="balance-value" id="total-balance">0.00</span>
+            </div>
+        </div>
+        
+        <div class="lives-container">
+            <span class="lives-label">GIROS</span>
+            <div class="lives-hearts" id="lives-display">
+                <span class="heart">🎰</span>
+                <span class="heart">🎰</span>
+                <span class="heart">🎰</span>
+            </div>
+        </div>
+        
+        <div class="spins-info">
+            <span class="spins-label">Próximo giro en</span>
+            <span class="spins-timer" id="spin-timer">--:--</span>
+        </div>
+    </div>
+
+    <div class="ui-layer" id="gameUI" style="display: none;">
+
+                    <div class="multiplier-badge hidden" id="activeMultiplier">
+                <span class="multiplier-icon">⚡</span>
+                <span class="multiplier-text">x2 PRÓXIMO GIRO</span>
+            </div>
+            
+        <div class="wheel-container">
+            <div class="wheel-pointer">▼</div>
+            <canvas id="wheelCanvas"></canvas>
+        </div>
+        
+        <div class="controls-section">           
+            <button class="btn-spin" id="spinBtn">
+                <span class="btn-text">GIRAR</span>
+                <span class="btn-cost">-1 ❤️</span>
+            </button>
+            
+            <div class="last-win" id="lastWin">
+                <span class="last-win-label">Último premio:</span>
+                <span class="last-win-value" id="lastWinValue">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Inicio -->
+    <div class="overlay" id="startScreen">
+        <h1 class="title">CHAIN<span class="title-accent">WHEEL</span></h1>
+        <p class="subtitle">Gira la ruleta. Multiplica tu suerte. Gana tokens CFT.</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalWon">0</div>
+                <div class="stat-label">Total Ganado Hoy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="bestWin">0</div>
+                <div class="stat-label">Mejor Premio</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="spinsLeft">3</div>
+                <div class="stat-label">Giros Disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="nextRegen">--:--</div>
+                <div class="stat-label">Próxima Recarga</div>
+            </div>
+        </div>
+
+        <button class="btn-primary" id="startBtn">JUGAR AHORA</button>
+
+<!-- Nuevo botón de salida -->
+<a href="https://chainfeed.space/juegos" class="btn-secondary" id="exitMenuBtn">
+    ← VOLVER A JUEGOS
+</a>
+    </div>
+
+    <!-- Modal de Resultado -->
+    <div class="modal-overlay hidden" id="resultModal">
+        <div class="modal-content result-modal">
+            <div class="result-animation" id="resultAnimation">
+                <div class="result-particles"></div>
+                <div class="result-icon" id="resultIcon">🎰</div>
+            </div>
+            
+            <h2 class="modal-title" id="resultTitle">¡GANASTE!</h2>
+            
+            <div class="result-amount" id="resultAmount">
+                <span class="amount-value">25</span>
+                <span class="amount-unit">CFT</span>
+            </div>
+            
+            <p class="result-message" id="resultMessage">Tokens añadidos a tu balance</p>
+            
+            <div class="result-multiplier" id="resultMultiplier">
+                <span class="multiplier-badge-large">⚡ MULTIPLICADOR x2 ACTIVADO</span>
+            </div>
+            
+            <button class="btn-primary" onclick="closeResultModal()">CONTINUAR</button>
+        </div>
+    </div>
+
+    <!-- Modal Sin Giros -->
+    <div class="modal-overlay hidden" id="noSpinsModal">
+        <div class="modal-content">
+            <div class="modal-icon">⏳</div>
+            <h2 class="modal-title">SIN GIROS</h2>
+            <p class="modal-text">Has usado todos tus giros de hoy.</p>
+            
+            <div class="regen-info">
+                <span class="regen-label">Próximo giro en:</span>
+                <span class="regen-timer" id="regenTimer">05:00</span>
+            </div>
+            
+            <div class="modal-divider">O</div>
+            
+            <div class="purchase-box">
+                <div class="purchase-header">
+                    <span class="purchase-icon">🎰</span>
+                    <span class="purchase-title">+3 Giros Extra</span>
+                </div>
+                <div class="purchase-detail">
+                    <span>Compra instantánea</span>
+                    <span class="purchase-price" id="spinsPrice">2 CFT</span>
+                </div>
+                <button class="btn-purchase" onclick="buySpins()">COMPRAR AHORA</button>
+            </div>
+            
+            <button class="btn-close" onclick="closeNoSpinsModal()">CERRAR</button>
+        </div>
+    </div>
+
+    <!-- Modal Opciones de Pago -->
+    <div class="modal-overlay hidden" id="paymentModal">
+        <div class="modal-content payment-modal">
+            <div class="modal-icon">💳</div>
+            <h2 class="modal-title">Opciones de Pago</h2>
+            
+            <div class="payment-summary">
+                <div class="summary-row">
+                    <span>Costo:</span>
+                    <span class="price-highlight" id="paymentCost">2 CFT</span>
+                </div>
+                <div class="summary-row">
+                    <span>Balance juego:</span>
+                    <span id="paymentGameBalance">0.00 CFT</span>
+                </div>
+                <div class="summary-row">
+                    <span>Balance plataforma:</span>
+                    <span id="paymentPlatformBalance">0.00 CFT</span>
+                </div>
+            </div>
+
+            <div id="paymentOptions"></div>
+            
+            <button class="btn-close" onclick="closePaymentModal()">CANCELAR</button>
+        </div>
+    </div>
+
+    <!-- Modal Transferencia -->
+    <div class="modal-overlay hidden" id="transferModal">
+        <div class="modal-content">
+            <div class="modal-icon">🔄</div>
+            <h2 class="modal-title">Transferir a ChainFeed</h2>
+            
+            <div class="payment-summary">
+                <div class="summary-row">
+                    <span>Balance en juego:</span>
+                    <span class="price-highlight" id="transferGameBalance">0.00 CFT</span>
+                </div>
+                <div class="summary-row">
+                    <span>Balance plataforma:</span>
+                    <span id="transferPlatformBalance">0.00 CFT</span>
+                </div>
+            </div>
+
+            <p class="modal-text">¿Transferir TODO tu balance del juego a tu cuenta ChainFeed?</p>
+
+            <div class="modal-actions">
+                <button class="btn-close" onclick="closeTransferModal()">CANCELAR</button>
+                <button class="btn-primary" onclick="executeTransfer()">TRANSFERIR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-notification hidden" id="toast">
+        <span class="toast-icon">✅</span>
+        <div class="toast-content">
+            <span class="toast-title" id="toastTitle">¡Éxito!</span>
+            <span class="toast-detail" id="toastDetail">Operación completada</span>
+        </div>
+    </div>
+
+    <script src="rul/rul.js?v4"></script>
+    
+    <script src="rul/chainwheel_integration.js?v2"></script>
+    
+</body>
+</html>

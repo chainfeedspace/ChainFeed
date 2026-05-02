@@ -1,0 +1,2629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
+    <title>ChainFeed - Whitepaper Oficial</title>
+    
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/logo512.png">
+<link rel="apple-touch-icon" href="/icons/logo192.png">
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#3b82f6">
+
+        <script src="/js/i18n-auto-translate.js"></script>
+
+ <script src="/js/noscroll.js"></script>
+
+    <style>
+    
+        html, body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+body {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+    color: #e0e0e0;
+    line-height: 1.6;
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw !important;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    width: 100%;
+    overflow-x: hidden !important;
+}
+
+header {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+    font-size: 1.3rem;
+    color: #e0e0ff;
+    margin-bottom: 10px;
+}
+
+.version {
+    font-size: 0.9rem;
+    color: #d0d0ff;
+    font-style: italic;
+}
+
+nav {
+    background: rgba(99, 102, 241, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    position: relative !important;
+    top: auto !important;
+    z-index: 10 !important;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    width: 100%;
+    overflow-x: hidden !important;
+}
+
+nav h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #6366f1;
+}
+
+nav ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+nav a {
+    color: #a0a0ff;
+    text-decoration: none;
+    display: block;
+    padding: 10px 15px;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+nav a:hover {
+    background: rgba(99, 102, 241, 0.2);
+    border-left-color: #6366f1;
+    transform: translateX(5px);
+}
+
+section {
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    overflow-x: hidden !important;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #6366f1;
+    border-bottom: 2px solid #6366f1;
+    padding-bottom: 10px;
+    word-wrap: break-word;
+}
+
+h3 {
+    font-size: 1.5rem;
+    margin: 25px 0 15px;
+    color: #8b5cf6;
+    word-wrap: break-word;
+}
+
+h4 {
+    font-size: 1.2rem;
+    margin: 20px 0 10px;
+    color: #a78bfa;
+    word-wrap: break-word;
+}
+
+p {
+    margin-bottom: 15px;
+    text-align: justify;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+ul, ol {
+    margin: 15px 0 15px 30px;
+    word-wrap: break-word;
+}
+
+li {
+    margin-bottom: 8px;
+    word-wrap: break-word;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: rgba(15, 15, 26, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    display: block;
+    overflow-x: auto !important;
+}
+
+th {
+    background: rgba(99, 102, 241, 0.3);
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+    word-wrap: break-word;
+}
+
+tr:hover {
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.highlight-box {
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 4px solid #6366f1;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.checkmark {
+    color: #10b981;
+    font-weight: bold;
+}
+
+.warning {
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+.danger {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+code {
+    background: rgba(15, 15, 26, 0.8);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #10b981;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+pre {
+    background: rgba(15, 15, 26, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    overflow-x: auto !important;
+    margin: 20px 0;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #6366f1;
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #a0a0ff;
+    word-wrap: break-word;
+}
+
+.cta-section {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    padding: 50px;
+    border-radius: 20px;
+    text-align: center;
+    margin: 40px 0;
+    overflow-x: hidden !important;
+}
+
+.cta-button {
+    display: inline-block;
+    background: #ffffff;
+    color: #6366f1;
+    padding: 15px 40px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    margin: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    word-wrap: break-word;
+}
+
+.cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(0,0,0,0.4);
+}
+
+footer {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(26, 26, 46, 0.8);
+    border-radius: 15px;
+    margin-top: 40px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    word-wrap: break-word;
+}
+
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #6366f1;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 1.5rem;
+    z-index: 1000;
+}
+
+.back-to-top:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 7px 20px rgba(99, 102, 241, 0.6);
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    nav ul {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-section {
+        padding: 30px 20px;
+    }
+    
+    table {
+        font-size: 0.9rem;
+    }
+}
+
+.comparison-table {
+    margin: 30px 0;
+}
+
+.comparison-table td:first-child {
+    font-weight: 600;
+    color: #a0a0ff;
+}
+
+.case-study {
+    background: rgba(99, 102, 241, 0.05);
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0;
+    border-left: 4px solid #6366f1;
+    word-wrap: break-word;
+}
+
+.roadmap-item {
+    position: relative;
+    padding-left: 40px;
+    margin: 20px 0;
+}
+
+.roadmap-item::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: -20px;
+    width: 2px;
+    background: linear-gradient(180deg, #6366f1 0%, transparent 100%);
+}
+
+.roadmap-dot {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    background: #6366f1;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+.completed .roadmap-dot {
+    background: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+}
+
+.in-progress .roadmap-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+}
+
+html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+}
+
+.back-button {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    background: #6366f1;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 1.5rem;
+    z-index: 1000;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.back-button:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 7px 20px rgba(99, 102, 241, 0.6);
+    background: #5558e3;
+}
+
+/* Responsive: En móviles hacerlo un poco más pequeño */
+@media (max-width: 768px) {
+    .back-button {
+        top: 15px;
+        left: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+}
+
+    </style>
+</head>
+<body>
+
+    <a href="javascript:void(0)" class="back-button" title="Volver atrás" onclick="window.history.back()"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" data-translated="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" data-translated="true"></path></svg></a>
+
+    <div class="container">
+        <header>
+            <h1>🌐 CHAINFEED</h1>
+            <div class="subtitle">Red Social Tokenizada con Economía de Creadores Descentralizada</div>
+            <div class="version">Whitepaper Oficial - Versión 1.0 | Noviembre 2025</div>
+        </header>
+
+        <nav>
+            <h2>📋 Índice de Contenidos</h2>
+            <ul>
+                <li><a href="#resumen-ejecutivo">📊 Resumen Ejecutivo</a></li>
+                <li><a href="#problema">🚨 El Problema</a></li>
+                <li><a href="#solucion">💡 La Solución</a></li>
+                <li><a href="#plataforma">🖥️ Plataforma Actual</a></li>
+                <li><a href="#modelo-economico">💰 Modelo Económico</a></li>
+                <li><a href="#tokenomics">🪙 Tokenomics CFT</a></li>
+                <li><a href="#casos-uso">📱 Casos de Uso</a></li>
+                <li><a href="#negocio">💼 Modelo de Negocio</a></li>
+                <li><a href="#mercado">📊 Análisis de Mercado</a></li>
+                <li><a href="#riesgos">⚠️ Riesgos y Mitigaciones</a></li>
+                <li><a href="#roadmap">🗓️ Roadmap</a></li>
+                <li><a href="#legal">⚖️ Información Legal</a></li>
+            </ul>
+        </nav>
+
+        <section id="resumen-ejecutivo">
+            <h2>📊 RESUMEN EJECUTIVO</h2>
+            
+            <h3>¿Qué es ChainFeed?</h3>
+            <p>ChainFeed es una red social funcional que recompensa automáticamente a usuarios por crear contenido y participar en la plataforma. Cada like, comentario y publicación genera tokens CFT que tienen valor económico real.</p>
+
+              <h3>Estado Actual del Proyecto</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">MVP</div>
+                    <div class="stat-label">Completamente Funcional</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1,000+</div>
+                    <div class="stat-label">Usuarios Activos Proyectados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15,000+</div>
+                    <div class="stat-label">Interacciones Tokenizadas Proyectadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Meses de Desarrollo</div>
+                </div>
+            </div>
+
+            <h3>Datos Verificables de Uso de prueba</h3>
+            <ul>
+                <li><strong>Publicaciones creadas:</strong> 10,000+</li>
+                <li><strong>Tokens distribuidos:</strong> 500,000+ CFT</li>
+                <li><strong>Eventos Chain completados:</strong> 50+</li>
+                <li><strong>Transacciones marketplace:</strong> 200+</li>
+                <li><strong>Uptime plataforma:</strong> 99.2%</li>
+            </ul>
+
+            <div class="highlight-box">
+                <h3>Propuesta de Valor</h3>
+                <ul>
+                    <li><span class="checkmark">✅</span> <strong>Para Creadores:</strong> Monetización desde el primer día, sin requisitos de seguidores</li>
+                    <li><span class="checkmark">✅</span> <strong>Para Usuarios:</strong> Gana tokens simplemente usando la plataforma</li>
+                    <li><span class="checkmark">✅</span> <strong>Para Inversores:</strong> Modelo económico sostenible con múltiples fuentes de ingreso</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="problema">
+            <h2>🚨 EL PROBLEMA</h2>
+            
+            <h3>La Economía Rota de las Redes Sociales</h3>
+            <p>Las plataformas sociales tradicionales capturan el 100% del valor generado por usuarios y creadores:</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">$5.1B</div>
+                    <div class="stat-label">Twitter/X Ingresos 2024</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$134B</div>
+                    <div class="stat-label">Meta Ingresos 2024</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$16B</div>
+                    <div class="stat-label">TikTok Ingresos 2024</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$0</div>
+                    <div class="stat-label">A Creadores Orgánicos</div>
+                </div>
+            </div>
+
+            <h3>Barreras Actuales para Creadores</h3>
+            
+            <h4>1. Requisitos Inalcanzables</h4>
+            <ul>
+                <li>Necesitas miles de seguidores antes de ganar $1</li>
+                <li>Algoritmos opacos que favorecen contenido corporativo</li>
+                <li>Monetización a discreción de la plataforma</li>
+            </ul>
+
+            <h4>2. Valor Capturado por Intermediarios</h4>
+            <ul>
+                <li>30-50% de comisiones en ventas de contenido</li>
+                <li>Sin transparencia en ingresos publicitarios</li>
+                <li>Cambios de reglas unilaterales sin compensación</li>
+            </ul>
+
+            <h4>3. Falta de Propiedad Real</h4>
+            <ul>
+                <li>Tu contenido pertenece a la plataforma</li>
+                <li>Pueden bloquearte sin derecho a apelación</li>
+                <li>No puedes transferir tu audiencia</li>
+            </ul>
+        </section>
+
+        <section id="solucion">
+            <h2>💡 LA SOLUCIÓN: CHAINFEED</h2>
+            
+            <h3>Principios Fundamentales</h3>
+            
+            <div class="highlight-box">
+                <h4>1. Recompensas Automáticas Inmediatas</h4>
+                <p>Cada interacción genera tokens CFT en tiempo real. No hay umbrales ni aprobaciones.</p>
+            </div>
+
+            <div class="highlight-box">
+                <h4>2. Economía Transparente</h4>
+                <p>Todos los movimientos de tokens son públicos y verificables en blockchain.</p>
+            </div>
+
+            <div class="highlight-box">
+                <h4>3. Propiedad Verificable</h4>
+                <p>El contenido que creas es tuyo. Puedes venderlo directamente sin intermediarios.</p>
+            </div>
+
+            <div class="highlight-box">
+                <h4>4. Modelo Sostenible</h4>
+                <p>El 90% del valor económico fluye hacia los usuarios. La plataforma retiene solo el 10% necesario para operar.</p>
+            </div>
+
+            <h3>Diferenciadores Clave vs Competencia</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>ChainFeed</th>
+                        <th>Twitter/X</th>
+                        <th>Steemit</th>
+                        <th>Friend.tech</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Recompensas desde día 1</td>
+                        <td><span class="checkmark">✅ Sí</span></td>
+                        <td><span class="danger">❌ No</span></td>
+                        <td><span class="checkmark">✅ Sí</span></td>
+                        <td><span class="danger">❌ No</span></td>
+                    </tr>
+                    <tr>
+                        <td>Pagos instantáneos</td>
+                        <td><span class="checkmark">✅ Inmediatos</span></td>
+                        <td><span class="danger">❌ 30-60 días</span></td>
+                        <td><span class="warning">⚠️ 7 días</span></td>
+                        <td><span class="checkmark">✅ Instantáneo</span></td>
+                    </tr>
+                    <tr>
+                        <td>Comisión plataforma</td>
+                        <td><span class="checkmark">✅ 10%</span></td>
+                        <td>❌ N/A</td>
+                        <td><span class="checkmark">✅ 0%</span></td>
+                        <td><span class="danger">❌ 10% compra + venta</span></td>
+                    </tr>
+                    <tr>
+                        <td>Modelo sostenible</td>
+                        <td><span class="checkmark">✅ Múltiples ingresos</span></td>
+                        <td><span class="checkmark">✅ Ads</span></td>
+                        <td><span class="danger">❌ Inflacionario</span></td>
+                        <td><span class="danger">❌ Ponzi colapsó</span></td>
+                    </tr>
+                    <tr>
+                        <td>Marketplace integrado</td>
+                        <td><span class="checkmark">✅ Sí</span></td>
+                        <td><span class="danger">❌ No</span></td>
+                        <td><span class="danger">❌ No</span></td>
+                        <td>❌ Solo trading keys</td>
+                    </tr>
+                    <tr>
+                        <td>Eventos gamificados</td>
+                        <td><span class="checkmark">✅ Sistema Chain</span></td>
+                        <td><span class="danger">❌ No</span></td>
+                        <td><span class="danger">❌ No</span></td>
+                        <td><span class="danger">❌ No</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="plataforma">
+            <h2>🖥️ PLATAFORMA ACTUAL</h2>
+            
+            <h3>Funcionalidades Implementadas y Operativas</h3>
+
+            <h4>1. Red Social Completa</h4>
+            <p><strong>Tipos de Contenido Soportados:</strong></p>
+            <ul>
+                <li>Publicaciones de texto (hasta 500 caracteres)</li>
+                <li>Imágenes (JPG, PNG, GIF)</li>
+                <li>Videos (MP4, máximo 60 segundos)</li>
+                <li>Enlaces con preview automático</li>
+            </ul>
+
+            <p><strong>Interacciones Sociales:</strong></p>
+            <ul>
+                <li>Likes con recompensa automática</li>
+                <li>Comentarios anidados (respuestas)</li>
+                <li>Reposts (similar a retweets)</li>
+                <li>Compartir fuera de la plataforma</li>
+                <li>Sistema de seguidores/seguidos</li>
+                <li>Perfiles públicos y privados</li>
+                <li>Notificaciones en tiempo real</li>
+            </ul>
+
+            <h4>2. Sistema de Recompensas Automático</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Acción del Usuario</th>
+                        <th>Tokens Ganados</th>
+                        <th>Categoría</th>
+                        <th>Límite Diario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Crear publicación texto</td>
+                        <td>3 CFT</td>
+                        <td>Propios</td>
+                        <td>50 CFT/día</td>
+                    </tr>
+                    <tr>
+                        <td>Crear publicación imagen</td>
+                        <td>5 CFT</td>
+                        <td>Propios</td>
+                        <td>50 CFT/día</td>
+                    </tr>
+                    <tr>
+                        <td>Crear publicación video</td>
+                        <td>7 CFT</td>
+                        <td>Propios</td>
+                        <td>50 CFT/día</td>
+                    </tr>
+                    <tr>
+                        <td>Recibir like en contenido</td>
+                        <td>1 CFT</td>
+                        <td>Recibidos</td>
+                        <td>100 CFT/día</td>
+                    </tr>
+                    <tr>
+                        <td>Recibir comentario</td>
+                        <td>1 CFT</td>
+                        <td>Recibidos</td>
+                        <td>100 CFT/día</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <h4>Sistema de Límites Inteligentes</h4>
+                <p>Implementamos categorías separadas de tokens para prevenir abuso:</p>
+                <ul>
+                    <li><strong>Tokens Propios (50 CFT/día):</strong> Generados por tu actividad de publicar</li>
+                    <li><strong>Tokens Recibidos (100 CFT/día):</strong> Generados por interacciones de otros usuarios</li>
+                    <li><strong>Tokens de Depósito (Ilimitado):</strong> Comprados mediante preventas</li>
+                    <li><strong>Tokens de Sistema (Ilimitado):</strong> Recompensas de eventos Chain y premios</li>
+                </ul>
+                <p><strong>Esta separación permite:</strong></p>
+                <ul>
+                    <li>Prevenir farming con bots</li>
+                    <li>Incentivar contenido de calidad</li>
+                    <li>Mantener economía sostenible</li>
+                    <li>Permitir crecimiento orgánico</li>
+                </ul>
+            </div>
+
+            <h4>3. Sistema Chain - Eventos Gamificados</h4>
+            <p>Los usuarios pueden crear tres tipos de eventos con pools de recompensas:</p>
+
+            <h5>A) Polls (Encuestas Recompensadas)</h5>
+            <p><strong>Funcionamiento:</strong></p>
+            <ul>
+                <li>El creador define pregunta y opciones (2-5)</li>
+                <li>Establece recompensa por voto (10-100 CFT)</li>
+                <li>Define máximo de participantes (10-1,000)</li>
+                <li>Los tokens se descontan del balance del creador</li>
+                <li>Cada voto otorga CFT instantáneamente al votante</li>
+            </ul>
+            <pre>Ejemplo real en la plataforma:
+Pregunta: "¿Qué feature quieres ver próximamente?"
+Opciones: [Mensajes, Grupos, Stories, NFTs]
+Recompensa: 20 CFT por voto
+Máximo: 100 participantes
+Presupuesto: 2,000 CFT (bloqueados del creador)</pre>
+
+            <h5>B) Campaigns (Campañas de Contenido)</h5>
+            <p><strong>Funcionamiento:</strong></p>
+            <ul>
+                <li>El creador define un desafío creativo</li>
+                <li>Establece pool total de recompensas (mínimo 100 CFT)</li>
+                <li>Define número de ganadores (1-100)</li>
+                <li>Usuarios participan con contenido (texto/imagen/video/audio)</li>
+                <li>El creador aprueba mejores participaciones manualmente</li>
+                <li>Recompensa se divide entre ganadores aprobados</li>
+            </ul>
+            <pre>Ejemplo real en la plataforma:
+Desafío: "Mejor meme sobre ChainFeed"
+Pool: 5,000 CFT
+Ganadores: 10
+Recompensa por ganador: 500 CFT
+Participaciones recibidas: 45
+Aprobadas: 10</pre>
+
+            <h5>C) Audio Challenges (Desafíos de Audio)</h5>
+            <p><strong>Funcionamiento:</strong></p>
+            <ul>
+                <li>El creador sube audio de referencia (máximo 60 segundos)</li>
+                <li>Define pool y ganadores (similar a campaigns)</li>
+                <li>Participantes responden con su propio audio</li>
+                <li>Ideal para covers, beatbox, imitaciones, podcasts</li>
+            </ul>
+
+            <h4>4. Marketplace de Contenido</h4>
+            <p><strong>Poner Contenido en Venta:</strong></p>
+            <ul>
+                <li>Solo el autor original puede poner su contenido en venta</li>
+                <li>Define precio en CFT libremente</li>
+                <li>El contenido se marca como "en venta" y aparece en marketplace</li>
+                <li>Automáticamente se hace público para que compradores lo vean</li>
+            </ul>
+
+            <p><strong>Proceso de Compra:</strong></p>
+            <ul>
+                <li>Comprador paga el precio establecido en CFT</li>
+                <li>90% va al vendedor inmediatamente</li>
+                <li>10% se retiene como comisión de plataforma</li>
+                <li>La propiedad se transfiere al comprador</li>
+                <li>El contenido se remueve automáticamente de la venta</li>
+            </ul>
+
+            <div class="highlight-box">
+                <p><strong>Protección al Creador Original:</strong></p>
+                <ul>
+                    <li>Los compradores NO pueden revender el contenido</li>
+                    <li>Solo el autor original tiene derecho a monetizar</li>
+                    <li>Previene especulación y flipping</li>
+                    <li>El comprador obtiene "coleccionable" único</li>
+                </ul>
+            </div>
+
+            <p><strong>Estadísticas Reales:</strong></p>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">200+</div>
+        <div class="stat-label">Publicaciones Vendidas</div>     
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">$8</div>
+        <div class="stat-label">Precio Promedio</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">16,000</div>
+        <div class="stat-label">CFT en Comisiones</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">$50</div>
+        <div class="stat-label">Precio Más Alto</div>
+    </div>
+</div>
+
+            <h4>5. Sistema de Promoción Pagada</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Duración</th>
+                        <th>Costo</th>
+                        <th>Visibilidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Daily</td>
+                        <td>24 horas</td>
+                        <td>50 CFT</td>
+                        <td>+2,000 impresiones</td>
+                    </tr>
+                    <tr>
+                        <td>10 Days</td>
+                        <td>10 días</td>
+                        <td>400 CFT</td>
+                        <td>+20,000 impresiones</td>
+                    </tr>
+                    <tr>
+                        <td>Monthly</td>
+                        <td>30 días</td>
+                        <td>1,000 CFT</td>
+                        <td>+60,000 impresiones</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Algoritmo de Distribución:</strong></p>
+            <ul>
+                <li>El contenido promocionado aparece cada 4 posts orgánicos</li>
+                <li>Se mezcla de forma aleatoria para dar exposición equitativa</li>
+                <li>El contenido sigue apareciendo en orden cronológico normal (sin badge)</li>
+                <li>Adicionalmente aparece como "destacado" cada 4 posts (con badge)</li>
+                <li>No se repite el mismo contenido promocionado consecutivamente</li>
+            </ul>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">15-20</div>
+                    <div class="stat-label">Promociones Activas/Día</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$80</div>
+                    <div class="stat-label">Ingreso Mensual Actual</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.2%</div>
+                    <div class="stat-label">CTR Promedio</div>
+                </div>
+            </div>
+
+            <h4>6. Sistema de Preventas</h4>
+            <p>El usuario puede comprar tokens CFT enviando USDT o USDC desde su billetera Proton a la cuenta oficial <code>@chainfeed</code>.</p>
+
+            <p><strong>Proceso:</strong></p>
+            <ol>
+                <li>Usuario inicia compra desde interfaz web</li>
+                <li>Especifica monto en USD y billetera Proton</li>
+                <li>Sistema calcula:
+                    <ul>
+                        <li>CFT base = Monto USD / $0.01</li>
+                        <li>CFT bonus = CFT base × 20%</li>
+                        <li>CFT total = CFT base + CFT bonus</li>
+                    </ul>
+                </li>
+                <li>Usuario envía USDT/USDC a <code>@chainfeed</code> en blockchain Proton</li>
+                <li>Sistema verifica transacción en blockchain automáticamente</li>
+                <li>Tokens CFT se acreditan instantáneamente en cuenta del usuario</li>
+                <li>Registro permanente en tabla <code>preventas</code> con transaction_id</li>
+            </ol>
+
+            <pre>Ejemplo Real:
+Usuario envía: $100 USDT
+CFT base: 10,000 CFT ($100 / $0.01)
+Bonus 20%: 2,000 CFT
+Total recibido: 12,000 CFT
+Tiempo de acreditación: &lt;2 minutos</pre>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">30+</div>
+                    <div class="stat-label">Preventas Completadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$1,500</div>
+                    <div class="stat-label">Volumen Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$50</div>
+                    <div class="stat-label">Ticket Promedio</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">$200</div>
+                    <div class="stat-label">Mayor Compra</div>
+                </div>
+            </div>
+
+            <h4>7. Sistema de Moderación</h4>
+            <p><strong>Filtro Automático de Contenido:</strong></p>
+            <ul>
+                <li>Base de datos de palabras prohibidas</li>
+                <li>Bloqueo preventivo antes de publicar</li>
+                <li>Protección contra spam y contenido inapropiado</li>
+            </ul>
+
+            <p><strong>Sistema de Reportes:</strong></p>
+            <ul>
+                <li>Usuarios pueden reportar contenido inapropiado</li>
+                <li>Genera token único de moderación de 64 caracteres</li>
+                <li>Moderadores revisan con token asignado</li>
+                <li>Si se confirma: contenido eliminado + infracción al autor</li>
+            </ul>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Infracciones</th>
+                        <th>Sanción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1-2</td>
+                        <td>Advertencia</td>
+                    </tr>
+                    <tr>
+                        <td>3-4</td>
+                        <td>Bloqueo temporal 7 días</td>
+                    </tr>
+                    <tr>
+                        <td>5-6</td>
+                        <td>Bloqueo temporal 30 días</td>
+                    </tr>
+                    <tr>
+                        <td>7+</td>
+                        <td>Bloqueo permanente</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>8. Wallet y Gestión de Tokens</h4>
+            <p><strong>Dashboard de Billetera:</strong></p>
+            <ul>
+                <li>Balance CFT interno (en plataforma)</li>
+                <li>Balance CFT externo (en billetera Proton)</li>
+                <li>Balance total combinado</li>
+                <li>Historial completo de transacciones</li>
+                <li>Gráfico de evolución temporal</li>
+                <li>Estadísticas de ganancias/gastos</li>
+            </ul>
+
+            <p><strong>Sistema de Retiros (Implementado con aprobación manual):</strong></p>
+            <ul>
+                <li><strong>Mínimo de retiro escalonado:</strong>
+                    <ul>
+                        <li>Balance &lt;2,000 CFT → Mínimo 400 CFT</li>
+                        <li>Balance 2,000-2,999 CFT → Mínimo 300 CFT</li>
+                        <li>Balance ≥3,000 CFT → Mínimo 200 CFT</li>
+                    </ul>
+                </li>
+                <li><strong>Restricciones:</strong> Solo 1 retiro cada 3 horas por usuario</li>
+            </ul>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">25</div>
+        <div class="stat-label">Retiros Procesados</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">1,200</div>
+        <div class="stat-label">CFT Promedio</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">2.5h</div>
+        <div class="stat-label">Tiempo Aprobación</div>
+    </div>
+</div>
+        </section>
+
+        <section id="modelo-economico">
+            <h2>💰 MODELO ECONÓMICO</h2>
+
+            <h3>Flujo de Valor en la Plataforma</h3>
+            <pre>┌─────────────────────────────────────────────────┐
+│           ENTRADAS DE VALOR (Ingresos)          │
+├─────────────────────────────────────────────────┤
+│ 1. Preventas con bonus 20%    → USDT/USDC      │
+│ 2. Comisiones marketplace 10% → CFT retenido    │
+│ 3. Promociones pagadas        → CFT retenido    │
+└─────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────┐
+│        DISTRIBUCIÓN DE VALOR (Egresos)          │
+├─────────────────────────────────────────────────┤
+│ 1. Recompensas por publicar   → Hasta 50/día   │
+│ 2. Recompensas por likes      → Hasta 100/día  │
+│ 3. Eventos Chain (pools)      → Variable       │
+│ 4. Marketplace (90% vendedor) → Directo        │
+└─────────────────────────────────────────────────┘</pre>
+
+            <h3>Análisis de Sostenibilidad Actual</h3>
+            
+            <h4>Con 1,000 Usuarios Activos Diarios:</h4>
+            <p><strong>Egreso Máximo Teórico:</strong></p>
+            <ul>
+                <li>1,000 usuarios × 150 CFT/día = 150,000 CFT/día</li>
+                <li>Mensual: 4,500,000 CFT</li>
+                <li>En USD (a $0.01): $45,000/mes</li>
+            </ul>
+
+            <p><strong>Ingreso Actual Real:</strong></p>
+            <ul>
+                <li>Preventas: ~$150/mes</li>
+                <li>Marketplace: ~$80/mes (10% de $800 volumen)</li>
+                <li>Promociones: ~$80/mes</li>
+                <li><strong>Total: $310/mes</strong></li>
+            </ul>
+
+            <p><strong>Ratio Sostenibilidad:</strong> $310 / $45,000 = <span class="warning">0.69%</span></p>
+
+            <h3>¿Por Qué Esto es Viable?</h3>
+            
+            <div class="highlight-box">
+                <h4>1. No Todos Usan el Máximo Diario</h4>
+                <ul>
+                    <li>Usuario promedio: 30 CFT/día (no 150)</li>
+                    <li>Egreso real: ~$9,000/mes (no $45,000)</li>
+                    <li>Ratio real: $310 / $9,000 = <strong>3.4%</strong></li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h4>2. Los Límites Previenen Colapso</h4>
+                <ul>
+                    <li>Sin límites, bots farmerían infinitamente</li>
+                    <li>Con límites, crecimiento es predecible</li>
+                    <li>Escalabilidad controlada matemáticamente</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h4>3. Tokens Permanecen en Ecosistema</h4>
+                <ul>
+                    <li>Solo ~5% de usuarios retiran</li>
+                    <li>95% reinvierten en promociones/eventos/marketplace</li>
+                    <li>Velocidad de circulación crea economía interna</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h4>4. Crecimiento de Ingresos es Más Rápido</h4>
+                <ul>
+                    <li>A 10,000 usuarios: ~$3,100/mes ingreso (10x)</li>
+                    <li>Egreso solo crece ~$90,000/mes (10x)</li>
+                    <li>Ratio mejora: $3,100 / $90,000 = <strong>3.4%</strong> (se mantiene)</li>
+                </ul>
+            </div>
+
+            <h3>Proyección Conservadora de Equilibrio</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuarios Activos</th>
+                        <th>Ingreso Mensual</th>
+                        <th>Egreso Mensual</th>
+                        <th>Ratio</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1,000</td>
+                        <td>$310</td>
+                        <td>$9,000</td>
+                        <td>3.4%</td>
+                        <td>Déficit controlado</td>
+                    </tr>
+                    <tr>
+                        <td>5,000</td>
+                        <td>$1,550</td>
+                        <td>$45,000</td>
+                        <td>3.4%</td>
+                        <td>Déficit controlado</td>
+                    </tr>
+                    <tr>
+                        <td>10,000</td>
+                        <td>$3,100</td>
+                        <td>$90,000</td>
+                        <td>3.4%</td>
+                        <td>Déficit controlado</td>
+                    </tr>
+                    <tr>
+                        <td>50,000</td>
+                        <td>$15,500</td>
+                        <td>$450,000</td>
+                        <td>3.4%</td>
+                        <td>Déficit controlado</td>
+                    </tr>
+                    <tr>
+                        <td>100,000</td>
+                        <td>$31,000</td>
+                        <td>$900,000</td>
+                        <td>3.4%</td>
+                        <td>Déficit controlado</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Punto de Equilibrio (Breakeven):</strong></p>
+            <ul>
+                <li>Necesario: Ratio ~30% (asumiendo 70% reinversión interna)</li>
+                <li>Con mejoras de monetización y adopción creciente</li>
+                <li>Estimado: 200,000-500,000 usuarios activos</li>
+            </ul>
+        </section>
+
+        <section id="tokenomics">
+            <h2>🪙 TOKENOMICS CFT</h2>
+
+            <h3>Especificaciones Técnicas del Token</h3>
+            <ul>
+                <li><strong>Nombre:</strong> ChainFeed Token</li>
+                <li><strong>Símbolo:</strong> CFT</li>
+                <li><strong>Blockchain:</strong> Proton (XPR Network)</li>
+                <li><strong>Contrato:</strong> <code>chainfeed</code></li>
+                <li><strong>Decimales:</strong> 8</li>
+                <li><strong>Precio Fijo:</strong> $0.01 USD</li>
+                <li><strong>Tipo:</strong> Utility Token (no security)</li>
+            </ul>
+
+            <h3>Supply del CFT v1 (Primera Versión)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Asignación</th>
+                        <th>Tokens</th>
+                        <th>%</th>
+                        <th>Estado Actual</th>
+                        <th>Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Preventas Públicas</td>
+                        <td>50,000,000 CFT</td>
+                        <td>50%</td>
+                        <td>Disponible</td>
+                        <td>Ventas con bonus 20%</td>
+                    </tr>
+                    <tr>
+                        <td>Recompensas Usuarios</td>
+                        <td>30,000,000 CFT</td>
+                        <td>30%</td>
+                        <td>Activo</td>
+                        <td>Distribución progresiva</td>
+                    </tr>
+                    <tr>
+                        <td>Desarrollo</td>
+                        <td>10,000,000 CFT</td>
+                        <td>10%</td>
+                        <td>Bloqueado</td>
+                        <td>Vesting 24 meses</td>
+                    </tr>
+                    <tr>
+                        <td>Marketing/Liquidez</td>
+                        <td>10,000,000 CFT</td>
+                        <td>10%</td>
+                        <td>Parcial</td>
+                        <td>Campañas + pools</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total Supply v1</strong></td>
+                        <td><strong>100,000,000 CFT</strong></td>
+                        <td><strong>100%</strong></td>
+                        <td><strong>En circulación</strong></td>
+                        <td><strong>$1M USD valoración</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Tokens Actualmente en Circulación:</strong></p>
+            <ul>
+                <li>Distribuidos como recompensas: ~500,000 CFT</li>
+                <li>Vendidos en preventas: ~150,000 CFT</li>
+                <li>En pools de eventos Chain: ~50,000 CFT</li>
+                <li><strong>Total circulante:</strong> ~700,000 CFT (0.7% del supply)</li>
+            </ul>
+
+            <h3>Sistema de Tokens Versionados</h3>
+            <p><strong>Innovación de Escalabilidad:</strong></p>
+            <p>Cuando el supply de CFT v1 (100M) se agote por demanda, el sistema genera automáticamente una nueva versión:</p>
+            
+            <pre>CFT v1 (100M supply) → Se agota por demanda
+         ↓
+CFTA v2 (100M supply) → Nueva versión generada automáticamente
+         ↓
+CFTB v3 (100M supply) → Si CFTA se agota
+         ↓
+... infinitamente escalable</pre>
+
+            <div class="highlight-box">
+                <h4>Reglas de Intercambio:</h4>
+                <ol>
+                    <li><strong>Ratio fijo:</strong> 1 CFT = 1 CFTA = 1 CFTB (siempre)</li>
+                    <li><strong>Precio fijo:</strong> Todas las versiones valen $0.01 USD</li>
+                    <li><strong>Compatibilidad total:</strong> Todos se aceptan en la plataforma</li>
+                    <li><strong>Intercambio libre:</strong> Los usuarios pueden convertir entre versiones cuando deseen</li>
+                    <li><strong>No hay inflación:</strong> Cada versión tiene supply fijo de 100M</li>
+                </ol>
+            </div>
+
+            <h4>Beneficios del Sistema:</h4>
+            <ul>
+                <li><span class="checkmark">✅</span> Escalabilidad matemáticamente infinita</li>
+                <li><span class="checkmark">✅</span> No hay escasez artificial que frene crecimiento</li>
+                <li><span class="checkmark">✅</span> Valor preservado para holders de versiones antiguas</li>
+                <li><span class="checkmark">✅</span> Supply predecible y controlado por versión</li>
+                <li><span class="checkmark">✅</span> Previene especulación destructiva</li>
+            </ul>
+
+            <h3>Mecanismos de Control de Inflación</h3>
+            
+            <h4>1. Límites Diarios por Categoría</h4>
+            <ul>
+                <li>Máximo teórico: 150 CFT/usuario/día</li>
+                <li>Real promedio: 30 CFT/usuario/día</li>
+                <li>Previene farming masivo</li>
+                <li>Incentiva calidad sobre cantidad</li>
+            </ul>
+
+            <h4>2. Tokens Bloqueados en Pools</h4>
+            <ul>
+                <li>Eventos Chain activos retienen CFT temporalmente</li>
+                <li>Reduce supply circulante efectivo</li>
+                <li>Presión deflacionaria natural</li>
+                <li>Ejemplo: 50 eventos × 2,000 CFT = 100,000 CFT bloqueados</li>
+            </ul>
+
+            <h4>3. Comisiones del Marketplace</h4>
+            <ul>
+                <li>10% de cada venta se retiene (no vuelve a circular inmediatamente)</li>
+                <li>Funciona como mini-quemado temporal</li>
+                <li>Puede ser quemado permanentemente vía DAO (futuro)</li>
+            </ul>
+
+            <h4>4. Reinversión Interna</h4>
+            <ul>
+                <li>~95% de usuarios no retiran, reinvierten</li>
+                <li>CFT circula dentro del ecosistema</li>
+                <li>Crea economía cerrada funcional</li>
+                <li>Reduce presión vendedora externa</li>
+            </ul>
+
+            <h3>Proyección de Agotamiento del Supply v1</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Escenario</th>
+                        <th>Usuarios Activos</th>
+                        <th>Tiempo Estimado</th>
+                        <th>Transición</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Conservador</td>
+                        <td>100K usuarios promedio</td>
+                        <td>5-7 años</td>
+                        <td>A CFTA v2</td>
+                    </tr>
+                    <tr>
+                        <td>Moderado</td>
+                        <td>500K usuarios promedio</td>
+                        <td>3-4 años</td>
+                        <td>A CFTA v2</td>
+                    </tr>
+                    <tr>
+                        <td>Optimista</td>
+                        <td>1M+ usuarios promedio</td>
+                        <td>2-3 años</td>
+                        <td>A CFTA v2</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><em>Nota: La transición es transparente y automática para los usuarios. No afecta su balance ni valor.</em></p>
+        </section>
+
+        <section id="casos-uso">
+            <h2>📱 CASOS DE USO REALES</h2>
+
+            <div class="case-study">
+                <h3>Caso 1: Creador de Contenido Pequeño</h3>
+                <p><strong>Perfil:</strong></p>
+                <ul>
+                    <li>@creador_memes</li>
+                    <li>150 seguidores</li>
+                    <li>Publica 3-5 memes diarios</li>
+                    <li>Uso: 4 meses activo</li>
+                </ul>
+
+                <p><strong>Actividad Real:</strong></p>
+                <ul>
+                    <li>Publicaciones creadas: 450</li>
+                    <li>Tokens ganados publicando: 1,350 CFT (450 × 3)</li>
+                    <li>Likes recibidos: 2,800</li>
+                    <li>Tokens por likes: 2,800 CFT</li>
+                    <li><strong>Total ganado: 4,150 CFT ($41.50 USD)</strong></li>
+                </ul>
+
+                <p><strong>Monetización:</strong></p>
+                <ul>
+                    <li>Vendió 5 memes virales a 200 CFT cada uno</li>
+                    <li>Ingreso por ventas: 1,000 CFT ($10 USD)</li>
+                    <li>Comisión plataforma: 100 CFT (10%)</li>
+                    <li><strong>Total ingreso neto: 900 CFT</strong></li>
+                </ul>
+
+                <p><strong>Balance Final:</strong></p>
+                <ul>
+                    <li>Ganado: 4,150 CFT</li>
+                    <li>Vendido: 900 CFT</li>
+                    <li>Gastado en promociones: 400 CFT (8 días)</li>
+                    <li><strong>Retirado a Proton: 3,000 CFT ($30 USD)</strong></li>
+                </ul>
+
+                <p><strong class="checkmark">ROI: $30 USD en 4 meses sin inversión inicial.</strong></p>
+            </div>
+
+            <div class="case-study">
+                <h3>Caso 2: Usuario Activo Regular</h3>
+                <p><strong>Perfil:</strong></p>
+                <ul>
+                    <li>@usuario_activo</li>
+                    <li>80 seguidores</li>
+                    <li>Comenta y participa frecuentemente</li>
+                    <li>Uso: 6 meses activo</li>
+                </ul>
+
+                <p><strong>Actividad Real:</strong></p>
+                <ul>
+                    <li>Publicaciones creadas: 180</li>
+                    <li>Tokens por publicar: 540 CFT</li>
+                    <li>Likes recibidos: 950</li>
+                    <li>Tokens por likes: 950 CFT</li>
+                    <li>Participaciones en 12 eventos Chain (polls)</li>
+                    <li>Tokens ganados en polls: 240 CFT</li>
+                    <li><strong>Total ganado: 1,730 CFT ($17.30 USD)</strong></li>
+                </ul>
+
+                <p><strong>Uso de Tokens:</strong></p>
+                <ul>
+                    <li>Compró 3 publicaciones en marketplace: 600 CFT</li>
+                    <li>Creó 2 polls propios: 400 CFT</li>
+                    <li><strong>Balance actual: 730 CFT</strong></li>
+                </ul>
+
+                <p><strong>Comportamiento:</strong> Reinvierte tokens en la plataforma, no retira.</p>
+            </div>
+
+            <div class="case-study">
+                <h3>Caso 3: Marca/Empresa Pequeña</h3>
+                <p><strong>Perfil:</strong></p>
+                <ul>
+                    <li>@tienda_online</li>
+                    <li>500 seguidores</li>
+                    <li>Promociona productos</li>
+                    <li>Uso: 2 meses activo</li>
+                </ul>
+
+                <p><strong>Inversión Inicial:</strong></p>
+                <ul>
+                    <li>Compra en preventa: $100 USD</li>
+                    <li>Recibido: 12,000 CFT (con 20% bonus)</li>
+                </ul>
+
+                <p><strong>Gastos en Marketing:</strong></p>
+                <ul>
+                    <li>6 promociones monthly: 6,000 CFT</li>
+                    <li>2 campaigns con 5,000 CFT de pool cada una: 10,000 CFT</li>
+                    <li><strong>Total gastado: 16,000 CFT</strong></li>
+                </ul>
+
+                <p><strong>Resultados:</strong></p>
+                <ul>
+                    <li>Impresiones totales: ~300,000</li>
+                    <li>Clicks a tienda externa: ~12,000</li>
+                    <li>Conversiones estimadas: 150 ventas</li>
+                    <li><strong>Ingreso externo generado: ~$3,000 USD</strong></li>
+                </ul>
+
+                <p><strong class="checkmark">ROI: Invirtió $100 USD en CFT, generó $3,000 USD en ventas externas. Ratio: 30x retorno sobre inversión.</strong></p>
+            </div>
+
+            <div class="case-study">
+                <h3>Caso 4: Artista Digital</h3>
+                <p><strong>Perfil:</strong></p>
+                <ul>
+                    <li>@artista_digital</li>
+                    <li>220 seguidores</li>
+                    <li>Sube ilustraciones originales</li>
+                    <li>Uso: 5 meses activo</li>
+                </ul>
+
+                <p><strong>Actividad:</strong></p>
+                <ul>
+                    <li>Publicaciones (ilustraciones): 85</li>
+                    <li>Tokens ganados publicando: 425 CFT (85 × 5 por imágenes)</li>
+                    <li>Likes recibidos: 3,400</li>
+                    <li>Tokens por likes: 3,400 CFT</li>
+                    <li><strong>Total ganado: 3,825 CFT</strong></li>
+                </ul>
+
+                <p><strong>Monetización Marketplace:</strong></p>
+                <ul>
+                    <li>12 ilustraciones puestas en venta</li>
+                    <li>Preciopromedio: 1,000 CFT</li>
+<li>8 vendidas exitosamente</li>
+<li>Ingreso bruto: 8,000 CFT</li>
+<li>Comisión plataforma (10%): 800 CFT</li>
+<li><strong>Ingreso neto ventas: 7,200 CFT</strong></li>
+</ul>
+<p><strong>Balance Total:</strong></p>
+            <ul>
+                <li>Ganado orgánico: 3,825 CFT</li>
+                <li>Ganado por ventas: 7,200 CFT</li>
+                <li><strong>Total: 11,025 CFT ($110.25 USD)</strong></li>
+            </ul>
+
+            <p><strong>Retirado:</strong> 10,000 CFT ($100 USD) en 5 meses sin inversión inicial.</p>
+
+            <div class="highlight-box">
+                <p><strong>Comparación con Plataformas Tradicionales:</strong></p>
+                <ul>
+                    <li>Instagram: $0 (no alcanza requisitos)</li>
+                    <li>DeviantArt: Requiere premium + comisión 20-30%</li>
+                    <li><strong class="checkmark">ChainFeed: $100 en 5 meses con 220 seguidores</strong></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="negocio">
+        <h2>💼 MODELO DE NEGOCIO</h2>
+
+        <h3>Fuentes de Ingreso Actuales</h3>
+
+        <h4>1. Preventas de Tokens CFT</h4>
+        <p><strong>Datos Reales:</strong></p>
+        <ul>
+            <li>Ticket promedio: $50 USD</li>
+            <li>Frecuencia: 2-3 compras/semana</li>
+            <li>Conversión: ~3% de usuarios registrados</li>
+            <li><strong>Ingreso mensual actual: ~$150 USD</strong></li>
+        </ul>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuarios Totales</th>
+                    <th>Conversión 3%</th>
+                    <th>Ticket $50</th>
+                    <th>Ingreso Mensual</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1,000</td>
+                    <td>30 compradores</td>
+                    <td>$50</td>
+                    <td>$1,500/mes</td>
+                </tr>
+                <tr>
+                    <td>5,000</td>
+                    <td>150 compradores</td>
+                    <td>$50</td>
+                    <td>$7,500/mes</td>
+                </tr>
+                <tr>
+                    <td>10,000</td>
+                    <td>300 compradores</td>
+                    <td>$50</td>
+                    <td>$15,000/mes</td>
+                </tr>
+                <tr>
+                    <td>50,000</td>
+                    <td>1,500 compradores</td>
+                    <td>$50</td>
+                    <td>$75,000/mes</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>2. Comisiones del Marketplace</h4>
+        <p><strong>Mecánica:</strong></p>
+        <ul>
+            <li>10% de cada transacción se retiene</li>
+            <li>Vendedor recibe 90% instantáneamente</li>
+            <li>Comisión queda en tesorería plataforma</li>
+        </ul>
+
+        <p><strong>Datos Reales:</strong></p>
+        <ul>
+            <li>Transacciones/mes: ~25</li>
+            <li>Precio promedio: 800 CFT ($8 USD)</li>
+            <li>Volumen mensual: 20,000 CFT ($200 USD)</li>
+            <li><strong>Comisión mensual: 2,000 CFT ($20 USD)</strong></li>
+        </ul>
+
+        <h4>3. Promociones Pagadas</h4>
+        <p><strong>Datos Reales:</strong></p>
+        <ul>
+            <li>Promociones activas promedio: 15-20/día</li>
+            <li>Plan más usado: Daily (50 CFT)</li>
+            <li>Uso mensual: ~450 promociones</li>
+            <li><strong>Ingreso mensual: ~22,500 CFT ($225 USD)</strong></li>
+        </ul>
+
+        <h3>Resumen de Ingresos Actuales</h3>
+        <div class="highlight-box">
+            <h4>Mes Típico (1,000 usuarios activos):</h4>
+            <pre>Preventas:       $150 USDMarketplace:     $20 USD
+Promociones:     $225 USD
+─────────────────────────
+Total Bruto:     ~$395 USD/mes</pre>
+</div>
+        <div class="highlight-box">
+            <h4>Proyección 10,000 Usuarios:</h4>
+            <pre>Preventas:       $1,500 USD
+Marketplace:     $200 USD
+Promociones:     $2,250 USD
+─────────────────────────
+Total Bruto:     ~$3,950 USD/mes</pre>
+</div>
+<div class="highlight-box">
+            <h4>Proyección 50,000 Usuarios:</h4>
+            <pre>Preventas:       $7,500 USDMarketplace:     $1,000 USD
+Promociones:     $11,250 USD
+─────────────────────────
+Total Bruto:     ~$19,750 USD/mes</pre>
+</div>
+<h3>Estructura de Costos Actual</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Costo Mensual</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Servidor Web (VPS)</td>
+                    <td>$50 USD</td>
+                </tr>
+                <tr>
+                    <td>Base de Datos (MySQL)</td>
+                    <td>$30 USD</td>
+                </tr>
+                <tr>
+                    <td>Storage (media)</td>
+                    <td>$20 USD</td>
+                </tr>
+                <tr>
+                    <td>Dominio + SSL</td>
+                    <td>$3 USD</td>
+                </tr>
+                <tr>
+                    <td>Blockchain fees</td>
+                    <td>~$5 USD</td>
+                </tr>
+                <tr>
+                    <td><strong>Total Infraestructura</strong></td>
+                    <td><strong>$108 USD/mes</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p><strong>Desarrollo:</strong></p>
+        <ul>
+            <li>Proyecto unipersonal</li>
+            <li>Sin salario (fundador bootstrap)</li>
+            <li>Inversión de tiempo: 18 meses</li>
+        </ul>
+
+<h3>Análisis de Margen</h3>
+<div class="highlight-box">
+    <h4>Situación Actual (1,000 usuarios):</h4>
+    <pre>Ingresos:  $395 USD/mes
+Gastos:    $108 USD/mes
+────────────────────────
+Margen:    +$287 USD/mes (73% margen)</pre>
+</div>
+
+<div class="highlight-box">
+    <h4>Proyección 10,000 Usuarios:</h4>
+    <pre>Ingresos:  $3,950 USD/mes
+Gastos:    $300 USD/mes
+────────────────────────
+Margen:    +$3,650 USD/mes (92% margen)</pre>
+</div>
+
+<div class="highlight-box">
+    <h4>Proyección 50,000 Usuarios:</h4>
+    <pre>Ingresos:  $19,750 USD/mes
+Gastos:    $1,000 USD/mes
+────────────────────────
+Margen:    +$18,750 USD/mes (95% margen)</pre>
+</div>
+
+<p><strong class="checkmark">Conclusión:</strong> El modelo es rentable incluso a pequeña escala actual. Los márgenes mejoran con crecimiento por economías de escala.</p>
+
+<h3>Fuentes de Ingreso Futuras (Roadmap)</h3>
+<p><strong>Próximos 12-24 Meses:</strong></p>
+
+<ol>
+    <li><strong>API Premium para Developers</strong>
+        <ul>
+            <li>Gratuita: 1,000 requests/día</li>
+            <li>Premium: $49 USD/mes por uso ilimitado</li>
+            <li>Proyección: 50 developers pagando = $2,450/mes adicional</li>
+        </ul>
+    </li>
+    <li><strong>Staking con APY</strong>
+        <ul>
+            <li>Usuarios bloquean CFT por rewards</li>
+            <li>Reduce supply circulante</li>
+            <li>No genera ingreso directo, mejora tokenomics</li>
+        </ul>
+    </li>
+    <li><strong>Subscripciones de Creadores</strong>
+        <ul>
+            <li>Modelo Patreon-style con CFT</li>
+            <li>Comisión 15% (vs 12% de Patreon)</li>
+            <li>Proyección: 100 creadores × $20 promedio × 15% = $300/mes</li>
+        </ul>
+    </li>
+    <li><strong>NFTs de Coleccionables</strong>
+        <ul>
+            <li>Publicaciones especiales como NFTs únicos</li>
+            <li>Comisión 5% en secondary sales</li>
+            <li>Proyección: $500/mes en volumen = $25/mes</li>
+        </ul>
+    </li>
+    <li><strong>White-Label para Empresas</strong>
+        <ul>
+            <li>Versión privada de ChainFeed para corporaciones</li>
+            <li>Licencia: $5,000 USD setup + $500/mes</li>
+            <li>Proyección: 2 clientes = $11,000 año 1</li>
+        </ul>
+    </li>
+</ol>
+    </section>
+
+    <section id="mercado">
+        <h2>📊 ANÁLISIS DE MERCADO</h2>
+
+        <h3>Tamaño del Mercado (TAM/SAM/SOM)</h3>
+
+        <h4>TAM (Total Addressable Market):</h4>
+        <ul>
+            <li>Economía de creadores global: $104 mil millones (2023)</li>
+            <li>Proyección 2030: $480 mil millones</li>
+            <li>CAGR: 23% anual</li>
+        </ul>
+
+        <h4>SAM (Serviceable Available Market):</h4>
+        <ul>
+            <li>Creadores de contenido digitales: 200 millones globalmente</li>
+            <li>Usuarios activos en social media: 4.8 mil millones</li>
+            <li>Mercado crypto-nativo: 420 millones (2024)</li>
+            <li>Intersección (creadores + crypto): ~50 millones</li>
+        </ul>
+
+        <h4>SOM (Serviceable Obtainable Market - 3 años):</h4>
+        <ul>
+            <li>Meta conservadora: 500,000 usuarios activos</li>
+            <li>1% del mercado crypto-creator</li>
+            <li>Valoración implícita: $50M-$100M</li>
+        </ul>
+
+        <h3>Análisis Competitivo Detallado</h3>
+
+        <h4>Competidor 1: Steemit</h4>
+        <p><strong>Fortalezas:</strong></p>
+        <ul>
+            <li>Pionero (2016), marca establecida</li>
+            <li>1M+ usuarios registrados</li>
+            <li>Modelo probado de rewards</li>
+        </ul>
+        <p><strong>Debilidades:</strong></p>
+        <ul>
+            <li>Interfaz anticuada (UI de 2016)</li>
+            <li>Inflación descontrolada de tokens</li>
+            <li>Complejidad técnica alta</li>
+            <li>Comunidad estancada</li>
+        </ul>
+        <p><strong class="checkmark">Ventaja ChainFeed:</strong></p>
+        <ul>
+            <li>UI moderna, mobile-first</li>
+            <li>Límites diarios previenen inflación</li>
+            <li>Onboarding simplificado</li>
+            <li>Sistema Chain (gamificación única)</li>
+        </ul>
+
+        <h4>Competidor 2: Lens Protocol</h4>
+        <p><strong>Fortalezas:</strong></p>
+        <ul>
+            <li>Respaldo de Aave ($15M fundraising)</li>
+            <li>Tecnología descentralizada avanzada</li>
+            <li>Enfoque en composability</li>
+        </ul>
+        <p><strong>Debilidades:</strong></p>
+        <ul>
+            <li>Extremadamente técnico</li>
+            <li>Sin revenue model claro</li>
+            <li>Adoption lenta (120K usuarios en 2 años)</li>
+            <li>Gas fees altos (Polygon)</li>
+        </ul>
+        <p><strong class="checkmark">Ventaja ChainFeed:</strong></p>
+        <ul>
+            <li>Producto simple y funcional</li>
+            <li>Revenue model claro desde día 1</li>
+            <li>Blockchain gratuito (Proton)</li>
+            <li>Enfoque en usabilidad sobre descentralización</li>
+        </ul>
+
+        <h4>Competidor 3: Friend.tech</h4>
+        <p><strong>Fortalezas:</strong></p>
+        <ul>
+            <li>Crecimiento viral rápido (800K usuarios en 6 meses)</li>
+            <li>Modelo innovador de "keys"</li>
+        </ul>
+        <p><strong>Debilidades:</strong></p>
+        <ul>
+            <li><strong class="danger">COLAPSÓ en 2024</strong></li>
+            <li>Modelo Ponzi insostenible</li>
+            <li>Especulación sin utilidad real</li>
+            <li>Perdió 95% de usuarios</li>
+        </ul>
+        <p><strong class="checkmark">Ventaja ChainFeed:</strong></p>
+        <ul>
+            <li>Modelo sostenible con utilidad real</li>
+            <li>No depende de especulación</li>
+            <li>Enfoque en contenido, no trading</li>
+            <li>Economía matemáticamente viable</li>
+        </ul>
+
+        <h4>Competidor 4: Farcaster</h4>
+        <p><strong>Fortalezas:</strong></p>
+        <ul>
+            <li>Respaldo de a16z crypto</li>
+            <li>Tecnología descentralizada robusta</li>
+            <li>350K usuarios (early 2024)</li>
+        </ul>
+        <p><strong>Debilidades:</strong></p>
+        <ul>
+            <li>Requiere pagar $5 USD para registrarse</li>
+            <li>Demasiado técnico para masas</li>
+            <li>Sin sistema de rewards directo</li>
+            <li>Enfoque solo en descentralización</li>
+        </ul>
+        <p><strong class="checkmark">Ventaja ChainFeed:</strong></p>
+        <ul>
+            <li>Registro gratuito, ganas tokens desde día 1</li>
+            <li>Rewards automáticos por uso</li>
+            <li>Balance entre usabilidad y descentralización</li>
+            <li>Marketplace y gamificación integrados</li>
+        </ul>
+
+        <h3>Posicionamiento de ChainFeed</h3>
+        <pre>Alta Descentralización
+    │
+    │  Lens Protocol
+    │  Farcaster
+    │────────┼────────────────────
+│
+│  ChainFeed ★
+│  (Balance óptimo)
+│
+│  Twitter/X
+│  Instagram
+│
+Baja Complejidad ──────→ Alta Complejidad</pre><p><strong>Propuesta Única:</strong></p>
+        <ul>
+            <li>Suficientemente descentralizado para atraer Web3</li>
+            <li>Suficientemente simple para atraer Web2</li>
+            <li>Rewards inmediatos (vs competitors que requieren inversión)</li>
+            <li>Modelo económico sostenible (vs Ponzis que colapsan)</li>
+        </ul>
+
+        <h3>Oportunidades de Mercado</h3>
+        <ol>
+            <li><strong>Insatisfacción Creciente con Web2</strong>
+                <ul>
+                    <li>Creadores frustrados con algoritmos opacos</li>
+                    <li>Monetización cada vez más difícil</li>
+                    <li>Buscando alternativas activamente</li>
+                </ul>
+            </li>
+            <li><strong>Maduración de Web3</strong>
+                <ul>
+                    <li>Billeteras más simples (Proton sin gas fees)</li>
+                    <li>Onboarding mejorado</li>
+                    <li>Menos fricción técnica</li>
+                </ul>
+            </li>
+            <li><strong>Regulación Clarificándose</strong>
+                <ul>
+                    <li>Utility tokens cada vez más aceptados</li>
+                    <li>Jurisprudencia favorable para plataformas</li>
+                    <li>Mayor certeza legal</li>
+                </ul>
+            </li>
+            <li><strong>Timing Post-Halving Bitcoin</strong>
+                <ul>
+                    <li>Bull market crypto 2024-2025</li>
+                    <li>Interés renovado en aplicaciones blockchain</li>
+                    <li>Capital disponible para proyectos sólidos</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section id="riesgos">
+        <h2>⚠️ RIESGOS Y MITIGACIONES</h2>
+
+        <h3>Riesgo 1: Escalabilidad Técnica</h3>
+        <p><strong>Descripción:</strong> Con crecimiento rápido a 10,000+ usuarios, la infraestructura actual (1 servidor VPS) podría saturarse.</p>
+        <p><strong>Probabilidad:</strong> <span class="warning">Alta</span> | <strong>Impacto:</strong> <span class="danger">Alto</span></p>
+        
+        <p><strong>Mitigación Implementada:</strong></p>
+        <ul>
+            <li>Base de datos optimizada con índices</li>
+            <li>Queries con LIMIT y paginación</li>
+            <li>CDN para contenido multimedia (Cloudflare)</li>
+            <li>Caché de consultas frecuentes</li>
+        </ul>
+
+        <p><strong>Mitigación Futura:</strong></p>
+        <ul>
+            <li>Migración a arquitectura escalable (AWS/GCP)</li>
+            <li>Balanceador de carga con múltiples servidores</li>
+            <li>Base de datos distribuida (sharding)</li>
+            <li>Presupuesto: $500-$1,000/mes a partir de 10K usuarios</li>
+        </ul>
+
+        <h3>Riesgo 2: Farming y Abuso del Sistema</h3>
+        <p><strong>Descripción:</strong> Usuarios malintencionados crean múltiples cuentas o bots para farmear tokens ilimitadamente.</p>
+        <p><strong>Probabilidad:</strong> <span class="warning">Media</span> | <strong>Impacto:</strong> <span class="danger">Alto</span></p>
+        
+        <p><strong>Mitigación Implementada:</strong></p>
+        <ul>
+            <li><strong>Límites diarios por categoría</strong> (innovación core)</li>
+            <li>Detección de patrones sospechosos</li>
+            <li>Filtro anti-spam en publicaciones</li>
+            <li>Sistema de reportes comunitario</li>
+            <li>Cooldowns en acciones consecutivas</li>
+        </ul>
+
+        <p><strong>Efectividad Demostrada:</strong></p>
+        <ul>
+            <li><span class="checkmark">✅</span> 18 meses sin incidentes graves de farming</li>
+            <li><span class="checkmark">✅</span> Solo 2 usuarios bloqueados por abuso</li>
+            <li><span class="checkmark">✅</span> Sistema de límites funcionó como diseñado</li>
+        </ul>
+
+        <h3>Riesgo 3: Regulación Crypto Adversa</h3>
+        <p><strong>Descripción:</strong> Gobiernos podrían clasificar CFT como security, requiriendo licencias costosas o prohibiendo operaciones.</p>
+        <p><strong>Probabilidad:</strong> <span class="warning">Media</span> | <strong>Impacto:</strong> <span class="danger">Alto</span></p>
+        
+        <div class="highlight-box">
+            <p><strong>CFT es utility token, no security:</strong></p>
+            <ul>
+                <li>Uso real en plataforma (no solo inversión)</li>
+                <li>Precio fijo de $0.01 (no especulativo)</li>
+                <li>No promesas de ganancias</li>
+            </ul>
+        </div>
+
+        <p><strong>Precedentes Favorables:</strong></p>
+        <ul>
+            <li>Casos como SEC vs Ripple estableciendo criterios</li>
+            <li>Utility tokens generalmente no clasificados como securities</li>
+            <li>Proton blockchain no tiene issues regulatorios</li>
+        </ul>
+
+        <h3>Riesgo 4: Competencia de Gigantes Tech</h3>
+        <p><strong>Descripción:</strong> Meta, Twitter/X o TikTok lanzan sistema de recompensas similar con recursos infinitamente mayores.</p>
+        <p><strong>Probabilidad:</strong> <span class="warning">Media</span> | <strong>Impacto:</strong> <span class="danger">Alto</span></p>
+        
+        <p><strong>Mitigación por Diferenciación:</strong></p>
+        <ul>
+            <li><strong>Autenticidad crypto-native:</strong> Comunidad Web3 desconfía de big tech</li>
+            <li><strong>Network effects propios:</strong> Difícil replicar comunidad leal establecida</li>
+            <li><strong>Velocidad:</strong> Pequeños innovan más rápido que corporaciones</li>
+            <li><strong>Nichos específicos:</strong> Sistema Chain único, no replicable fácilmente</li>
+        </ul>
+
+        <p><strong>Posible Resultado Positivo:</strong></p>
+        <ul>
+            <li>Si copian bien, valida el modelo</li>
+            <li>Aumenta valoración para adquisición</li>
+            <li>ChainFeed se vuelve "pure play" atractivo para compra</li>
+        </ul>
+
+        <h3>Riesgo 5: Volatilidad del Mercado Crypto</h3>
+        <p><strong>Descripción:</strong> Bear market prolongado reduce interés en tokens y preventas caen dramáticamente.</p>
+        <p><strong>Probabilidad:</strong> <span class="danger">Alta (cíclico)</span> | <strong>Impacto:</strong> <span class="warning">Medio</span></p>
+        
+        <p><strong>Mitigación Implementada:</strong></p>
+        <ul>
+            <li><strong>Precio fijo $0.01:</strong> CFT no especula, es utility estable</li>
+            <li><strong>Ingresos diversificados:</strong> Marketplace + promociones siguen funcionando</li>
+            <li><strong>Modelo freemium:</strong> Usuarios pueden usar gratis sin comprar CFT</li>
+        </ul>
+
+        <h3>Riesgo 6: Dependencia de Fundador Único</h3>
+        <p><strong>Descripción:</strong> Proyecto desarrollado por una sola persona. Si el fundador no puede continuar, proyecto se detiene.</p>
+        <p><strong>Probabilidad:</strong> <span class="warning">Media</span> | <strong>Impacto:</strong> <span class="danger">Crítico</span></p>
+        
+        <p><strong>Mitigación Necesaria:</strong></p>
+        <ul>
+            <li>Documentación exhaustiva de código y arquitectura</li>
+            <li>Repositorio GitHub privado accesible a inversores</li>
+            <li>Runbooks para operación y mantenimiento</li>
+            <li><strong>Bus factor &gt;1:</strong> Contratar 1-2 developers en primeros $50K de funding</li>
+        </ul>
+
+        <p><strong class="danger">Prioridad Post-Funding:</strong> Primer uso de capital debe ser contratar CTO/Senior Dev para reducir dependencia.</p>
+    </section>
+
+    <section id="roadmap">
+        <h2>🗓️ ROADMAP REALISTA</h2>
+
+        <p><strong>Filosofía del Roadmap:</strong> Este roadmap refleja lo que es factualmente alcanzable con los recursos actuales (1 developer) y futuros (con funding). No incluye promesas inalcanzables.</p>
+
+        <div class="roadmap-item completed">
+            <div class="roadmap-dot"></div>
+            <h3>Q1 2024 - Q2 2026: Consolidación ✅ COMPLETADO</h3>
+            <p><strong>Objetivo:</strong> Estabilizar producto y llegar a 1,000 usuarios.</p>
+            <ul>
+                <li>✅ Lanzamiento MVP en producción</li>
+                <li>✅ Sistema de recompensas automático funcional</li>
+                <li>✅ Marketplace de contenido operativo</li>
+                <li>✅ Sistema Chain (polls, campaigns, audio)</li>
+                <li>✅ Integración Proton blockchain</li>
+                <li>✅ Sistema de promociones pagadas</li>
+                <li>✅ Sistema de preventas con bonus 20%</li>
+                <li>✅ Dashboard de billetera completo</li>
+                <li>✅ Sistema de moderación básico</li>
+                <li>✅ 1,000+ usuarios activos</li>
+            </ul>
+            <p><strong class="checkmark">Resultado: ✅ Objetivos alcanzados. Plataforma estable y funcional.</strong></p>
+        </div>
+
+        <div class="roadmap-item in-progress">
+            <div class="roadmap-dot"></div>
+            <h3>Q3 2026: Mejoras y Optimización 🚧 EN PROGRESO</h3>
+            <p><strong>Objetivo:</strong> Optimizar experiencia y reducir fricción. Meta: 2,500 usuarios.</p>
+            <p><strong>Desarrollo (3 meses):</strong></p>
+            <ul>
+                <li>Sistema de notificaciones mejorado (push notifications)</li>
+                <li>Búsqueda avanzada de contenido (hashtags, usuarios)</li>
+                <li>Mensajería directa básica (texto)</li>
+                <li>Mejoras de performance y caché</li>
+                <li>Compresión automática de imágenes/videos</li>
+                <li>Sistema de backup automatizado</li>
+                <li>Documentación técnica completa</li>
+            </ul>
+            <p><strong>Marketing (paralelo):</strong></p>
+            <ul>
+                <li>Campaña con 10 micro-influencers crypto ($500)</li>
+                <li>Contenido educativo (YouTube, Medium)</li>
+                <li>Presencia en foros crypto (Reddit, Bitcointalk)</li>
+            </ul>
+            <p><strong>Recursos Necesarios:</strong> $2,000 (desarrollo + marketing)</p>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <h3>Q4 2026: Expansión de Features</h3>
+            <p><strong>Objetivo:</strong> Añadir features diferenciadores. Meta: 5,000 usuarios.</p>
+            <p><strong>Si se consigue funding ($50K+):</strong></p>
+            <ul>
+                <li>Contratar 1 developer adicional</li>
+                <li>Sistema de grupos/comunidades</li>
+                <li>API pública beta (documentada)</li>
+                <li>Mejoras en Sistema Chain (nuevos tipos de eventos)</li>
+                <li>Dashboard de analytics para creadores</li>
+                <li>Sistema de badges y logros</li>
+            </ul>
+            <p><strong>Si NO se consigue funding:</strong></p>
+            <ul>
+                <li>Priorizar solo: Grupos básicos + API simple</li>
+                <li>Desarrollo más lento (6 meses en vez de 3)</li>
+            </ul>
+            <p><strong>Recursos Necesarios:</strong> $25,000 (salario developer 3 meses)</p>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <h3>Q1 2027: Monetización Avanzada</h3>
+            <p><strong>Objetivo:</strong> Diversificar ingresos. Meta: 10,000 usuarios.</p>
+            <p><strong>Con funding:</strong></p>
+            <ul>
+                <li>Staking con APY (incentiva holding)</li>
+                <li>API premium para developers ($49/mes)</li>
+                <li>Sistema de subscripciones a creadores</li>
+                <li>Integración Stripe para comprasfiat directas</li>
+<li>Mejoras en marketplace (subastas, ofertas)</li>
+</ul>
+<p><strong>Sin funding:</strong></p>
+<ul>
+<li>Solo staking básico + API free tier</li>
+</ul>
+<p><strong>Recursos Necesarios:</strong> $15,000 (desarrollo + integraciones)</p>
+</div><div class="roadmap-item">
+            <div class="roadmap-dot"></div>
+            <h3>2026: Escalamiento y Descentralización</h3>
+            <p><strong>Objetivo:</strong> Preparar para 50,000+ usuarios y estructura DAO.</p>
+            <p><strong>Fase 1 (Q1-Q2 2026):</strong></p>
+            <ul>
+                <li>Migración a infraestructura escalable (AWS/GCP)</li>
+                <li>Multi-chain (Ethereum, BSC, Polygon)</li>
+                <li>OAuth (login Google, Twitter, Discord)</li>
+                <li>Transmisiones en vivo beta</li>
+                <li>Mobile apps (iOS, Android)</li>
+            </ul>
+            <p><strong>Fase 2 (Q3-Q4 2026):</strong></p>
+            <ul>
+                <li>Formación de DAO</li>
+                <li>Gobernanza con CFT</li>
+                <li>Programa de grants para developers</li>
+                <li>Whitepaper técnico descentralización</li>
+            </ul>
+            <p><strong>Recursos Necesarios:</strong> $200,000+ (equipo 5 personas)</p>
+            <p><em>Nota: Esta fase requiere Serie A funding o crecimiento orgánico muy fuerte.</em></p>
+        </div>
+
+        <h3>Hitos de Fundraising</h3>
+        <div class="highlight-box">
+            <h4>Milestone 1: Seed Round ($50K-$100K)</h4>
+            <ul>
+                <li>Desbloquea: Q3 2025 acelerado + 1 developer</li>
+                <li>Uso: Salarios + marketing + infraestructura</li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Milestone 2: Pre-Serie A ($500K)</h4>
+            <ul>
+                <li>Desbloquea: 2026 completo + equipo 5 personas</li>
+                <li>Uso: Producto maduro + escalamiento global</li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Milestone 3: Serie A ($2M-$5M)</h4>
+            <ul>
+                <li>Desbloquea: Expansión internacional + descentralización</li>
+                <li>Uso: Equipo 20+ personas + marketing agresivo</li>
+            </ul>
+        </div>
+
+        <h3>Roadmap Conservador (Sin Funding Adicional)</h3>
+        <p>Si no se consigue inversión externa, el proyecto continúa así:</p>
+        
+        <p><strong>2026:</strong></p>
+        <ul>
+            <li>Mejoras incrementales con 1 developer</li>
+            <li>Crecimiento orgánico lento pero sostenible</li>
+            <li>Meta: 5,000 usuarios para fin de año</li>
+            <li>Enfoque: Rentabilidad sobre crecimiento explosivo</li>
+        </ul>
+
+        <p><strong>2027:</strong></p>
+        <ul>
+            <li>Reinversión de ganancias en features prioritarias</li>
+            <li>Posible contratación 1 developer part-time</li>
+            <li>Meta: 20,000 usuarios</li>
+            <li>Breakeven operativo alcanzado</li>
+        </ul>
+
+        <p><strong>2028:</strong></p>
+        <ul>
+            <li>Consideración de exit vía adquisición</li>
+            <li>O continuar como lifestyle business rentable</li>
+            <li>O abrir Serie A en ese momento con tracción probada</li>
+        </ul>
+    </section>
+
+    <section id="legal">
+        <h2>⚖️ INFORMACIÓN LEGAL</h2>
+
+        <h3>Estructura Corporativa Actual</h3>
+        <ul>
+            <li><strong>Entidad:</strong> Proyecto independiente (no incorporado formalmente aún)</li>
+            <li><strong>Desarrollo:</strong> Argentina (Pehuajó, Buenos Aires)</li>
+            <li><strong>Jurisdicción Blockchain:</strong> Proton (sin jurisdicción física específica)</li>
+        </ul>
+
+        <p><strong>Plan de Incorporación (Post-Funding):</strong></p>
+        <ul>
+            <li><strong>Opción 1:</strong> Delaware C-Corp (USA) - Estándar para startups tech</li>
+            <li><strong>Opción 2:</strong> Cayman Islands / BVI - Común para crypto</li>
+            <li><strong>Opción 3:</strong> Singapur / Suiza - Crypto-friendly, respetado</li>
+        </ul>
+
+        <p><strong>Razón Actual para No Incorporar:</strong></p>
+        <ul>
+            <li>Costos legales prohibitivos pre-revenue significativo ($5K-$15K)</li>
+            <li>Complejidad regulatoria sin claridad aún</li>
+            <li>Enfoque en producto sobre estructura legal</li>
+            <li>Post-funding será prioridad inmediata</li>
+        </ul>
+
+        <h3>Clasificación del Token CFT</h3>
+        <div class="highlight-box">
+            <h4>Posición Oficial:</h4>
+            <p><strong>CFT es un Utility Token, NO un Security.</strong></p>
+        </div>
+
+        <p><strong>Justificación Legal (Howey Test):</strong></p>
+        <ol>
+            <li><strong>¿Inversión de dinero?</strong> Sí, pero también se puede ganar gratis</li>
+            <li><strong>¿En una empresa común?</strong> No. CFT es utility para usar plataforma, no ownership de empresa</li>
+            <li><strong>¿Expectativa de ganancias?</strong> No promovida. CFT vale $0.01 fijo, no se promociona apreciación</li>
+            <li><strong>¿Basada en esfuerzos de otros?</strong> No. Usuarios crean valor con su contenido, no dependiente de equipo</li>
+        </ol>
+
+        <p><strong class="checkmark">Conclusión:</strong> CFT pasa Howey Test como utility, no security.</p>
+
+        <p><strong>Precedentes Similares:</strong></p>
+        <ul>
+            <li><strong>BAT (Basic Attention Token)</strong> - Utility para Brave Browser</li>
+            <li><strong>MANA (Decentraland)</strong> - Utility para mundo virtual</li>
+            <li>Ambos aprobados por reguladores como utilities</li>
+        </ul>
+
+        <h3>Cumplimiento Regulatorio</h3>
+        <p><strong>Actual:</strong></p>
+        <ul>
+            <li>No KYC requerido (plataforma social, no exchange)</li>
+            <li>No AML complejo (transacciones peer-to-peer verificables)</li>
+            <li>Terms of Service publicados</li>
+            <li>Privacy Policy conforme GDPR</li>
+        </ul>
+
+        <p><strong>Post-Funding / Escala:</strong></p>
+        <ul>
+            <li>KYC opcional para retiros mayores ($500+ USD equivalent)</li>
+            <li>AML monitoring con software especializado</li>
+            <li>Registro como MSB si requerido por jurisdicción</li>
+            <li>Compliance officer contratado</li>
+        </ul>
+
+        <h3>Propiedad Intelectual</h3>
+        <p><strong>Copyright:</strong></p>
+        <ul>
+            <li>Todo el código es propiedad del fundador</li>
+            <li>Usuarios retienen copyright de su contenido</li>
+            <li>Plataforma tiene licencia para mostrar/distribuir</li>
+        </ul>
+
+        <p><strong>Patentes:</strong></p>
+        <ul>
+            <li>Posible patentar "Sistema de Límites por Categoría"</li>
+            <li>Posible patentar "Tokens Versionados con Intercambio 1:1"</li>
+            <li>Costo: $10K-$20K por patente</li>
+            <li>Prioridad post-funding</li>
+        </ul>
+
+        <p><strong>Marca Registrada:</strong></p>
+        <ul>
+            <li>ChainFeed™ - En proceso de registro</li>
+            <li>CFT™ - En proceso de registro</li>
+            <li>Costo: $500-$1,500 por marca</li>
+        </ul>
+
+        <h3>Términos de Inversión (Seed Round)</h3>
+        <p><strong>Instrumento:</strong> SAFE (Simple Agreement for Future Equity)</p>
+        <ul>
+            <li>Estándar Y Combinator</li>
+            <li>Conversión en próxima ronda priced</li>
+            <li>Protección para ambas partes</li>
+        </ul>
+
+        <p><strong>Términos Indicativos:</strong></p>
+        <ul>
+            <li><strong>Valoración Cap:</strong> $5,000,000 USD</li>
+            <li><strong>Discount:</strong> 20% (primeros $100K)</li>
+            <li><strong>Mínimo Inversión:</strong> $10,000 USD</li>
+            <li><strong>Máximo Ronda:</strong> $500,000 USD</li>
+        </ul>
+
+        <p><strong>Derechos de Inversores:</strong></p>
+        <ul>
+            <li>Pro-rata rights (invertir en siguientes rondas)</li>
+            <li>Información trimestral financiera</li>
+            <li>Board observer seat (inversiones $100K+)</li>
+            <li>Liquidation preference 1x (estándar)</li>
+        </ul>
+
+        <h3>Exit Strategy y Liquidez</h3>
+        <h4>1. Adquisición Estratégica (18-36 meses)</h4>
+        <p><strong>Potenciales Compradores:</strong></p>
+        <ul>
+            <li>Meta (Facebook/Instagram)</li>
+            <li>Twitter/X</li>
+            <li>Discord</li>
+            <li>Reddit</li>
+            <li>TikTok (ByteDance)</li>
+            <li>Exchanges crypto (Binance, Coinbase)</li>
+        </ul>
+        <p><strong>Múltiplo Esperado:</strong> 5-10x revenue anual</p>
+        <p><strong>Timeline:</strong> 2-3 años con tracción sólida</p>
+
+        <h4>2. Token Generation Event / ICO (12-24 meses)</h4>
+        <p><strong>Mecánica:</strong></p>
+        <ul>
+            <li>Venta pública de CFT v1 remanente</li>
+            <li>Listado en exchanges (Binance, Coinbase, Kraken)</li>
+            <li>Liquidez inmediata para early investors</li>
+            <li>Conversión de equity a tokens (opcional)</li>
+        </ul>
+
+        <h4>3. IPO (5+ años)</h4>
+        <p><strong>Escenario:</strong></p>
+        <ul>
+            <li>Listado en NASDAQ o NYSE</li>
+            <li>Valoración $500M-$1B+</li>
+            <li>Modelo maduro y profitable</li>
+            <li>Comparables: Twitter, Pinterest, Snapchat</li>
+        </ul>
+        <p><strong>Timeline Realista:</strong> 2028-2030</p>
+
+        <h3>Políticas de Contenido</h3>
+        <p><strong>Contenido Prohibido:</strong></p>
+        <ul>
+            <li>Pornografía / NSFW sin marcar</li>
+            <li>Incitación al odio, racismo, discriminación</li>
+            <li>Violencia gráfica explícita</li>
+            <li>Contenido ilegal (drogas, armas, etc)</li>
+            <li>Spam y estafas</li>
+            <li>Violación de copyright de terceros</li>
+        </ul>
+
+        <p><strong>Contenido Permitido con Moderación:</strong></p>
+        <ul>
+            <li>Desnudos artísticos (marcados NSFW)</li>
+            <li>Opiniones políticas (sin incitación)</li>
+            <li>Contenido controversial pero legal</li>
+        </ul>
+
+        <h3>Seguridad y Auditorías</h3>
+        <p><strong>Medidas de Seguridad Actuales:</strong></p>
+        <ul>
+            <li>Contraseñas hasheadas (bcrypt)</li>
+            <li>HTTPS en toda la plataforma</li>
+            <li>Sanitización de inputs (prevención SQL injection)</li>
+            <li>Rate limiting en APIs</li>
+            <li>Backups diarios automatizados</li>
+        </ul>
+
+        <p><strong>Auditorías Futuras (Post-Funding):</strong></p>
+        <ul>
+            <li><strong>Smart Contract Audit:</strong> CertiK o Hacken ($15K-$30K)</li>
+            <li><strong>Penetration Testing:</strong> Empresa especializada ($5K-$10K)</li>
+            <li><strong>Bug Bounty Program:</strong> $100-$5,000 por vulnerabilidad</li>
+        </ul>
+
+        <p><strong>Historial de Seguridad:</strong></p>
+        <ul>
+            <li><span class="checkmark">✅</span> 18 meses sin brechas de seguridad</li>
+            <li><span class="checkmark">✅</span> 0 pérdidas de fondos de usuarios</li>
+            <li><span class="checkmark">✅</span> 2 intentos de SQL injection bloqueados automáticamente</li>
+        </ul>
+    </section>
+
+    <section class="cta-section">
+        <h2>🎯 CALL TO ACTION</h2>
+        <h3 style="color: white;">¿Por Qué Invertir en ChainFeed?</h3>
+        
+        <div style="text-align: left; max-width: 800px; margin: 20px auto;">
+            <p><strong>✅ Producto Real Funcionando</strong></p>
+            <ul style="list-style: none; padding-left: 0;">
+                <li>• No es vaporware ni promesas</li>
+                <li>• 1,000+ usuarios reales usando la plataforma hoy</li>
+                <li>• 18 meses de desarrollo consolidado</li>
+                <li>• Modelo probado generando ingresos</li>
+            </ul>
+
+            <p><strong>✅ Timing de Mercado Óptimo</strong></p>
+            <ul style="list-style: none; padding-left: 0;">
+                <li>• Competidores colapsaron o estancados</li>
+                <li>• Frustración creciente con plataformas Web2</li>
+                <li>• Bull market crypto 2024-2025 entrante</li>
+                <li>• Ventana de oportunidad abierta</li>
+            </ul>
+
+            <p><strong>✅ Modelo Sostenible</strong></p>
+            <ul style="list-style: none; padding-left: 0;">
+                <li>• Economía matemáticamente viable</li>
+                <li>• Múltiples fuentes de ingreso</li>
+                <li>• No es Ponzi ni especulación</li>
+                <li>• Tracción orgánica sin marketing</li>
+            </ul>
+
+            <p><strong>✅ Valoración Atractiva</strong></p>
+            <ul style="list-style: none; padding-left: 0;">
+                <li>• $5M pre-money con producto y usuarios</li>
+                <li>• Competidores sin producto levantaron a $15M+</li>
+                <li>• Retorno potencial 10-20x en 3-4 años</li>
+                <li>• Riesgo mitigado por producto existente</li>
+            </ul>
+        </div>
+
+        <h3 style="color: white; margin-top: 40px;">Próximos Pasos</h3>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
+            <a href="mailto:invest@chainfeed.io?subject=Solicitud de Reunión" class="cta-button">📞 Agendar Llamada</a>
+            <a href="mailto:invest@chainfeed.io?subject=Solicitud Data Room" class="cta-button">📁 Acceso Data Room</a>
+            <a href="mailto:invest@chainfeed.io?subject=Letter of Intent" class="cta-button">📄 Descargar LOI</a>
+        </div>
+    </section>
+
+    <section>
+        <h2>📊 RESUMEN EJECUTIVO PARA INVERSIONISTAS</h2>
+        <h3>En Una Página</h3>
+        <table>
+            <tbody>
+                <tr>
+                    <td><strong>Producto</strong></td>
+                    <td>Red social tokenizada funcional</td>
+                </tr>
+                <tr>
+                    <td><strong>Estado</strong></td>
+                    <td>MVP en producción, 18 meses desarrollo</td>
+                </tr>
+                <tr>
+                    <td><strong>Usuarios</strong></td>
+                    <td>1,000+ activos, 10,000+ publicaciones</td>
+                </tr>
+                <tr>
+                    <td><strong>Ingresos</strong></td>
+                    <td>~$395 USD/mes (preventas + marketplace + promociones)</td>
+                </tr>
+                <tr>
+                    <td><strong>Blockchain</strong></td>
+                    <td>Proton (XPR Network) - sin gas fees</td>
+                </tr>
+                <tr>
+                    <td><strong>Token</strong></td>
+                    <td>CFT - $0.01 USD fijo, 100M supply v1</td>
+                </tr>
+                <tr>
+                    <td><strong>Tracción</strong></td>
+                    <td>500K+ CFT distribuidos, 200+ ventas marketplace</td>
+                </tr>
+                <tr>
+                    <td><strong>Equipo</strong></td>
+                    <td>1 fundador (developer full-stack)</td>
+                </tr>
+                <tr>
+                    <td><strong>Mercado TAM</strong></td>
+                    <td>$480B economía creadores para 2030</td>
+                </tr>
+                <tr>
+                    <td><strong>Competencia</strong></td>
+                    <td>Friend.tech colapsó, Steemit estancado, Lens sin tracción</td>
+                </tr>
+                <tr>
+                    <td><strong>Ventaja</strong></td>
+                    <td>Único con: recompensas + marketplace + gamificación funcionando</td>
+                </tr>
+                <tr>
+                    <td><strong>Valoración</strong></td>
+                    <td>$5M pre-money</td>
+                </tr>
+                <tr>
+                    <td><strong>Buscando</strong></td>
+                    <td>$50K-$500K Seed Round</td>
+                </tr>
+                <tr>
+                    <td><strong>Uso Fondos</strong></td>
+                    <td>40% desarrollo, 30% marketing, 20% equipo, 10% legal/ops</td>
+                </tr>
+                <tr>
+                    <td><strong>Proyección</strong></td>
+                    <td>$50M-$100M valoración en 3 años con 500K usuarios</td>
+                </tr>
+                <tr>
+                    <td><strong>Exit</strong></td>
+                    <td>Adquisición (Meta, Twitter, Discord) o ICO/listado exchanges</td>
+                </tr>
+                <tr>
+                    <td><strong>ROI Esperado</strong></td>
+                    <td>10-20x en 3-4 años</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>✍️ DECLARACIÓN FINAL</h2>
+        <h3>Compromiso de Transparencia</h3>
+        <p>Este whitepaper representa fielmente el estado actual de ChainFeed a fecha de Noviembre 2025. No incluye promesas inalcanzables ni proyecciones fantasiosas.</p>
+
+        <div class="highlight-box">
+            <h4>Transparencia Total:</h4>
+            <ul>
+                <li>Los datos de usuarios, transacciones e ingresos son reales y verificables</li>
+                <li>Las limitaciones y riesgos están expuestos honestamente</li>
+                <li>El roadmap es conservador y realista para un proyecto unipersonal</li>
+                <li>Las proyecciones financieras asumen crecimiento orgánico posible</li>
+            </ul>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Compromiso con Inversores:</h4>
+            <p>Si decides invertir en ChainFeed, recibirás:</p>
+            <ul>
+                <li>Acceso completo a métricas en tiempo real</li>
+                <li>Reportes mensuales detallados</li>
+                <li>Respuestas honestas sobre desafíos y fracasos</li>
+                <li>Participación en decisiones estratégicas clave</li>
+            </ul>
+        </div>
+
+        <h3>Filosofía del Proyecto</h3>
+        <p>ChainFeed no es un proyecto crypto especulativo más. Es un intento genuino de construir una plataforma social que redistribuya valor hacia los creadores.</p>
+        <p>El objetivo no es hacernos ricos rápidamente con un token pump-and-dump. Es construir un negocio sostenible que resuelva un problema real: la captura de valor por plataformas centralizadas.</p>
+        <p><strong>Si esa visión resuena contigo, bienvenido a bordo.</strong></p>
+    </section>
+
+    <section>
+        <h2>🏁 CIERRE</h2>
+        <p style="font-size: 1.2rem; text-align: center; margin: 30px 0;">ChainFeed es una oportunidad de inversión en una plataforma real, funcional y creciendo, que ataca un mercado masivo con un modelo innovador pero sostenible.</p>
+        
+        <p style="text-align: center;">No prometemos hacerte millonario de la noche a la mañana. Prometemos trabajo duro, transparencia total y una oportunidad realista de construir algo significativo.</p>
+        
+        <p style="text-align: center;">Si estás buscando el próximo meme coin para especular, este no es tu proyecto.</p>
+        
+        <p style="text-align: center;"><strong>Si estás buscando un negocio sólido con fundamentos reales, producto probado y visión a largo plazo, conversemos.</strong></p>
+
+        <div style="text-align: center; margin: 40px 0; font-size: 1.3rem; line-height: 2;">
+            <p><strong>El futuro de las redes sociales es descentralizado.</strong></p>
+            <p><strong>El valor debe fluir hacia los creadores.</strong></p>
+            <p><strong>ChainFeed está construyendo ese futuro, hoy.</strong></p>
+            <p style="font-size: 1.5rem; color: #6366f1; margin-top: 30px;"><strong>¿Te unes?</strong></p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <h3>Contacto Final:</h3>
+            <p style="font-size: 1.3rem;"><a href="mailto:invest@chainfeed.io" style="color: #6366f1; text-decoration: none;">invest@chainfeed.io</a></p>
+        </div>
+    </section>
+
+    <footer>
+        <p><strong>© 2025 ChainFeed. Todos los derechos reservados.</strong></p>
+        <p><em>Este documento no constituye oferta de valores sin documentación legal apropiada.</em></p>
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid rgba(99, 102, 241, 0.3);">
+        <p><strong>FIN DEL WHITEPAPER</strong></p>
+        <p>Total Páginas: 42 | Palabras: ~16,000</p>
+        <p>Enfoque: Realista, transparente, basado en datos verificables</p>
+        <p>Audiencia: Inversores Angel, VCs, Family Offices, compradores institucionales</p>
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid rgba(99, 102, 241, 0.3);">
+        <p><strong>Preparado por:</strong> ChainFeed Team</p>
+        <p><strong>Fecha:</strong> Noviembre 2025</p>
+        <p><strong>Versión:</strong> 1.0 Final</p>
+        <p><strong>Validez:</strong> Información precisa a la fecha de publicación</p>
+    </footer>
+
+    <a href="#" class="back-to-top" title="Volver arriba">↑</a>
+</div>
+
+<script>
+    // Smooth scroll para los enlaces del menú
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        
+        // Si el href es solo "#", hacer scroll al top
+        if (href === '#') {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            return;
+        }
+        
+        // Para otros enlaces con ID específico
+        const target = document.querySelector(href);
+        if (target) {
+            e.preventDefault();
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+const backToTop = document.querySelector('.back-to-top');
+if (backToTop) {
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            backToTop.style.opacity = '1';
+            backToTop.style.pointerEvents = 'auto';
+        } else {
+            backToTop.style.opacity = '0';
+            backToTop.style.pointerEvents = 'none';
+        }
+    });
+}
+
+// Animación de entrada para las secciones
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, {
+    threshold: 0.1
+});
+
+document.querySelectorAll('section').forEach(section => {
+    section.style.opacity = '0';
+    section.style.transform = 'translateY(20px)';
+    section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(section);
+});
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')  // ✅ CORRECTO
+                .then(registration => {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ Error registrando Service Worker:', error);
+                });
+        });
+    }
+</script>
+
+</body>
+</html>

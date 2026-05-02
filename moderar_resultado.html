@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
+    <title>ChainFeed - Moderación</title>
+    
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/logo512.png">
+<link rel="apple-touch-icon" href="/icons/logo192.png">
+  
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#3b82f6">
+
+      <script src="/js/i18n-auto-translate.js"></script>
+
+ <script src="/js/noscroll.js"></script>
+
+
+    <style>
+    
+        html, body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+body {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .info { color: #2196f3; }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .details {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            text-align: left;
+        }
+        
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .details-row:last-child {
+            border-bottom: none;
+        }
+        
+        .details-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .details-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .blocked-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ff6b6b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .blocked-warning h3 {
+            color: #d32f2f;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .already-used-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .already-used-warning h3 {
+            color: #f57c00;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .already-used-warning p {
+            color: #666;
+            margin: 8px 0;
+        }
+        
+        .already-used-warning .timestamp {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-family: monospace;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        #loading {
+            display: block;
+        }
+        
+        #result {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Loading State -->
+        <div id="loading">
+            <div class="icon info">⏳</div>
+            <h1>Procesando Moderación...</h1>
+            <p>Por favor espera mientras se ejecuta la acción</p>
+            <div class="loader"></div>
+        </div>
+        
+        <!-- Result State -->
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Obtener token de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        if (!token) {
+            showError('Token no encontrado', 'El enlace es inválido o está incompleto.', null);
+        } else {
+            processModeration(token);
+        }
+        
+        async function processModeration(token) {
+            try {
+                // ✅ CRITICAL: Forzar petición sin caché
+                const response = await fetch(`php/moderar_contenido.php?token=${token}&_t=${Date.now()}`, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                const data = await response.json();
+                
+                console.log('Respuesta del servidor:', data);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                
+                if (data.success) {
+                    showSuccess(data);
+                } else {
+                    // Verificar si es un caso de token ya usado
+                    if (data.already_processed || data.used_at || 
+                        data.message.includes('ya fue ejecutada')) {
+                        showAlreadyUsed(data.message, data.used_at || 'Fecha no disponible');
+                    } else {
+                        showError(data.message, data.debug || '', null);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error en processModeration:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                showError('Error de conexión', 'No se pudo comunicar con el servidor.', null);
+            }
+        }
+        
+        function showSuccess(data) {
+            const blocked = data.data.bloqueado;
+            const infracciones = data.data.infracciones_totales;
+            const diasBloqueo = data.data.dias_bloqueo;
+            
+            let blockedHTML = '';
+            if (blocked) {
+                blockedHTML = `
+                    <div class="blocked-warning">
+                        <h3>🚫 Usuario Bloqueado</h3>
+                        <p>El usuario ha sido bloqueado por <strong>${diasBloqueo} días</strong> debido a múltiples infracciones.</p>
+                        <p>Fecha de desbloqueo: <strong>${new Date(data.data.blocked_until).toLocaleString('es-ES')}</strong></p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <div class="icon success">✅</div>
+                <h1>Moderación Exitosa</h1>
+                <p>El contenido ha sido eliminado y la sanción aplicada correctamente</p>
+                
+                <div class="details">
+                    <div class="details-row">
+                        <span class="details-label">Contenido eliminado:</span>
+                        <span class="details-value">✓ Sí</span>
+                    </div>
+                    <div class="details-row">
+                        <span class="details-label">Infracciones totales:</span>
+                        <span class="details-value">${infracciones}</span>
+                    </div>
+                    <div class="details-row">
+                        <span class="details-label">Días de bloqueo:</span>
+                        <span class="details-value">${diasBloqueo > 0 ? diasBloqueo + ' días' : 'Sin bloqueo'}</span>
+                    </div>
+                    <div class="details-row">
+                        <span class="details-label">Estado usuario:</span>
+                        <span class="details-value">${blocked ? '🚫 Bloqueado' : '✅ Activo'}</span>
+                    </div>
+                </div>
+                
+                ${blockedHTML}
+                
+                <a href="https://chainfeed.space" class="btn">Volver a ChainFeed</a>
+            `;
+        }
+        
+        function showAlreadyUsed(message, usedAt) {
+            let fecha = 'Fecha no disponible';
+            
+            if (usedAt && usedAt !== 'Fecha no disponible') {
+                try {
+                    fecha = new Date(usedAt).toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                } catch (e) {
+                    console.error('Error parseando fecha:', e);
+                    fecha = usedAt; // Usar el valor original si hay error
+                }
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <div class="icon warning">⚠️</div>
+                <h1>Acción Ya Ejecutada</h1>
+                <p>Este reporte ya fue procesado anteriormente</p>
+                
+                <div class="already-used-warning">
+                    <h3>📋 Información del Reporte</h3>
+                    <p><strong>Estado:</strong> La moderación de este contenido ya fue completada por otro administrador.</p>
+                    <p><strong>Acción tomada:</strong> El contenido reportado ya fue eliminado y la sanción correspondiente fue aplicada al usuario infractor.</p>
+                    
+                    <div class="timestamp">
+                        <strong>🕐 Procesado el:</strong> ${fecha}
+                    </div>
+                </div>
+                
+                <div class="details">
+                    <div class="details-row">
+                        <span class="details-label">Contenido eliminado:</span>
+                        <span class="details-value">✓ Previamente</span>
+                    </div>
+                    <div class="details-row">
+                        <span class="details-label">Sanción aplicada:</span>
+                        <span class="details-value">✓ Previamente</span>
+                    </div>
+                    <div class="details-row">
+                        <span class="details-label">Estado del token:</span>
+                        <span class="details-value">🔒 Usado</span>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 20px; color: #999; font-size: 14px;">
+                    Cada enlace de moderación solo puede ser usado una vez por seguridad.<br>
+                    Si crees que esto es un error, contacta con el equipo técnico.
+                </p>
+                
+                <a href="https://chainfeed.space" class="btn">Volver a ChainFeed</a>
+            `;
+        }
+        
+        function showError(message, details, errorType) {
+            let iconClass = 'error';
+            let icon = '❌';
+            
+            if (message.includes('expirado')) {
+                iconClass = 'info';
+                icon = '⏰';
+            }
+            
+            document.getElementById('result').innerHTML = `
+                <div class="icon ${iconClass}">${icon}</div>
+                <h1>${message}</h1>
+                <p>${details}</p>
+                
+                <a href="https://chainfeed.space" class="btn">Volver a ChainFeed</a>
+            `;
+        }
+    </script>
+    
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')  // ✅ CORRECTO
+                .then(registration => {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ Error registrando Service Worker:', error);
+                });
+        });
+    }
+</script>
+
+</body>
+</html>

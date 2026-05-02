@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
+    <title>ChainFeed Token - La Red Social del Futuro Web3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/logo512.png">
+<link rel="apple-touch-icon" href="/icons/logo192.png">
+
+    <script src="https://unpkg.com/@proton/web-sdk@4/dist/bundle.js"></script>
+ 
+    <script src="/js/user-access-control.js"></script>
+    <script src="/js/i18n-auto-translate.js"></script>
+
+<style>
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --dark: #0f0f14;
+            --dark-secondary: #1a1a24;
+            --dark-tertiary: #252532;
+            --text: #ffffff;
+            --text-secondary: #a0a0b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navbar exacto MetaMask */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 6px 12px;
+            background: rgba(15, 15, 20, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+.logo {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-icon {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-link:hover {
+            opacity: 0.6;
+        }
+
+        .nav-cta {
+            padding: 12px 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            border: none;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Hero exacto MetaMask - texto enorme */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 48px 80px;
+            position: relative;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--dark-secondary) 100%);
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: clamp(64px, 10vw, 120px);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.04em;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, var(--text), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(24px, 3vw, 36px);
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            line-height: 1.4;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-primary {
+            padding: 20px 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            border: none;
+            border-radius: 100px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hero-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-hero-secondary {
+            padding: 20px 48px;
+            background: transparent;
+            color: var(--text);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 100px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        /* Floating mockup style MetaMask */
+        .floating-visual {
+            position: absolute;
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 400px;
+            perspective: 1000px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .mockup-card {
+            background: var(--dark-secondary);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+            pointer-events: auto;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateY(-5deg); }
+            50% { transform: translateY(-20px) rotateY(5deg); }
+        }
+
+        .mockup-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mockup-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .mockup-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .mockup-value {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .mockup-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Section large estilo MetaMask */
+        .section-large {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 48px;
+            position: relative;
+        }
+
+        .section-large:nth-child(even) {
+            background: var(--dark-secondary);
+        }
+
+        .section-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .section-container.reverse {
+            direction: rtl;
+        }
+
+        .section-text {
+            position: relative;
+            z-index: 10;
+        }
+
+        .section-text h2 {
+            font-size: clamp(48px, 6vw, 72px);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 32px;
+            color: var(--text);
+        }
+
+        .section-text p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .section-visual {
+            position: relative;
+            height: 600px;
+            z-index: 1;
+            min-width: 600px;
+        }
+
+        .visual-item {
+            position: absolute;
+            background: var(--dark-secondary);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .visual-item:hover {
+            transform: scale(1.05) translateY(-10px);
+            z-index: 100 !important;
+            box-shadow: 0 40px 100px rgba(99, 102, 241, 0.3);
+        }
+
+        .visual-1 {
+            top: 0;
+            left: 0;
+            width: 240px;
+            z-index: 3;
+        }
+
+        .visual-2 {
+            top: 240px;
+            right: 0;
+            width: 300px;
+            z-index: 2;
+        }
+
+        .visual-3 {
+            bottom: 0;
+            left: 60px;
+            width: 260px;
+            z-index: 1;
+            height: fit-content;
+        }
+
+        .visual-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .visual-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .visual-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Stats section estilo MetaMask */
+        .stats-section {
+            padding: 120px 48px;
+            background: var(--dark);
+            color: var(--text);
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 60px;
+            text-align: center;
+        }
+
+        .stat-item {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+
+        .stat-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stat-number {
+            font-size: 64px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* CTA Final estilo MetaMask */
+        .final-cta-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 48px;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--dark-secondary) 100%);
+            text-align: center;
+        }
+
+        .final-cta-content {
+            max-width: 900px;
+        }
+
+        .final-cta-content h2 {
+            font-size: clamp(56px, 8vw, 96px);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.04em;
+            margin-bottom: 32px;
+            color: var(--text);
+        }
+
+        .final-cta-content p {
+            font-size: 24px;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            line-height: 1.5;
+        }
+
+        /* Footer estilo MetaMask */
+        footer {
+            padding: 80px 48px 40px;
+            background: var(--dark);
+            color: var(--text);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-grid {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-desc {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: transparent;
+        }
+
+        .footer-column h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Mobile Responsive */
+@media (max-width: 1024px) {
+    .floating-visual {
+        display: none;
+    }
+
+    .section-container {
+        grid-template-columns: 1fr;
+        gap: 60px;
+    }
+
+    .section-visual {
+        height: 700px;
+        min-width: auto;
+        width: 100%;
+        position: relative;
+    }
+
+    .visual-1 {
+        top: 0;
+        transform: translateX(-50%);
+        width: 85%;
+        max-width: 320px;
+        position: absolute;
+    }
+
+    .visual-2 {
+        left: auto;
+        width: 85%;
+        max-width: 320px;
+        position: absolute;
+    }
+
+    .visual-3 {
+        top: 490px;
+        left: 5%;
+        width: 85%;
+        max-width: 320px;
+        position: absolute;
+    }
+
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    nav, .hero, .section-large, .stats-section, .final-cta-section, footer {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .hero h1 {
+        font-size: 48px;
+    }
+
+    .hero-subtitle {
+        font-size: 20px;
+    }
+
+    .section-text h2 {
+        font-size: 40px;
+    }
+
+    .section-visual {
+        height: 650px;
+    }
+
+    .visual-1 {
+        top: 0;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 280px;
+    }
+
+    .visual-2 {
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 280px;
+    }
+
+    .visual-3 {
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 280px;
+    }
+
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+        /* Parallax smooth scroll */
+        .parallax-item {
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+/* ================================================
+   SECCIÓN CONTADOR PREVENTA
+   ================================================ */
+
+.preventa-countdown-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 48px;
+    background: linear-gradient(180deg, var(--dark-secondary) 0%, var(--dark) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.preventa-countdown-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.countdown-container {
+    max-width: 1200px;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+}
+
+/* Header */
+.countdown-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.countdown-title {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--text), var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+}
+
+.countdown-subtitle {
+    font-size: 20px;
+    color: var(--text-secondary);
+}
+
+/* Contador Digital Estilo LED */
+.countdown-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 60px;
+    flex-wrap: nowrap;
+}
+
+.countdown-digit-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.countdown-digit {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    border: 2px solid rgba(99, 102, 241, 0.4);
+    border-radius: 16px;
+    padding: 24px 32px;
+    font-size: 64px;
+    font-weight: 900;
+    font-family: 'Courier New', monospace;
+    color: var(--primary);
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.6),
+                 0 0 40px rgba(99, 102, 241, 0.3);
+    min-width: 140px;
+    text-align: center;
+    box-shadow: inset 0 0 30px rgba(99, 102, 241, 0.1),
+                0 8px 32px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.countdown-digit::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: digit-shine 3s infinite;
+}
+
+@keyframes digit-shine {
+    to { left: 100%; }
+}
+
+.countdown-label {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+}
+
+.countdown-separator {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--primary);
+    align-self: flex-start;
+    margin-top: 24px;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0.3; }
+}
+
+/* Stats Grid */
+.preventa-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, rgba(26, 26, 36, 0.8), rgba(15, 15, 20, 0.8));
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 24px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+    border-color: var(--primary);
+}
+
+.stat-icon {
+    filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 36px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+}
+
+.stat-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Loading shimmer */
+.loading-shimmer {
+    background: linear-gradient(90deg, 
+        rgba(99, 102, 241, 0.3) 0%, 
+        rgba(139, 92, 246, 0.5) 50%, 
+        rgba(99, 102, 241, 0.3) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* User Card */
+.user-card {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.user-not-logged {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.user-message {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.participate-btn {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+}
+
+.participate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+}
+
+.user-logged {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--primary);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info {
+    text-align: center;
+}
+
+.user-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.user-username {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.user-balance {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    width: 100%;
+}
+
+.balance-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.balance-value {
+    font-size: 32px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 100px;
+    transition: width 1s ease;
+    position: relative;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.progress-bar-fill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progress-shine 2s infinite;
+}
+
+@keyframes progress-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-info {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .countdown-digit {
+        font-size: 36px;
+        padding: 6px 10px;
+        min-width: 10px;
+    }
+    
+    .preventa-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 1068px) {
+    .preventa-countdown-section {
+        padding: 60px 24px;
+    }
+    
+    .countdown-display {
+        gap: 6px;
+    }
+    
+    .countdown-separator {
+        font-size: 32px;
+    }
+    
+    .stat-value {
+        font-size: 28px;
+    }
+}
+
+
+/* ================================================
+   SISTEMA DE REFERIDOS - INTEGRADO EN STAT-CARDS
+   ================================================ */
+
+.referral-code-card,
+.referral-input-card {
+    flex-direction: row;
+    align-items: center;
+}
+
+.referral-code-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+#user-referral-code {
+    font-size: 28px;
+    letter-spacing: 3px;
+}
+
+.share-code-btn {
+    width: 44px;
+    height: 44px;
+    background: rgba(16, 185, 129, 0.2);
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.share-code-btn:hover:not(:disabled) {
+    background: rgba(16, 185, 129, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.share-code-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.referral-stats-inline {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.referral-stats-inline strong {
+    color: #10b981;
+    font-weight: 700;
+}
+
+.referral-input-group {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.referral-code-input {
+    flex: 1;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(99, 102, 241, 0.3);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.referral-code-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.referral-code-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.apply-code-btn {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.apply-code-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+.apply-code-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.referral-benefit {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.referral-benefit strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #user-referral-code {
+        font-size: 20px;
+    }
+    
+    .referral-input-group {
+        flex-direction: column;
+    }
+    
+    .apply-code-btn {
+        width: 100%;
+    }
+}
+
+.wallet-selector-wallet {
+    border-radius: 20px !important;
+    }
+/* ================================================
+   SELECTOR DE IDIOMA - VERSIÓN UNIFICADA
+   ================================================ */
+
+#language-selector {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.lang-btn {
+    width: 28px !important;
+    height: 28px !important;
+    background: rgba(37, 37, 50, 0.5);
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    outline: none;
+}
+
+/* Efecto de brillo al hover */
+.lang-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.lang-btn:hover::before {
+    left: 100%;
+}
+
+.lang-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+/* Botón activo */
+.lang-btn.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+    border: 2px solid var(--primary);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px) scale(1.08);
+}
+
+/* Animación de pulso para el botón activo */
+.lang-btn.active::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    transform: translate(-50%, -50%);
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0;
+    }
+}
+
+/* Imagen de la bandera */
+.lang-btn img {
+    display: block;
+    object-fit: cover;
+    padding: 2px;
+    border-radius: 8px;
+    width: 26px;
+    height: 26px;
+}
+
+.lang-btn:hover img {
+    transform: scale(1.1) rotate(2deg);
+}
+
+.lang-btn.active img {
+    transform: scale(1.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #language-selector {
+        gap: 8px;
+    }
+    
+    .lang-btn {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .lang-btn img {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <!-- Nav -->
+<nav>
+    <div class="nav-container">
+        <div class="logo" data-translated="true">
+    <img src="/icons/logo96.png" alt="ChainFeed Logo" class="logo-icon">
+    ChainFeed
+</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Características</a>
+            <a href="#" class="nav-link">Tokenomics</a>
+            <a href="#" class="nav-link">Whitepaper</a>
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <button class="nav-cta">Comprar CFT</button>
+        </div>
+                    <div id="language-selector"></div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">🚀 Preventa en Vivo - Fase 1</div>
+        <h1>Gana tokens desde<br>tu primer like</h1>
+        <p class="hero-subtitle">La red social que recompensa cada interacción.</p>
+        <div class="hero-cta-group">
+            <button class="btn-hero-primary">Comprar Tokens Ahora</button>
+            <button class="btn-hero-secondary">Ver Whitepaper</button>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Contador y Stats Preventa -->
+<section class="preventa-countdown-section">
+    <div class="countdown-container">
+        <!-- Título -->
+        <div class="countdown-header">
+            <h2 class="countdown-title">Lanzamiento Oficial</h2>
+            <p class="countdown-subtitle">La preventa termina en:</p>
+        </div>
+        
+        <!-- Contador Digital -->
+        <div class="countdown-display">
+            <div class="countdown-digit-group">
+                <div class="countdown-digit" id="countdown-days">00</div>
+                <div class="countdown-label">Días</div>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-digit-group">
+                <div class="countdown-digit" id="countdown-hours">00</div>
+                <div class="countdown-label">Horas</div>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-digit-group">
+                <div class="countdown-digit" id="countdown-minutes">00</div>
+                <div class="countdown-label">Minutos</div>
+            </div>
+            <div class="countdown-separator">:</div>
+            <div class="countdown-digit-group">
+                <div class="countdown-digit" id="countdown-seconds">00</div>
+                <div class="countdown-label">Segundos</div>
+            </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="preventa-stats-grid">
+            <!-- Tokens Disponibles -->
+<!-- Tokens Disponibles -->
+<div class="stat-card tokens-card">
+    <div class="stat-icon">
+        <img src="/icons/logo96.png" alt="ChainFeed Token" style="width: 68px; height: 68px; filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));">
+    </div>
+    <div class="stat-content">
+        <div class="stat-label">Tokens Disponibles</div>
+        <div class="stat-value" id="tokens-disponibles">
+            <span class="loading-shimmer">Cargando...</span>
+        </div>
+        <div class="stat-meta">
+            <span id="tokens-porcentaje">--%</span> otorgado
+        </div>
+    </div>
+</div>
+            
+            <!-- Panel de Usuario -->
+            <div class="stat-card user-card" id="user-card">
+                <!-- Estado: No logueado -->
+                <div class="user-not-logged" id="user-not-logged">
+                    <div class="stat-icon">👤</div>
+                    <div class="user-message">Conecta tu wallet para obterelos</div>
+                    <button class="participate-btn" onclick="openPreventaModal()">
+                        🚀 Reclama tus 50 CFT!
+                    </button>
+                </div>
+                
+                <!-- Estado: Logueado -->
+                <div class="user-logged" id="user-logged" style="display: none;">
+                    <div class="user-avatar" id="user-avatar-section">
+                        <img src="" alt="Avatar" id="user-avatar-img" />
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name" id="user-name">-</div>
+                        <div class="user-username" id="user-username">@-</div>
+                    </div>
+                    <div class="user-balance">
+                        <div class="balance-label">Tus tokens CFT</div>
+                        <div class="balance-value" id="user-balance">0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Barra de progreso -->
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%"></div>
+        </div>
+        <div class="progress-info">
+            <span id="progress-text">0 CFT otorgados de 10,000,000 CFT</span>
+        </div>
+    </div>
+</section>
+
+<!-- Section 1 -->
+<section class="section-large">
+    <div class="section-container">
+        <div class="section-text">
+            <h2>Recompensas automáticas por cada acción</h2>
+            <p>Publica contenido, recibe likes, comenta y gana tokens CFT instantáneamente. Sin umbrales de seguidores, sin aprobaciones. Tu actividad se monetiza desde el día 1.</p>
+            <button class="btn-hero-primary">Descubrir Más</button>
+        </div>
+        <div class="section-visual">
+            <div class="visual-item visual-1 parallax-item" data-speed="1">
+                <div class="visual-icon">💰</div>
+                <div class="visual-title">Gana por Publicar</div>
+                <div class="visual-desc">3-7 CFT por post</div>
+            </div>
+            <div class="visual-item visual-2 parallax-item" data-speed="2">
+                <div class="visual-icon">❤️</div>
+                <div class="visual-title">Gana por Likes</div>
+                <div class="visual-desc">1 CFT por cada like recibido</div>
+            </div>
+            <div class="visual-item visual-3 parallax-item" data-speed="1.5">
+                <div class="visual-icon">💬</div>
+                <div class="visual-title">Gana por Comentarios</div>
+                <div class="visual-desc">1 CFT por interacción</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2 -->
+<section class="section-large">
+    <div class="section-container reverse">
+        <div class="section-text">
+            <h2>Marketplace y eventos gamificados</h2>
+            <p>Vende tu contenido directamente sin intermediarios. Crea encuestas recompensadas, campañas creativas y desafíos de audio. Los usuarios ganan, tú decides cuánto.</p>
+            <button class="btn-hero-primary">Explorar Marketplace</button>
+        </div>
+        <div class="section-visual">
+            <div class="visual-item visual-1 parallax-item" data-speed="1.2">
+                <div class="visual-icon">🏪</div>
+                <div class="visual-title">Vende tu Contenido</div>
+                <div class="visual-desc">Comisión solo 10%</div>
+            </div>
+            <div class="visual-item visual-2 parallax-item" data-speed="1.8">
+                <div class="visual-icon">🎯</div>
+                <div class="visual-title">Sistema Chain</div>
+                <div class="visual-desc">Polls, campaigns y audio</div>
+            </div>
+            <div class="visual-item visual-3 parallax-item" data-speed="1.4">
+                <div class="visual-icon">📈</div>
+                <div class="visual-title">Promociona Posts</div>
+                <div class="visual-desc">Desde 50 CFT/día</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-item">
+            <div class="stat-number">100M+</div>
+            <div class="stat-label">Tokens a distribuir</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">10M</div>
+            <div class="stat-label">Tokens para preventa</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">20%</div>
+            <div class="stat-label">Bonus Preventa</div>
+        </div>
+            <div class="stat-item">
+            <div class="stat-number">0G</div>
+            <div class="stat-label">Gas en transacciones</div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta-section">
+    <div class="final-cta-content">
+        <h2>Únete a la revolución</h2>
+        <p>No pierdas esta oportunidad única de ser parte del futuro de las redes sociales descentralizadas.</p>
+        <button class="btn-hero-primary">Participar en la Preventa</button>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-grid">
+        <div>
+            <div class="footer-brand">⚡ ChainFeed</div>
+            <p class="footer-desc">La primera red social completamente descentralizada y tokenizada.</p>
+            <div class="footer-socials">
+                <a href="#" class="social-icon">𝕏</a>
+                <a href="#" class="social-icon">in</a>
+                <a href="#" class="social-icon">▶</a>
+                <a href="#" class="social-icon">●</a>
+            </div>
+        </div>
+        <div class="footer-column">
+            <h4>Producto</h4>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Características</a>
+                <a href="#" class="footer-link">Tokenomics</a>
+                <a href="#" class="footer-link">Roadmap</a>
+                <a href="#" class="footer-link">Whitepaper</a>
+            </div>
+        </div>
+        <div class="footer-column">
+            <h4>Recursos</h4>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Documentación</a>
+                <a href="#" class="footer-link">Ayuda</a>
+                <a href="#" class="footer-link">Blog</a>
+                <a href="#" class="footer-link">FAQ</a>
+            </div>
+        </div>
+        <div class="footer-column">
+            <h4>Legal</h4>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Términos</a>
+                <a href="#" class="footer-link">Privacidad</a>
+                <a href="#" class="footer-link">Disclaimer</a>
+                <a href="#" class="footer-link">KYC/AML</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2025 ChainFeed. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+    <script>
+// Parallax mejorado - más movimiento, menos superposición
+window.addEventListener('scroll', () => {
+    document.querySelectorAll('.parallax-item').forEach(item => {
+        const rect = item.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isVisible) {
+            const speed = parseFloat(item.dataset.speed) || 1;
+            const relativeScroll = (window.innerHeight - rect.top) / window.innerHeight;
+            
+            // Aumenté el multiplicador de 20 a 60 para más movimiento
+            // Centrado en 0 para que se mueva hacia arriba y abajo
+            const yPos = (relativeScroll - 0.5) * speed * 60;
+            
+            item.style.transform = `translateY(${yPos}px)`;
+        }
+    });
+});
+
+        // Intersection Observer for stats
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-item').forEach(stat => {
+            observer.observe(stat);
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+    
+    <script>
+/**
+ * Sistema de Contador y Stats de Preventa
+ */
+
+let preventaState = {
+    targetDate: new Date('2025-12-01T00:00:00').getTime(),
+    stats: null,
+    countdownInterval: null
+};
+
+/**
+ * Inicializa el sistema de preventa
+ */
+async function initPreventaCountdown() {
+    console.log('🚀 Inicializando sistema de preventa');
+    
+    // Cargar stats iniciales
+    await loadPreventaStats();
+    
+    // Iniciar contador
+    startCountdown();
+    
+    // Actualizar stats cada 30 segundos
+    setInterval(loadPreventaStats, 30000);
+}
+
+/**
+ * Carga las estadísticas desde el servidor
+ */
+async function loadPreventaStats() {
+    try {
+        console.log('📊 Cargando stats de preventa...');
+        
+        const response = await fetch('https://chainfeed.space/php/obtener_stats_preventa.php', {
+            method: 'GET',
+            credentials: 'include' // Para enviar cookies de sesión
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+const data = await response.json();
+
+if (!data.success) {
+    throw new Error(data.error || 'Error cargando stats');
+}
+
+preventaState.stats = data;
+
+// ✅ AGREGAR ESTO:
+if (data.countdown_target) {
+    preventaState.targetDate = new Date(data.countdown_target).getTime();
+    console.log('🎯 Fecha countdown actualizada:', new Date(preventaState.targetDate));
+}
+
+updatePreventaUI(data);
+
+console.log('✅ Stats cargadas:', data);
+        
+    } catch (error) {
+        console.error('❌ Error cargando stats:', error);
+        // Mostrar valores por defecto en caso de error
+        updatePreventaUI({
+            preventa: {
+                tokens_disponibles: 10000000,
+                porcentaje_vendido: 0,
+                total_vendido: 0
+            },
+            usuario: null,
+            is_logged_in: false
+        });
+    }
+}
+
+/**
+ * Actualiza la interfaz con los datos
+ */
+function updatePreventaUI(data) {
+    const preventa = data.preventa;
+    const usuario = data.usuario;
+    const isLoggedIn = data.is_logged_in;
+    
+    // Actualizar tokens disponibles
+    const tokensDisponibles = document.getElementById('tokens-disponibles');
+    if (tokensDisponibles) {
+        tokensDisponibles.innerHTML = formatNumber(preventa.tokens_disponibles) + ' CFT';
+    }
+    
+const porcentaje = document.getElementById('tokens-porcentaje');
+if (porcentaje) {
+    const tokensOtorgados = parseFloat(preventa.total_tokens) - parseFloat(preventa.tokens_disponibles) + 35988;
+    const porcentajeReal = (tokensOtorgados / parseFloat(preventa.total_tokens)) * 100;
+    porcentaje.textContent = porcentajeReal.toFixed(2) + '%';
+}
+    
+    // Actualizar barra de progreso
+    const progressBar = document.getElementById('progress-bar-fill');
+    if (progressBar) {
+        progressBar.style.width = preventa.porcentaje_vendido + '%';
+    }
+    
+const progressText = document.getElementById('progress-text');
+if (progressText) {
+    // Restar tokens disponibles del total para obtener lo distribuido + compensación
+    const tokensOtorgados = parseFloat(preventa.total_tokens) - parseFloat(preventa.tokens_disponibles) + 35988;
+    progressText.textContent = `${formatNumber(tokensOtorgados)} CFT otorgados de ${formatNumber(preventa.total_tokens)} CFT`;
+}
+    
+    // Actualizar panel de usuario
+    const userNotLogged = document.getElementById('user-not-logged');
+    const userLogged = document.getElementById('user-logged');
+    
+    if (isLoggedIn && usuario) {
+        // Mostrar datos de usuario
+        if (userNotLogged) userNotLogged.style.display = 'none';
+        if (userLogged) userLogged.style.display = 'flex';
+        
+        // Avatar
+        const avatarImg = document.getElementById('user-avatar-img');
+        if (avatarImg && usuario.avatar_url) {
+            avatarImg.src = usuario.avatar_url;
+            avatarImg.alt = usuario.display_name;
+        }
+        
+        // Nombre
+        const userName = document.getElementById('user-name');
+        if (userName) {
+            userName.textContent = usuario.display_name;
+        }
+        
+        // Username
+        const userUsername = document.getElementById('user-username');
+        if (userUsername) {
+            userUsername.textContent = '@' + usuario.username;
+        }
+        
+        // Balance
+        const userBalance = document.getElementById('user-balance');
+        if (userBalance) {
+            userBalance.textContent = formatNumber(usuario.token_balance) + ' CFT';
+        }
+        
+    } else {
+        // Mostrar botón de participar
+        if (userLogged) userLogged.style.display = 'none';
+        if (userNotLogged) userNotLogged.style.display = 'flex';
+    }
+
+        if (isLoggedIn && usuario) {
+        window.dispatchEvent(new CustomEvent('preventaStatsLoaded', {
+            detail: { usuario: usuario }
+        }));
+        console.log('📢 Evento preventaStatsLoaded disparado');
+    }
+}
+
+/**
+ * Inicia el contador regresivo
+ */
+function startCountdown() {
+    // Limpiar intervalo anterior si existe
+    if (preventaState.countdownInterval) {
+        clearInterval(preventaState.countdownInterval);
+    }
+    
+    // Actualizar inmediatamente
+    updateCountdown();
+    
+    // Actualizar cada segundo
+    preventaState.countdownInterval = setInterval(updateCountdown, 1000);
+}
+
+/**
+ * Actualiza el contador
+ */
+function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = preventaState.targetDate - now;
+    
+    if (distance < 0) {
+        // Countdown terminado
+        clearInterval(preventaState.countdownInterval);
+        document.getElementById('countdown-days').textContent = '00';
+        document.getElementById('countdown-hours').textContent = '00';
+        document.getElementById('countdown-minutes').textContent = '00';
+        document.getElementById('countdown-seconds').textContent = '00';
+        return;
+    }
+    
+    // Calcular tiempo restante
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+    // Actualizar display
+    document.getElementById('countdown-days').textContent = padZero(days);
+    document.getElementById('countdown-hours').textContent = padZero(hours);
+    document.getElementById('countdown-minutes').textContent = padZero(minutes);
+    document.getElementById('countdown-seconds').textContent = padZero(seconds);
+}
+
+/**
+ * Agrega cero a la izquierda si es necesario
+ */
+function padZero(num) {
+    return num.toString().padStart(2, '0');
+}
+
+/**
+ * Formatea números con comas
+ */
+function formatNumber(num) {
+    return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
+
+/**
+ * Función para refrescar stats después de una compra exitosa
+ */
+window.refreshPreventaStats = async function() {
+    console.log('🔄 Refrescando stats después de compra...');
+    await loadPreventaStats();
+};
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPreventaCountdown);
+} else {
+    initPreventaCountdown();
+}
+
+console.log('✨ Sistema de contador de preventa cargado');
+</script>
+
+<script src="/js/proton_login.js"></script>
+  <script src="/js/preventa_modal.js"></script>
+  
+  <script src="/js/referidos_front.js"></script>
+  
+    <script src="/js/idiomas.js"></script>
+<script src="/js/ocultar_botones_index.js"></script>
+
+<script src="/js/reedirigirbotones_index.js"></script>
+
+</body>
+</html>

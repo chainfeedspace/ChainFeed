@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <script>
+    (function() {
+        var theme = localStorage.getItem('chainfeed_theme') || 'dark';
+        document.documentElement.className = theme + '-theme';
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        if (theme === 'light') {
+            var s = document.createElement('style');
+            s.id = 'preload-theme';
+            s.textContent = ':root{--dark:#f0f0eb;--dark-secondary:#e5e5db;--dark-tertiary:#dadacd;--text-primary:#875ba9;--primary:#4f46e5}body,html{background:#f0f0eb!important}';
+            document.head.appendChild(s);
+        }
+    })();
+    </script>
+    
+    <title>Flashes - ChainFeed</title>
+    
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+    <link rel="manifest" href="/manifest.json">
+<!-- Theme color para modo oscuro (default) -->
+<meta name="theme-color" content="#0F0F14">
+
+<!-- Theme color para modo claro -->
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+
+<!-- Theme color para modo oscuro (explícito) -->
+<meta name="theme-color" content="#0F0F14" media="(prefers-color-scheme: dark)">
+    
+    <script src="/js/i18n-auto-translate.js"></script>
+    
+    <style>
+    
+    /* Prevenir flash de tema */
+body {
+    transition: opacity 0.15s ease-in;
+}
+
+/* Mientras carga el tema, ocultar brevemente */
+body:not(.light-theme):not(.dark-theme) {
+    opacity: 0;
+}
+
+body.light-theme,
+body.dark-theme {
+    opacity: 1;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --dark: #0f0f14;
+            --dark-secondary: #1a1a24;
+            --dark-tertiary: #252532;
+            --text: #ffffff;
+            --text-secondary: #a0a0b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Fondo animado */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #c471f5 75%, #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            opacity: 0.05;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Header con navegación */
+        .flashes-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+        }
+
+        .header-back-btn {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .header-back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .header-user-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .header-user-info:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            overflow: hidden;
+        }
+
+        .header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header-user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .header-username {
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .verified-badge {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .header-flash-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Contenedor principal */
+        .flashes-container {
+            margin-top: 60px;
+            padding: 1.5rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 2rem;
+        }
+
+        /* Grid de flashes */
+        .flashes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .flashes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        /* Card de Flash */
+        .flash-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--dark-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            aspect-ratio: 9/16;
+        }
+
+        .flash-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .flash-card.viewed {
+            opacity: 0.7;
+        }
+
+        .flash-card.anclado {
+            border: 2px solid #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        /* Contenido del flash */
+        .flash-media {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .flash-text-content {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        /* Overlay con información */
+        .flash-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .flash-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: white;
+        }
+
+        .flash-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .flash-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Badges */
+        .flash-badges {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            right: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .flash-badge {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .badge-anclado {
+            background: rgba(251, 191, 36, 0.9);
+            color: #000;
+        }
+
+        .badge-viewed {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .badge-tokens {
+            background: rgba(251, 191, 36, 0.9);
+            color: #000;
+        }
+
+        /* Loading state */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            gap: 1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .empty-description {
+            color: var(--text-secondary);
+            max-width: 400px;
+        }
+
+        /* Error state */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            gap: 1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--error);
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Notificaciones */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 2rem;
+            background: rgba(26, 26, 36, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            color: white;
+            animation: slideInRight 0.3s ease;
+            z-index: 10000;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flashes-header {
+                padding: 0 1rem;
+            }
+
+            .header-user-details {
+                max-width: 200px;
+            }
+
+            .header-username {
+                font-size: 0.9rem;
+            }
+
+            .header-flash-count {
+                font-size: 0.75rem;
+            }
+
+            .flashes-container {
+                padding: 1rem;
+            }
+
+            .flash-text-content {
+                font-size: 1rem;
+                padding: 1.5rem;
+            }
+        }
+        
+        /* ============================================
+   PANEL INFERIOR DESLIZANTE
+   ============================================ */
+
+.cfv-bottom-panel {
+    position: fixed;
+    bottom: -30vh; /* ✅ CAMBIADO: altura inicial */
+    left: 0;
+    right: 0;
+    height: 30vh; /* ✅ CAMBIADO: altura inicial */
+    background: rgb(15 15 20 / 88%);
+    backdrop-filter: blur(20px);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    z-index: 101;
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1), height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.cfv-bottom-panel.visible {
+    bottom: 0;
+}
+
+/* ✅ NUEVO: Estado expandido */
+.cfv-bottom-panel.expanded {
+    height: 70vh;
+    bottom: 0;
+}
+
+.panel-handle {
+width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    margin: 0.5rem auto 1rem auto;
+}
+
+/* Estadísticas públicas */
+.panel-stats {
+display: flex;
+    justify-content: space-around;
+    padding: 0.5rem;
+    background: rgb(0 0 0 / 44%);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #dadaf7;
+}
+
+.stat-item.stat-clickable {
+    cursor: pointer;
+}
+
+.stat-item.stat-clickable:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: scale(1.05);
+}
+
+.stat-item span:last-child {
+    color: white;
+}
+
+/* Lista de viewers (solo dueño) */
+.panel-viewers-list {
+    display: none;
+    padding: 1rem;
+}
+
+.viewers-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.viewers-back-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.viewers-back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.viewers-header h3 {
+    flex: 1;
+    margin: 0;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.viewers-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.viewer-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.viewer-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.viewer-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.viewer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.viewer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.viewer-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.viewer-name .verified {
+    color: #6366f1;
+    font-size: 0.9rem;
+}
+
+.viewer-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+.viewer-reaction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(251, 191, 36, 0.2);
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.viewer-reaction-emoji {
+    font-size: 1.2rem;
+}
+
+.viewer-reaction-amount {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fbbf24;
+}
+
+.viewer-no-reaction {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.viewers-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Lista de reacciones (solo creador) */
+.panel-reactions-list {
+    padding: 1.5rem;
+    display: none;
+}
+
+.panel-reactions-list.visible {
+    display: block;
+}
+
+.reactions-total {
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.2));
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.reactions-total-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fbbf24;
+    display: block;
+}
+
+.reactions-total-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.reactions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.reaction-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reaction-card-emoji {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.reaction-card-count {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    display: block;
+}
+
+.reaction-card-tokens {
+    font-size: 0.85rem;
+    color: #fbbf24;
+    margin-top: 0.25rem;
+}
+
+.reactions-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+}
+
+/* Botones de reacción (visitantes) */
+.panel-user-reactions {
+    display: none;
+}
+
+.panel-user-reactions.visible {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.panel-reaction-btn {
+background: rgb(99 102 241 / 0%);
+    border: 1px solid rgb(146 148 229 / 22%);
+    border-radius: 40px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s 
+ease;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.panel-reaction-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-2px);
+}
+
+.panel-reaction-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.panel-reaction-btn.reacted {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.3));
+    border-color: #6366f1;
+}
+
+.panel-reaction-emoji {
+    font-size: 2rem;
+}
+
+.panel-reaction-cost {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fbbf24;
+}
+
+/* Acciones de dueño */
+.panel-owner-actions {
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+    display: none;
+}
+
+.panel-owner-actions.visible {
+    display: flex;
+}
+
+.panel-action-btn {
+padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s 
+ease;
+}
+
+.panel-action-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.panel-action-btn.primary {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-color: #fbbf24;
+    color: #000;
+}
+
+.panel-action-btn.primary:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.panel-action-btn.danger {
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+}
+
+.panel-action-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+}
+
+/* Responsive para panel */
+@media (max-width: 768px) {
+    .cfv-bottom-panel {
+        max-height: 80vh;
+    }
+
+    .reactions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.notification {
+    z-index: 9999999; /* O cualquier número mayor a 999999 */
+}
+
+/* O si usas otro nombre de clase: */
+.toast-notification,
+.alert-notification,
+.snackbar {
+    z-index: 9999999;
+}
+
+.flash-create-card {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    aspect-ratio: 9/16;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6), 0 0 60px rgba(168, 85, 247, 0.4); }
+}
+
+.flash-create-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+}
+
+.flash-create-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.flash-create-card:hover .flash-create-icon {
+    transform: rotate(90deg) scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.flash-create-text {
+    text-align: center;
+}
+
+.flash-create-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.flash-create-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+/* ============================================
+   MODAL CREATOR
+   ============================================ */
+.flash-creator-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.flash-creator-modal.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.flash-creator-content {
+    background: var(--dark-secondary);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.flash-creator-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    background: var(--dark-secondary);
+    z-index: 10;
+}
+
+.flash-creator-header h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.flash-creator-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.flash-creator-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+/* Tabs */
+.flash-type-tabs {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.flash-type-tab {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.flash-type-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.flash-type-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-color: transparent;
+    color: white;
+}
+
+/* Content Sections */
+.flash-content-section {
+    display: none;
+    padding: 1.5rem;
+    min-height: 300px;
+}
+
+.flash-content-section.active {
+    display: block;
+}
+
+/* Upload Area */
+.flash-upload-area {
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.flash-upload-area:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.flash-upload-area p {
+    margin: 1rem 0 0.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.flash-upload-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Preview Container */
+.flash-preview-container {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+}
+
+.flash-preview-container.hidden {
+    display: none;
+}
+
+.flash-preview-container img,
+.flash-preview-container video {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 400px;
+    object-fit: contain;
+}
+
+.flash-remove-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.flash-remove-btn:hover {
+    background: #ef4444;
+    transform: scale(1.1);
+}
+
+/* Compression Progress */
+.flash-compression-progress {
+    text-align: center;
+    padding: 2rem;
+}
+
+.flash-compression-progress.hidden {
+    display: none;
+}
+
+.compression-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.compression-text {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+.compression-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.compression-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.compression-status {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Audio Control */
+.flash-audio-control {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.flash-audio-control.hidden {
+    display: none;
+}
+
+.flash-audio-control label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.flash-audio-control input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* Text Input */
+.flash-text-input-wrapper {
+    position: relative;
+}
+
+.flash-text-input-wrapper textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s ease;
+}
+
+.flash-text-input-wrapper textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.flash-char-counter {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+}
+
+/* Create Button */
+.flash-create-btn {
+    width: calc(100% - 3rem);
+    margin: 0 1.5rem 1.5rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.flash-create-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+}
+
+.flash-create-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flash-creator-content {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .flash-type-tabs {
+        gap: 0.3rem;
+    }
+
+    .flash-type-tab {
+        font-size: 0.85rem;
+        padding: 0.7rem 0.8rem;
+    }
+
+    .flash-upload-area {
+        padding: 2rem 1rem;
+    }
+}
+
+.flash-card {
+    aspect-ratio: 9 / 16; /* ✅ Ya lo tienes, asegúrate que esté */
+}
+
+.flash-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.flash-media,
+.flash-card img,
+.flash-card video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ✅ Cover para llenar sin espacios */
+    object-position: center;
+}
+
+.flash-preview-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.flash-preview-container img,
+.flash-preview-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.cfv-media-container {
+   max-height: 100%;
+}
+
+/* Loading state del header */
+.header-loading {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.header-loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(99, 102, 241, 0.2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.cfv-bottom-panel.expanded-visitor {
+    height: 45vh;
+}
+
+/* Spinner para reacciones */
+.reaction-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: reaction-spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes reaction-spin {
+    to { transform: rotate(360deg); }
+}
+
+.panel-reaction-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Header con navegación -->
+<header class="flashes-header">
+    <button class="header-back-btn" id="backBtn" onclick="goBack()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+    </button>
+    
+    <!-- Loading state del header -->
+    <div class="header-loading" id="headerLoading">
+        <div class="header-loading-spinner"></div>
+        <span>Cargando...</span>
+    </div>
+    
+    <!-- User info (oculto inicialmente) -->
+    <div class="header-user-info" id="headerUserInfo" onclick="goToProfile()" style="display: none;">
+        <div class="header-avatar" id="headerAvatar">U</div>
+        <div class="header-user-details">
+            <div class="header-username" id="headerUsername">
+                <span>Usuario</span>
+                <span class="verified-badge" id="verifiedBadge" style="display: none;">✓</span>
+            </div>
+            <div class="header-flash-count" id="headerFlashCount">Flashes</div>
+        </div>
+    </div>
+</header>
+
+    <!-- MODAL CREATOR DE FLASHES -->
+<div class="flash-creator-modal" id="flashCreatorModal">
+    <div class="flash-creator-content">
+        <!-- Header -->
+        <div class="flash-creator-header">
+            <h2>✨ Crear Flash</h2>
+            <button class="flash-creator-close" onclick="window.flashCreator?.close()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flash-type-tabs">
+            <button class="flash-type-tab active" data-type="imagen" onclick="window.flashCreator?.switchType('imagen')">
+                📸 Imagen
+            </button>
+            <button class="flash-type-tab" data-type="video" onclick="window.flashCreator?.switchType('video')">
+                🎥 Video
+            </button>
+            <button class="flash-type-tab" data-type="texto" onclick="window.flashCreator?.switchType('texto')">
+                ✍️ Texto
+            </button>
+        </div>
+
+        <!-- Sección Imagen -->
+        <div class="flash-content-section active" id="flashImageSection">
+            <div class="flash-upload-area" onclick="document.getElementById('flashImageInput').click()">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.5;">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+                <p>Selecciona una imagen</p>
+                <span class="flash-upload-hint">JPG, PNG, GIF, WEBP (máx 5MB)</span>
+            </div>
+            <input type="file" id="flashImageInput" accept="image/*" style="display: none;" 
+                   onchange="window.flashCreator?.handleFileSelect(event, 'imagen')">
+            
+                   <!-- Progreso de Compresión de Imagen -->
+<div class="flash-compression-progress hidden" id="flashImageCompression">
+    <div class="compression-icon">🖼️</div>
+    <div class="compression-text">Procesando imagen...</div>
+    <div class="compression-bar">
+        <div class="compression-fill" id="flashImageCompressionFill"></div>
+    </div>
+    <div class="compression-status" id="flashImageCompressionStatus">0%</div>
+</div>
+
+            <!-- Preview Imagen -->
+            <div class="flash-preview-container hidden" id="flashImagePreview">
+                <button class="flash-remove-btn" onclick="window.flashCreator?.removeFile('imagen')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+                <img id="flashImagePreviewImg" alt="Preview">
+            </div>
+        </div>
+
+        <!-- Sección Video -->
+        <div class="flash-content-section" id="flashVideoSection">
+            <div class="flash-upload-area" onclick="document.getElementById('flashVideoInput').click()">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" style="opacity: 0.5;">
+                    <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                </svg>
+                <p>Selecciona un video</p>
+                <span class="flash-upload-hint">MP4, WEBM, MOV (máx 60s, 50MB)</span>
+            </div>
+            <input type="file" id="flashVideoInput" accept="video/*" style="display: none;" 
+                   onchange="window.flashCreator?.handleFileSelect(event, 'video')">
+            
+            <!-- Progreso de Compresión -->
+            <div class="flash-compression-progress hidden" id="flashVideoCompression">
+                <div class="compression-icon">🎬</div>
+                <div class="compression-text">Comprimiendo video...</div>
+                <div class="compression-bar">
+                    <div class="compression-fill" id="flashCompressionFill"></div>
+                </div>
+                <div class="compression-status" id="flashCompressionStatus">0%</div>
+            </div>
+
+            <!-- Preview Video -->
+            <div class="flash-preview-container hidden" id="flashVideoPreview">
+                <button class="flash-remove-btn" onclick="window.flashCreator?.removeFile('video')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+                <video id="flashVideoPreviewVid" controls muted></video>
+            </div>
+
+            <!-- Control de Audio -->
+            <div class="flash-audio-control hidden" id="flashAudioControl">
+                <label>
+                    <input type="checkbox" id="flashHasAudio" checked>
+                    <span>Incluir audio</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Sección Texto -->
+        <div class="flash-content-section" id="flashTextoSection">
+            <div class="flash-text-input-wrapper">
+                <textarea id="flashTextInput" placeholder="Escribe tu mensaje..." maxlength="200" 
+                          oninput="window.flashCreator?.updateCharCount()"></textarea>
+                <div class="flash-char-counter">
+                    <span id="flashCharCount">0</span>/200
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón Crear -->
+        <button class="flash-create-btn" id="flashCreateBtn" onclick="window.flashCreator?.create()">
+            ⚡ Crear Flash (-1 CFT)
+        </button>
+    </div>
+</div>
+
+    <!-- Contenedor principal -->
+    <main class="flashes-container" id="mainContainer">
+        <!-- Loading state inicial -->
+        <div class="loading-container" id="loadingState">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Cargando flashes...</div>
+        </div>
+
+        <!-- Grid de flashes (se llenará dinámicamente) -->
+        <div class="flashes-grid" id="flashesGrid" style="display: none;"></div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">✨</div>
+            <h2 class="empty-title">Sin Flashes</h2>
+            <p class="empty-description">Este usuario aún no ha creado ningún Flash</p>
+        </div>
+
+<!-- Error state -->
+        <div class="error-container" id="errorState" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <h2 class="error-title">Error al cargar</h2>
+            <p class="error-message" id="errorMessage">No se pudieron cargar los flashes</p>
+            
+            <!-- Debug info -->
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 12px; max-width: 500px; text-align: left; font-family: monospace; font-size: 0.85rem;">
+                <div style="margin-bottom: 0.5rem;"><strong>🌐 URL actual:</strong></div>
+                <div style="word-break: break-all; color: var(--text-secondary);" id="debugUrl"></div>
+                
+                <div style="margin-top: 1rem; margin-bottom: 0.5rem;"><strong>📋 Parámetros:</strong></div>
+                <div style="color: var(--text-secondary);" id="debugParams"></div>
+                
+                <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 3px solid var(--primary);">
+                    <strong>💡 Ejemplo de URL correcta:</strong><br>
+                    <code style="color: var(--primary);">?user_id=123</code> o <code style="color: var(--primary);">?user=aguuuu</code>
+                </div>
+            </div>
+            
+            <button class="retry-btn" onclick="loadUserFlashes()">Reintentar</button>
+        </div>
+    </main>
+
+    <script>
+
+        // Variables globales
+        let currentUserId = null;
+        let userFlashes = [];
+        let currentUser = null;
+
+        let isOwner = false;
+
+        // Obtener parámetro de URL
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Obtener usuario actual
+        function getCurrentUser() {
+            try {
+                const savedUser = localStorage.getItem('chainfeed_user');
+                if (savedUser) {
+                    const userData = JSON.parse(savedUser);
+                    return userData.username;
+                }
+                return null;
+            } catch (error) {
+                console.error('Error obteniendo usuario actual:', error);
+                return null;
+            }
+        }
+
+        // Generar iniciales
+        function generateInitials(username) {
+            if (!username) return 'U';
+            return username.substring(0, 2).toUpperCase();
+        }
+
+        // Formatear tiempo
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const postDate = new Date(date);
+            const diffMs = now - postDate;
+            
+            if (diffMs < 0) return 'Ahora';
+            
+            const diffSeconds = Math.floor(diffMs / 1000);
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffSeconds < 60) return `${diffSeconds}seg`;
+            if (diffMinutes < 60) return `${diffMinutes}min`;
+            if (diffHours < 24) return `${diffHours}h`;
+            return `${diffDays}d`;
+        }
+
+        // Formatear tokens
+        function formatTokens(amount) {
+            return amount >= 1 ? amount.toFixed(1) : amount.toFixed(2);
+        }
+
+async function loadUserFlashes() {
+    try {
+        showLoading();
+
+        console.log('🌐 URL completa:', window.location.href);
+        console.log('🔍 Search params:', window.location.search);
+
+        let userId = getUrlParameter('user_id');
+        let username = getUrlParameter('user') || getUrlParameter('username');
+
+        console.log('📋 Parámetros detectados:', { userId, username });
+
+        const loggedUser = getCurrentUser();
+
+        // Si no hay parámetros, usar el usuario logueado actual
+        if (!userId && !username) {
+            if (loggedUser) {
+                username = loggedUser;
+                isOwner = true;
+                console.log('✅ Usando usuario logueado:', loggedUser);
+            }
+        } else {
+            // Verificar si es el mismo usuario
+            if (username && loggedUser && username === loggedUser) {
+                isOwner = true;
+            } else if (userId && loggedUser && userId === loggedUser) {
+                isOwner = true;
+            } else {
+                isOwner = false;
+            }
+        }
+        
+        if (!userId && username) {
+            currentUserId = username;
+        } else if (userId) {
+            currentUserId = userId;
+        } else {
+            // Intentar hash params
+            const hash = window.location.hash;
+            if (hash) {
+                const hashParams = new URLSearchParams(hash.substring(1));
+                userId = hashParams.get('user_id') || hashParams.get('user');
+                if (userId) {
+                    currentUserId = userId;
+                }
+            }
+            
+            if (!currentUserId) {
+                throw new Error('No se especificó un usuario y no hay sesión activa.');
+            }
+        }
+
+        console.log('🔍 Cargando flashes para:', currentUserId);
+
+        const apiUrl = `/php/chain_flashes/obtener_flashes_usuario.php?user_id=${encodeURIComponent(currentUserId)}`;
+        const response = await fetch(apiUrl);
+
+if (response.status === 403) {
+    const errorData = await response.json();
+    // ✅ ACTUALIZAR HEADER CON INFO DEL USUARIO ANTES DE MOSTRAR ERROR
+    if (errorData.user_info) {
+        updateHeaderWithUserInfo(errorData.user_info);
+    }
+    showAccessDenied(errorData.message);
+    return;
+}
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('📦 Respuesta del servidor:', data);
+
+        if (data.success) {
+            userFlashes = data.flashes || [];
+            
+            // ✅ ACTUALIZAR HEADER CON DATOS DEL SERVIDOR
+            // Usar data.user_info si existe, o el primer flash
+            updateHeader(data);
+            renderFlashes();
+        } else {
+            throw new Error(data.message || 'Error al cargar flashes');
+        }
+
+    } catch (error) {
+        console.error('❌ Error cargando flashes:', error);
+        showError(error.message);
+    }
+}
+
+// Actualiza la función updateHeader:
+function updateHeader(data) {
+    const headerLoading = document.getElementById('headerLoading');
+    const headerUserInfo = document.getElementById('headerUserInfo');
+    const headerAvatar = document.getElementById('headerAvatar');
+    const headerUsername = document.getElementById('headerUsername');
+    const headerFlashCount = document.getElementById('headerFlashCount');
+    const verifiedBadge = document.getElementById('verifiedBadge');
+
+    // Ocultar loading, mostrar info
+    if (headerLoading) headerLoading.style.display = 'none';
+    if (headerUserInfo) headerUserInfo.style.display = 'flex';
+
+    // ✅ PRIORIDAD: user_info del servidor > primer flash > currentUserId
+    let userInfo = null;
+    
+    if (data.user_info) {
+        userInfo = data.user_info;
+    } else if (userFlashes.length > 0) {
+        userInfo = userFlashes[0];
+    }
+
+    if (userInfo) {
+        // Avatar
+        if (userInfo.avatar_url) {
+            headerAvatar.innerHTML = `<img src="${userInfo.avatar_url}" alt="${userInfo.username}">`;
+        } else {
+            headerAvatar.textContent = generateInitials(userInfo.username);
+        }
+
+        // Username
+        const usernameSpan = headerUsername.querySelector('span');
+        usernameSpan.textContent = userInfo.display_name || userInfo.username;
+        
+        // Verificado
+        if (userInfo.verified) {
+            verifiedBadge.style.display = 'inline';
+        } else {
+            verifiedBadge.style.display = 'none';
+        }
+    } else {
+        // ✅ FALLBACK
+        headerAvatar.textContent = generateInitials(currentUserId);
+        const usernameSpan = headerUsername.querySelector('span');
+        usernameSpan.textContent = currentUserId;
+        verifiedBadge.style.display = 'none';
+    }
+
+    // Contador de flashes
+    const count = userFlashes.length;
+    headerFlashCount.textContent = `${count} Flash${count !== 1 ? 'es' : ''}`;
+}
+
+// Actualiza updateHeaderWithUserInfo:
+function updateHeaderWithUserInfo(userInfo) {
+    const headerLoading = document.getElementById('headerLoading');
+    const headerUserInfo = document.getElementById('headerUserInfo');
+    const headerAvatar = document.getElementById('headerAvatar');
+    const headerUsername = document.getElementById('headerUsername');
+    const headerFlashCount = document.getElementById('headerFlashCount');
+    const verifiedBadge = document.getElementById('verifiedBadge');
+
+    // Ocultar loading, mostrar info
+    if (headerLoading) headerLoading.style.display = 'none';
+    if (headerUserInfo) headerUserInfo.style.display = 'flex';
+
+    // Avatar
+    if (userInfo.avatar_url) {
+        headerAvatar.innerHTML = `<img src="${userInfo.avatar_url}" alt="${userInfo.username}">`;
+    } else {
+        headerAvatar.textContent = generateInitials(userInfo.username);
+    }
+
+    // Username
+    const usernameSpan = headerUsername.querySelector('span');
+    usernameSpan.textContent = userInfo.display_name || userInfo.username;
+    
+    // Verificado
+    if (userInfo.verified) {
+        verifiedBadge.style.display = 'inline';
+    } else {
+        verifiedBadge.style.display = 'none';
+    }
+
+    // Ocultar contador (no tiene acceso)
+    headerFlashCount.style.display = 'none';
+}
+
+function renderFlashes() {
+    const grid = document.getElementById('flashesGrid');
+    const emptyState = document.getElementById('emptyState');
+    const loadingState = document.getElementById('loadingState');
+
+    loadingState.style.display = 'none';
+
+    // ✅ SIN FLASHES
+    if (userFlashes.length === 0) {
+        grid.style.display = 'none';
+        
+        if (isOwner) {
+            // ✅ DUEÑO SIN FLASHES: Mostrar card de crear
+            emptyState.style.display = 'none';
+            grid.style.display = 'grid';
+            grid.innerHTML = `
+                <div class="flash-create-card" onclick="openFlashCreator()">
+                    <div class="flash-create-icon">✨</div>
+                    <div class="flash-create-text">
+                        <div class="flash-create-title">Crear tu primer Flash</div>
+                        <div class="flash-create-subtitle">-1 CFT</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // ✅ VISITANTE SIN FLASHES: Mostrar empty state mejorado
+            emptyState.innerHTML = `
+                <div class="empty-icon">✨</div>
+                <h2 class="empty-title">Sin Flashes</h2>
+                <p class="empty-description">Este usuario aún no ha publicado ningún Flash</p>
+                <button class="retry-btn" onclick="window.location.href='/inicio'" style="margin-top: 1.5rem;">
+                    🏠 Ir al Inicio
+                </button>
+            `;
+            emptyState.style.display = 'flex';
+        }
+        return;
+    }
+
+    // ✅ HAY FLASHES: Mostrar grid
+    emptyState.style.display = 'none';
+    grid.style.display = 'grid';
+
+    let html = '';
+
+    // Card de creación solo para el dueño
+    if (isOwner) {
+        html += `
+            <div class="flash-create-card" onclick="openFlashCreator()">
+                <div class="flash-create-icon">✨</div>
+                <div class="flash-create-text">
+                    <div class="flash-create-title">Crear Flash</div>
+                    <div class="flash-create-subtitle">-1 CFT</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Renderizar flashes
+    userFlashes.forEach(flash => {
+        const tokensTotal = parseFloat(flash.tokens_ganados_vistas || 0) + 
+                           parseFloat(flash.tokens_ganados_reacciones || 0);
+        
+        const isViewed = flash.ya_visto == 1;
+        const isAnclado = flash.es_anclado == 1;
+
+        html += `
+            <div class="flash-card ${isViewed ? 'viewed' : ''} ${isAnclado ? 'anclado' : ''}" 
+                 onclick="openFlash(${flash.id})">
+                
+                <div class="flash-badges">
+                    ${tokensTotal > 0 ? `<span class="flash-badge badge-tokens">💰 +${formatTokens(tokensTotal)} CFT</span>` : ''}
+                    ${isViewed ? '<span class="flash-badge badge-viewed">👁️ Visto</span>' : ''}
+                </div>
+
+                ${renderFlashContent(flash)}
+
+                <div class="flash-overlay">
+                    <div class="flash-stats">
+                        <span class="flash-stat">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                            ${flash.vistas || 0}
+                        </span>
+                        <span class="flash-stat">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                            ${flash.total_reacciones || 0}
+                        </span>
+                    </div>
+                    <div class="flash-time">
+                        ${flash.es_anclado ? 'Permanente' : formatTimeAgo(flash.created_at)}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    grid.innerHTML = html;
+}
+
+function openFlashCreator() {
+    if (window.flashCreator) {
+        window.flashCreator.open();
+    } else {
+        showNotification('⚠️ Creator no disponible', 'error');
+    }
+}
+
+        // Renderizar contenido según tipo
+        function renderFlashContent(flash) {
+            switch(flash.tipo) {
+                case 'imagen':
+                    return `<img src="${flash.media_url}" class="flash-media" alt="Flash">`;
+                
+                case 'video':
+                    return `<video src="${flash.media_url}" class="flash-media" ${flash.has_audio ? '' : 'muted'}></video>`;
+                
+                case 'texto':
+                    return `<div class="flash-text-content">${flash.contenido}</div>`;
+                
+                default:
+                    return '<div class="flash-text-content">Flash</div>';
+            }
+        }
+
+function openFlash(flashId) {
+    if (window.flashViewer && typeof window.flashViewer.open === 'function') {
+        window.flashViewer.open(parseInt(flashId), () => {
+            console.log('🔄 Recargando flashes después de acción...');
+            loadUserFlashes();
+        });
+    } else {
+        showNotification('⚠️ Visor de flashes no disponible', 'error');
+    }
+}
+
+        // Ir al perfil del usuario
+        function goToProfile() {
+            const flash = userFlashes[0];
+            const username = flash ? flash.username : null;
+            
+            if (username) {
+                window.location.href = `https://chainfeed.space/perfil?user=${username}`;
+            } else if (currentUserId) {
+                // Si currentUserId es un username
+                window.location.href = `https://chainfeed.space/perfil?user=${currentUserId}`;
+            } else {
+                showNotification('⚠️ No se pudo determinar el usuario', 'error');
+            }
+        }
+
+// Reemplaza tu función goBack() actual por esta:
+function goBack() {
+    // Verificar si hay modales abiertos
+    const hasModals = window.autoModalHandler?.getState?.()?.modalStack?.length > 0;
+    
+    if (hasModals) {
+        // Si hay modales, usar history.back() para cerrarlos
+        window.history.back();
+    } else {
+        // Si NO hay modales, navegar directamente (evitar popstate)
+        if (document.referrer && document.referrer.includes('chainfeed.space')) {
+            window.location.href = document.referrer;
+        } else {
+            window.location.href = 'https://chainfeed.space/inicio';
+        }
+    }
+}
+
+        // Estados de UI
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'flex';
+            document.getElementById('flashesGrid').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+        }
+
+        
+function showError(message) {
+    const headerLoading = document.getElementById('headerLoading');
+    const headerUserInfo = document.getElementById('headerUserInfo');
+    
+    // Ocultar loading en error
+    if (headerLoading) headerLoading.style.display = 'none';
+    if (headerUserInfo) headerUserInfo.style.display = 'none';
+    
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorState').style.display = 'flex';
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('flashesGrid').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'none';
+    
+    // Info de debug
+    const debugUrl = document.getElementById('debugUrl');
+    const debugParams = document.getElementById('debugParams');
+    
+    if (debugUrl) {
+        debugUrl.textContent = window.location.href;
+    }
+    
+    if (debugParams) {
+        const params = new URLSearchParams(window.location.search);
+        const paramsList = [];
+        for (const [key, value] of params) {
+            paramsList.push(`${key} = "${value}"`);
+        }
+        debugParams.innerHTML = paramsList.length > 0 
+            ? paramsList.join('<br>') 
+            : '<span style="color: var(--error);">No se detectaron parámetros en la URL</span>';
+    }
+}
+
+function showAccessDenied(message) {
+    const headerLoading = document.getElementById('headerLoading');
+    const headerUserInfo = document.getElementById('headerUserInfo');
+    
+    // Ocultar loading
+    if (headerLoading) headerLoading.style.display = 'none';
+    // El header ya está actualizado con updateHeaderWithUserInfo antes de llamar esta función
+    
+    const container = document.getElementById('mainContainer');
+    container.innerHTML = `
+        <div class="error-container" style="display: flex;">
+            <div class="error-icon">🔒</div>
+            <h2 class="error-title">Perfil Privado</h2>
+            <p class="error-message" style="max-width: 400px; text-align: center;">
+                ${message || 'Este usuario tiene un perfil privado. Debes seguirlo para ver sus flashes.'}
+            </p>
+            
+            <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; max-width: 300px; width: 100%;">
+                <button class="retry-btn" onclick="goToProfile()" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+                    👤 Ir al Perfil
+                </button>
+                <button class="retry-btn" onclick="goBack()" style="background: rgba(255, 255, 255, 0.1);">
+                    ← Volver
+                </button>
+            </div>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 12px; border-left: 3px solid var(--primary); max-width: 400px;">
+                <strong>💡 Tip:</strong> Para ver los flashes de este usuario, puedes:
+                <ul style="text-align: left; margin-top: 0.5rem; padding-left: 1.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    <li>Seguir al usuario si su perfil es privado</li>
+                    <li>Esperar a que acepte tu solicitud</li>
+                </ul>
+            </div>
+        </div>
+    `;
+}
+
+        // Notificaciones
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            if (type === 'error') {
+                notification.style.borderLeft = '4px solid var(--error)';
+            }
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Inicializar al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            currentUser = getCurrentUser();
+            
+            if (!currentUser) {
+                showNotification('⚠️ Debes iniciar sesión', 'error');
+                setTimeout(() => {
+                    window.location.href = 'https://chainfeed.space/';
+                }, 2000);
+                return;
+            }
+
+            loadUserFlashes();
+        });
+
+        // Recargar al volver desde el visor
+        window.addEventListener('focus', function() {
+            // Recargar flashes si es necesario
+            if (currentUserId && userFlashes.length > 0) {
+                loadUserFlashes();
+            }
+        });
+        
+    </script>
+    
+    <script src="/js/block-check.js"></script>
+
+    <!-- Scripts necesarios del sistema de flashes -->
+    <script src="/js/chain_flashes/flash-viewer-perfil.js"></script>
+    <script src="/js/chain_flashes/flash-reactions.js"></script>
+    <script src="/js/chain_flashes/anclar-modal.js"></script>
+    <script src="/js/chain_flashes/flash-compressor.js"></script>
+<script src="/js/compressors/flash-image-compressor.js"></script>
+<script src="/js/compressors/flash-video-compressor.js"></script>
+<script src="/js/chain_flashes/flash-creator.js"></script>
+
+<script src="/js/temas.js"></script>
+
+<script src="/js/auto-modal-handler.js"></script>
+
+<script src="/js/terms-modal.js"></script>
+
+</body>
+</html>

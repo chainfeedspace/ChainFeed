@@ -1,0 +1,2597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+    
+    
+<!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://chainfeed.space/">
+<meta property="og:title" content="ChainFeed - Tu interacción tiene valor">
+<meta property="og:description" content="Gana tokens por cada publicación, like y comentario. Red social Web3 donde cada interacción genera recompensas reales.">
+<meta property="og:image" content="https://chainfeed.space/images/og-image.png">
+<meta property="og:image:secure_url" content="https://chainfeed.space/images/og-image.png">
+
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ChainFeed Logo - Red Social Web3">
+<meta property="og:site_name" content="ChainFeed">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@chainfeed">
+<meta name="twitter:creator" content="@chainfeed">
+<meta name="twitter:url" content="https://chainfeed.space/">
+<meta name="twitter:title" content="ChainFeed - Tu interacción tiene valor">
+<meta name="twitter:description" content="Gana tokens por cada publicación, like y comentario. Red social Web3 donde cada interacción genera recompensas reales.">
+<meta name="twitter:image" content="https://chainfeed.space/images/og-image.png">
+<meta name="twitter:image:alt" content="ChainFeed Logo">
+
+<!-- Meta adicionales para SEO y LinkedIn -->
+<meta name="description" content="ChainFeed: Red social Web3 que recompensa tu actividad. Gana CFT tokens por publicar, comentar y dar likes. Sin intermediarios, sin umbrales mínimos.">
+<meta name="keywords" content="ChainFeed, Web3, Social Media, Blockchain, Tokens, CFT, Proton, Rewards, Red Social, Criptomonedas">
+<meta name="author" content="ChainFeed">
+<meta name="robots" content="index, follow">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="https://chainfeed.space/">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2G5YM06JT1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-2G5YM06JT1');
+    </script>
+    
+        <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+    
+    <title>ChainFeed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/logo512.png">
+<link rel="apple-touch-icon" href="/icons/logo192.png">
+
+<link rel="manifest" href="/manifest.json">
+
+<!-- Theme color para modo oscuro (default) -->
+<meta name="theme-color" content="#0F0F14">
+<!-- Theme color para modo claro -->
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<!-- Theme color para modo oscuro (explícito) -->
+<meta name="theme-color" content="#0F0F14" media="(prefers-color-scheme: dark)">
+
+    <script src="https://unpkg.com/@proton/web-sdk@4.2.20"></script>
+
+    <script src="/js/i18n-auto-translate.js?v7"></script>
+    
+    <script src="/js/hide-install-in-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #000;
+            color: #fafafa;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        a { color: inherit; text-decoration: none; }
+        
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(0,0,0,0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+            font-size: 17px;
+            letter-spacing: -0.3px;
+        }
+        
+        .logo svg { width: 28px; height: 28px; }
+        
+        nav { display: flex; align-items: center; gap: 36px; }
+        
+        nav a {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            transition: color 0.15s;
+        }
+        
+        nav a:hover { color: #fff; }
+        
+        @media (max-width: 768px) {
+            nav { display: none; }
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            padding: 0 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+        
+        .btn-primary {
+            background: #fff;
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            background: rgba(255,255,255,0.85);
+        }
+        
+        .btn-ghost {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .btn-ghost:hover { color: #fff; }
+        
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+        
+        .nav-cta {
+            height: 36px;
+            padding: 0 16px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .nav-cta:hover {
+            background: rgba(255,255,255,0.85);
+        }
+        
+        #language-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+/* Hero */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 0 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 120%;
+    background: radial-gradient(ellipse at center top, rgba(88,28,135,0.2) 0%, rgba(88,28,135,0.1) 30%, transparent 60%);
+    pointer-events: none;
+}
+
+/* Mejorar visibilidad en móviles */
+@media (max-width: 768px) {
+    .hero::before {
+        top: -10%;
+        width: 120%;
+        height: 100%;
+        background: radial-gradient(ellipse at center top, rgba(88,28,135,0.25) 0%, rgba(88,28,135,0.15) 40%, transparent 70%);
+    }
+}
+        
+        .hero-content {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 100px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 3.5rem;
+        }
+        
+        .hero-tag::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+        
+        h1 {
+            font-size: clamp(42px, 7vw, 72px);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 20px;
+        }
+
+/* Animación de texto rotativo */
+.text-rotate-wrapper {
+    display: inline-block;
+    position: relative;
+    min-height: 1.2em;
+    text-align: center;
+}
+
+.text-rotate-spacer {
+    visibility: hidden;
+    display: block;
+}
+
+.text-rotate {
+    display: block;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    opacity: 0;
+    width: 100%;
+    animation: textRotate 9s infinite;
+}
+
+.text-rotate:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.text-rotate:nth-child(2) {
+    animation-delay: 3s;
+}
+
+.text-rotate:nth-child(3) {
+    animation-delay: 6s;
+}
+
+@keyframes textRotate {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    8% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    33% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    41% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Ajuste para móviles */
+@media (max-width: 600px) {
+    .text-rotate {
+        transform: translateY(0) !important;
+    }
+}
+        
+        .hero-subtitle {
+            font-size: 18px;
+            color: rgba(255,255,255,0.6);
+            max-width: 540px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+        
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .btn-hero-primary {
+            height: 48px;
+            padding: 0 28px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .btn-hero-primary:hover {
+            background: rgba(255,255,255,0.85);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255,255,255,0.15);
+        }
+        
+        .btn-hero-secondary {
+            height: 48px;
+            padding: 0 28px;
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.4);
+        }
+        
+        /* Claim Section */
+        .claim-section {
+            padding: 60px 0 80px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .claim-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px;
+        }
+        
+        /* User Card */
+        .user-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-not-logged {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .user-message {
+            font-size: 15px;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .btn-claim {
+            height: 48px;
+            padding: 0 28px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .btn-claim:hover {
+            background: rgba(255,255,255,0.85);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255,255,255,0.15);
+        }
+        
+        .user-logged {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .user-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+        
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-info {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+        
+        .user-username {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .user-balance-box {
+            text-align: right;
+        }
+        
+        .balance-label {
+            display: block;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 4px;
+        }
+        
+        .balance-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        /* Section */
+        section {
+            padding: 100px 0;
+        }
+        
+        .section-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #a78bfa;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        
+        .section-title {
+            font-size: 36px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+        
+        .section-desc {
+            font-size: 17px;
+            color: rgba(255,255,255,0.6);
+            max-width: 520px;
+            line-height: 1.6;
+        }
+        
+        .section-header {
+            margin-bottom: 56px;
+        }
+        
+        /* Features */
+        .features-section {
+            padding: 100px 0;
+            overflow: hidden;
+        }
+        
+        .features-header {
+            max-width: 1120px;
+            margin: 0 auto 48px;
+            padding: 0 20px;
+        }
+        
+        .features-track-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        
+        .features-track {
+            display: flex;
+            gap: 20px;
+            padding: 0 20px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            cursor: grab;
+        }
+        
+        .features-track::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .features-track:active {
+            cursor: grabbing;
+        }
+        
+        .feature {
+            flex: 0 0 360px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 36px 32px;
+            scroll-snap-align: start;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        
+        .feature:first-child {
+            margin-left: calc((100vw - 1120px) / 2);
+        }
+        
+        .feature:last-child {
+            margin-right: calc((100vw - 1120px) / 2);
+        }
+        
+        .feature:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.15);
+        }
+        
+        .feature h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+        
+        .feature p {
+            font-size: 15px;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(167,139,250,0.12);
+            color: #c4b5fd;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+        
+        /* Scroll indicators */
+        .features-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+        }
+        
+        .features-nav button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        
+        .features-nav button:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+        
+        @media (max-width: 1200px) {
+            .feature:first-child { margin-left: 20px; }
+            .feature:last-child { margin-right: 20px; }
+        }
+        
+        @media (max-width: 600px) {
+            .feature { flex: 0 0 300px; }
+        }
+        
+/* Token section */
+.token-section {
+    background: linear-gradient(180deg, rgba(88,28,135,0.08) 0%, transparent 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Agregar efecto radial adicional */
+.token-section::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center top, rgba(88,28,135,0.15) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.token-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Mejorar visibilidad en móviles */
+@media (max-width: 768px) {
+    .token-section::before {
+        top: -20%;
+        width: 120%;
+        background: radial-gradient(ellipse at center top, rgba(88,28,135,0.2) 0%, rgba(88,28,135,0.1) 40%, transparent 60%);
+    }
+}
+        
+        .token-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        
+        .token-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .token-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 24px;
+        }
+        
+        .token-card-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+        
+        .token-card-value {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        .token-list {
+            list-style: none;
+            margin-top: 32px;
+        }
+        
+        .token-list li {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 15px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .token-list li:last-child { border-bottom: none; }
+        
+        .token-list svg {
+            width: 18px;
+            height: 18px;
+            color: #22c55e;
+            flex-shrink: 0;
+        }
+        
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            padding: 120px 0;
+        }
+        
+        .cta-section h2 {
+            font-size: 44px;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            margin-bottom: 2.5rem;
+        }
+        
+.cta-section p {
+    font-size: 17px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 36px;
+}
+
+.cta-text-block {
+    max-width: 800px;
+    margin: 0 auto 40px;
+    text-align: left;
+}
+
+.cta-text-block p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 20px;
+}
+
+.cta-text-block p:first-child {
+    text-indent: 0;
+}
+
+.cta-text-block strong {
+    color: #fff;
+    font-weight: 600;
+}
+        
+        .cta-section .btn {
+            height: 52px;
+            padding: 0 32px;
+            font-size: 16px;
+        }
+        
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 40px 0;
+        }
+        
+        footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 28px;
+        }
+        
+        .footer-links a {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+            transition: color 0.15s;
+        }
+        
+        .footer-links a:hover { color: #fff; }
+        
+        .footer-copy {
+            font-size: 13px;
+            color: rgba(255,255,255,0.4);
+        }
+        
+        /* Mobile */
+        @media (max-width: 900px) {
+            .token-grid { grid-template-columns: 1fr; gap: 48px; }
+        }
+        
+        @media (max-width: 600px) {
+            .hero-actions { flex-direction: column; align-items: center; }
+            .btn-hero-primary, .btn-hero-secondary { width: 100%; max-width: 300px; }
+            footer .container { flex-direction: column; gap: 20px; text-align: center; }
+            .footer-links { flex-wrap: wrap; justify-content: center; }
+            .user-logged { text-align: center; }
+            .user-info { text-align: center; }
+            .user-balance-box { text-align: center; }
+            .claim-card { padding: 24px; }
+        }
+
+        @media (max-width: 600px) {
+        .balance-value {
+            font-size: 16px;
+                }
+}
+        /* Auth Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+    display: flex !important;
+}
+        .modal {
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 380px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s;
+            line-height: 1;
+        }
+        
+        .modal-close:hover {
+            color: #fff;
+        }
+        
+        .modal-header {
+            margin-bottom: 28px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+        
+        .modal-subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        /* Auth Methods */
+        .auth-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .auth-method-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+        }
+        
+        .auth-method-btn:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .method-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .method-icon svg {
+            width: 18px;
+            height: 18px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .method-content {
+            flex: 1;
+        }
+        
+        .method-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 1px;
+        }
+        
+        .method-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        
+        /* Auth Forms */
+        .auth-view {
+            display: none;
+        }
+        
+        .auth-view.active {
+            display: block;
+        }
+        
+        .auth-back-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            padding: 0;
+            transition: color 0.15s;
+        }
+        
+        .auth-back-btn:hover {
+            color: #fff;
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .form-input {
+            height: 44px;
+            padding: 0 14px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .form-input::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+        
+        .form-hint {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+        }
+        
+        .password-input-container {
+            position: relative;
+        }
+        
+        .password-input-container .form-input {
+            padding-right: 44px;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+        }
+        
+        .auth-submit-btn {
+            height: 44px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 4px;
+        }
+        
+        .auth-submit-btn:hover {
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .auth-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 12px;
+        }
+        
+        .auth-link {
+            font-size: 13px;
+            color: #fff;
+            transition: color 0.15s;
+        }
+        
+        .auth-link:hover {
+            color: rgba(255,255,255,0.4); 
+        }
+        
+        .auth-error {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #f87171;
+            margin-top: 8px;
+        }
+        
+        .auth-success {
+            background: rgba(34,197,94,0.08);
+            border: 1px solid rgba(34,197,94,0.2);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #4ade80;
+            margin-top: 8px;
+        }
+        
+        /* Whitepaper Modal */
+        .wp-modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .wp-lang-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .wp-lang-btn:hover {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .wp-lang-btn.primary {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+        }
+        
+        .wp-lang-btn.primary:hover {
+            background: rgba(255,255,255,0.9);
+        }
+
+        /* Contact Modal */
+.contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-method-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+}
+
+.contact-method-btn:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.2);
+}
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .toast {
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 14px 16px;
+            min-width: 280px;
+            max-width: 360px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: toastIn 0.3s ease;
+        }
+        
+        .toast.hiding {
+            animation: toastOut 0.3s ease forwards;
+        }
+        
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes toastOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .toast-icon { font-size: 18px; flex-shrink: 0; }
+        .toast-content { flex: 1; }
+        .toast-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+        .toast-message { font-size: 13px; color: rgba(255,255,255,0.5); }
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            line-height: 1;
+        }
+        /* ================================================
+   SELECTOR DE IDIOMA - VERSIÓN UNIFICADA
+   ================================================ */
+
+#language-selector {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.lang-btn {
+    width: 50px;
+    height: 50px;
+    background: rgba(37, 37, 50, 0.5);
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    outline: none;
+}
+
+/* Efecto de brillo al hover */
+.lang-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.lang-btn:hover::before {
+    left: 100%;
+}
+
+.lang-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+/* Botón activo */
+.lang-btn.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+    border: 2px solid var(--primary);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px) scale(1.08);
+}
+
+/* Animación de pulso para el botón activo */
+.lang-btn.active::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    transform: translate(-50%, -50%);
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0;
+    }
+}
+
+/* Imagen de la bandera */
+.lang-btn img {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+    display: block;
+}
+
+.lang-btn:hover img {
+    transform: scale(1.1) rotate(2deg);
+}
+
+.lang-btn.active img {
+    transform: scale(1.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #language-selector {
+        gap: 8px;
+    }
+    
+    .lang-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .lang-btn img {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+.preventa-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.stat-card,
+.referral-code-card,
+.referral-input-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover,
+.referral-code-card:hover,
+.referral-input-card:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.12);
+}
+
+.stat-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.referral-code-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.share-code-btn,
+.apply-code-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.share-code-btn:hover:not(:disabled),
+.apply-code-btn:hover:not(:disabled) {
+    background: rgba(167,139,250,0.2);
+    border-color: #a78bfa;
+    transform: scale(1.05);
+}
+
+.share-code-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.apply-code-btn {
+    background: rgba(167,139,250,0.15);
+    border-color: rgba(167,139,250,0.4);
+    color: #c4b5fd;
+}
+
+.apply-code-btn:hover:not(:disabled) {
+    background: rgba(167,139,250,0.3);
+    border-color: #a78bfa;
+    color: #fff;
+}
+
+.referral-stats-inline {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+}
+
+.referral-stats-inline strong {
+    color: #fff;
+}
+
+.referral-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.referral-code-input {
+    flex: 1;
+    height: 44px;
+    padding: 0 14px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.15s;
+}
+
+.referral-code-input:focus {
+    outline: none;
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.02);
+}
+
+.referral-code-input::placeholder {
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 3px;
+}
+
+.referral-benefit {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+}
+
+.referral-benefit strong {
+    color: #a78bfa;
+}
+
+.loading-shimmer {
+    color: rgba(255,255,255,0.3);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+@media (max-width: 600px) {
+    .preventa-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card,
+    .referral-code-card,
+    .referral-input-card {
+        padding: 16px;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+    }
+}
+/* Exchanges Section */
+.exchanges-section {
+    padding: 100px 0;
+    position: relative;
+}
+
+.exchanges-grid {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 48px;
+    flex-wrap: wrap;
+}
+
+.exchange-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 48px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    min-width: 180px;
+}
+
+.exchange-card:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.4);
+    transform: translateY(-2px);
+}
+
+.exchange-logo {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exchange-logo img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    border-radius: 16px;
+}
+
+.exchange-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.8);
+}
+
+@media (max-width: 600px) {
+    .exchange-card {
+        padding: 24px 36px;
+        min-width: 140px;
+    }
+    
+    .exchange-logo {
+        width: 56px;
+        height: 56px;
+    }
+    
+.exchange-logo img {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+}
+}
+
+/* Botón Instalar APK */
+.pwa-install-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 24px;
+    background: #03021436;
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.04);
+    transition: all 0.3s ease;
+}
+
+.pwa-install-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.8);
+}
+
+.pwa-install-btn.slide-in {
+    animation: slideIn 0.3s ease forwards;
+}
+
+.pwa-install-btn.slide-out {
+    animation: slideOut 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100px); opacity: 0; }
+}
+
+.hero-tag-clickable {
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.hero-tag-clickable:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+}
+
+.hero-tag-clickable:active {
+    transform: translateY(0);
+}
+        .toast.success { border-left: 2px solid #22c55e; }
+        .toast.error { border-left: 2px solid #ef4444; }
+        .toast.info { border-left: 2px solid #3b82f6; }
+
+    </style>
+    
+    <script src="/js/app_chain.js?v2" defer></script>
+    
+</head>
+<body>
+    
+    <button id="installBtn" class="pwa-install-btn" style="display: none;">
+    <span class="install-icon">📲</span>
+    <span class="install-text">Instalar App</span>
+</button>
+
+    <header>
+        <div class="container">
+            <a href="/" class="logo">
+                <img src="/icons/logo96.png" alt="ChainFeed Logo" class="logo-icon" style="
+    width: 45px;">
+                ChainFeed
+            </a>
+            <nav>
+                <a href="#features">Características</a>
+                <a href="#token">Token</a>
+                <a href="/docs/whitepaper.pdf">Whitepaper</a>
+            </nav>
+            <div class="header-actions">
+                <button class="nav-cta">Conectate</button>
+                <div id="language-selector"></div>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <a href="#cta" class="hero-tag hero-tag-clickable">Entrar a la ronda privada para inversores</a>
+<h1>
+    <span class="text-rotate-wrapper">
+        <span class="text-rotate-spacer" aria-hidden="true">Tu interaccion</span>
+        <span class="text-rotate">Tu contenido</span>
+        <span class="text-rotate">Tu like</span>
+        <span class="text-rotate">Tu interaccion</span>
+    </span>
+    <br>tiene valor
+</h1>
+                <p class="hero-subtitle">Gana tokens por cada publicación, like y comentario. Sin umbrales mínimos, sin intermediarios.</p>
+                <div class="hero-actions">
+                    <button class="btn-hero-primary">Conectate a ChainFeed</button>
+                    <button class="btn-hero-secondary" onclick="downloadWhitepaper()">Leer whitepaper</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Reclamar / Stats -->
+    <section class="claim-section">
+        <div class="container">
+            <div class="claim-grid">
+                <!-- Panel Usuario -->
+                <div class="claim-card user-card" id="user-card">
+                    <!-- No logueado -->
+                    <div class="user-not-logged" id="user-not-logged">
+                        <div class="user-message">Conecta tu wallet para obtener tokens</div>
+                        <button class="btn btn-claim" onclick="authenticateWithProton()">Reclama tus 50 CFT</button>
+                    </div>
+                    
+                    <!-- Logueado -->
+                    <div class="user-logged" id="user-logged" style="display: none;">
+                        <div class="user-avatar" id="user-avatar-section">
+                            <img src="" alt="Avatar" id="user-avatar-img">
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name" id="user-name">-</div>
+                            <div class="user-username" id="user-username">@-</div>
+                        </div>
+                        <div class="user-balance-box">
+                            <span class="balance-label">Tus tokens CFT</span>
+                            <span class="balance-value" id="user-balance">0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="preventa-stats-grid" id="preventa-stats-grid"></div>
+                
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section" id="features">
+        <div class="features-header">
+            <div class="section-label">Funcionalidades</div>
+            <h2 class="section-title">Todo lo que necesitas</h2>
+            <p class="section-desc">Una plataforma completa donde cada interacción genera recompensas reales.</p>
+        </div>
+        <div class="features-track-wrapper">
+            <div class="features-track" id="featuresTrack">
+                <div class="feature">
+                    <h3>Publicaciones</h3>
+                    <p>Comparte contenido original y recibe tokens automáticamente por cada post que creas. Sin necesidad de miles de seguidores para comenzar a monetizar.</p>
+                    <span class="feature-tag">3-7 CFT por post</span>
+                </div>
+                <div class="feature">
+                    <h3>Engagement</h3>
+                    <p>Cada like que recibes se convierte directamente en tokens para ti. Entre más engagement generas, más ganas.</p>
+                    <span class="feature-tag">1 CFT por like</span>
+                </div>
+                <div class="feature">
+                    <h3>Comentarios</h3>
+                    <p>Participa en conversaciones y genera valor con cada interacción. Las conversaciones tienen valor real en ChainFeed.</p>
+                    <span class="feature-tag">1 CFT por comentario</span>
+                </div>
+                <div class="feature">
+                    <h3>Marketplace</h3>
+                    <p>Vende contenido exclusivo, servicios o productos directamente a tu audiencia sin intermediarios tradicionales.</p>
+                    <span class="feature-tag">Solo 10% comisión</span>
+                </div>
+                <div class="feature">
+                    <h3>Chain Events</h3>
+                    <p>Crea encuestas recompensadas, campañas creativas y desafíos de audio. Los participantes ganan, tú decides las reglas.</p>
+                    <span class="feature-tag">Gamificación real</span>
+                </div>
+                <div class="feature">
+                    <h3>Promoción</h3>
+                    <p>Amplifica el alcance de tus publicaciones más importantes invirtiendo tokens. Llega a más personas.</p>
+                    <span class="feature-tag">Desde 50 CFT/día</span>
+                </div>
+            </div>
+            <div class="features-nav">
+                <button id="prevBtn" aria-label="Anterior">←</button>
+                <button id="nextBtn" aria-label="Siguiente">→</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="token-section" id="token">
+        <div class="container">
+            <div class="token-grid">
+                <div>
+                    <div class="section-label">Tokenomics</div>
+                    <h2 class="section-title">CFT Token</h2>
+                    <p class="section-desc">El token nativo que impulsa todo el ecosistema ChainFeed. Gana, intercambia y participa en la gobernanza.</p>
+                    <ul class="token-list">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Construido sobre Proton Network
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Sin costos de transacción
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Distribución basada en actividad
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Preventa activa con bonus
+                        </li>
+                    </ul>
+                </div>
+                <div class="token-cards">
+                    <div class="token-card">
+                        <div class="token-card-label">Supply total</div>
+                        <div class="token-card-value">100M</div>
+                    </div>
+                    <div class="token-card">
+                        <div class="token-card-label">Usuarios Activos</div>
+                        <div class="token-card-value" id="usuarios-activos">--</div>
+                    </div>
+                    <div class="token-card">
+                        <div class="token-card-label">Tokens Distribuidos</div>
+                        <div class="token-card-value" id="tokens-otorgados">--</div>
+                    </div>
+                    <div class="token-card">
+                        <div class="token-card-label">Bonus actual</div>
+                        <div class="token-card-value">+20%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Exchanges Section -->
+<section class="exchanges-section">
+    <div class="container">
+        <div class="section-header" style="text-align: center;">
+            <div class="section-label">Exchanges</div>
+            <h2 class="section-title">Disponible en exchanges</h2>
+            <p class="section-desc" style="margin: 0 auto;">Adquiere CFT en los principales mercados descentralizados</p>
+        </div>
+        
+        <div class="exchanges-grid">
+            <a href="https://alcor.exchange/" target="_blank" rel="noopener" class="exchange-card" id="alcor-link">
+                <div class="exchange-logo">
+                    <img src="/logos/alcor.png" alt="Alcor Exchange">
+                </div>
+                <span class="exchange-name">Alcor DEX</span>
+            </a>
+            
+            <a href="https://www.coingecko.com/" target="_blank" rel="noopener" class="exchange-card" id="coingecko-link">
+                <div class="exchange-logo">
+                    <img src="/logos/coingecko.png" alt="CoinGecko">
+                </div>
+                <span class="exchange-name">CoinGecko</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section" id="cta">
+    <div class="container">
+        <h2>Ronda privada para inversores estratégicos</h2>
+        <div class="cta-text-block">
+            <p>ChainFeed es una startup en etapa temprana con el producto ya desarrollado y operativo.</p>
+            
+            <p>En esta instancia se encuentra abierta una ronda privada destinada a inversores estratégicos interesados en <strong>adquirir una participación en la startup, y no en la compra de tokens</strong>.</p>
+            
+            <p>Esta ronda se realiza de forma previa a cualquier preventa del token, el cual forma parte del ecosistema futuro del proyecto, pero no es el instrumento de inversión en esta etapa.</p>
+            
+            <p>La participación se estructura bajo un esquema contractual claro, con foco en el crecimiento a largo plazo del proyecto y su modelo económico.</p>
+        </div>
+        <button class="btn btn-primary btn-cta-main" onclick="openContactModal()">Contacto para inversores</button>
+    </div>
+</section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="/">Whitepaper</a>
+                <a href="/">Términos</a>
+                <a href="/">Privacidad</a>
+                <a href="/">Twitter</a>
+            </div>
+            <div class="footer-copy">© 2025 ChainFeed</div>
+        </div>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeAuthModal()">×</button>
+            
+            <!-- Vista Selector -->
+            <div id="auth-selector-view" class="auth-view active">
+                <div class="modal-header">
+                    <h2 class="modal-title">Conectar a ChainFeed</h2>
+                    <p class="modal-subtitle">Selecciona cómo quieres acceder</p>
+                </div>
+                
+                <div class="auth-methods">
+                    <button class="auth-method-btn" onclick="showLoginView()">
+                        <div class="method-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                <polyline points="3 7 12 13 21 7"/>
+                            </svg>
+                        </div>
+                        <div class="method-content">
+                            <div class="method-title">Email</div>
+                            <div class="method-desc">Accede con tu cuenta</div>
+                        </div>
+                    </button>
+                    
+                    <button class="auth-method-btn" onclick="authenticateWithProtonFromModal()">
+                        <div class="method-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+                        <div class="method-content">
+                            <div class="method-title">Wallet</div>
+                            <div class="method-desc">Proton WebAuth</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Vista Login -->
+            <div id="auth-login-view" class="auth-view">
+                <button class="auth-back-btn" onclick="showSelectorView()">← Volver</button>
+                
+                <div class="modal-header">
+                    <h2 class="modal-title">Iniciar sesión</h2>
+                    <p class="modal-subtitle">Ingresa tus credenciales</p>
+                </div>
+                
+                <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="login-email" class="form-input" placeholder="tu@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <div class="password-input-container">
+                            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required minlength="8">
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('login-password')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="auth-submit-btn" id="login-submit-btn">Continuar</button>
+                    
+                    <div class="auth-footer">
+                        <a href="#" class="auth-link" onclick="showRegisterView(); return false;">Crear cuenta nueva</a>
+                    </div>
+                </form>
+                
+                <div id="login-error" class="auth-error" style="display: none;"></div>
+            </div>
+            
+            <!-- Vista Registro -->
+            <div id="auth-register-view" class="auth-view">
+                <button class="auth-back-btn" onclick="showSelectorView()">← Volver</button>
+                
+                <div class="modal-header">
+                    <h2 class="modal-title">Crear cuenta</h2>
+                    <p class="modal-subtitle">Completa tus datos</p>
+                </div>
+                
+                <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="register-username" class="form-input" placeholder="usuario" required minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+">
+                        <span class="form-hint">Letras, números y guiones bajos</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="register-email" class="form-input" placeholder="tu@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <div class="password-input-container">
+                            <input type="password" id="register-password" class="form-input" placeholder="••••••••" required minlength="8">
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('register-password')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="form-hint">Mínimo 8 caracteres</span>
+                    </div>
+                    
+                    <button type="submit" class="auth-submit-btn" id="register-submit-btn">Crear cuenta</button>
+                    
+                    <div class="auth-footer">
+                        <a href="#" class="auth-link" onclick="showLoginView(); return false;">Ya tengo cuenta</a>
+                    </div>
+                </form>
+                
+                <div id="register-error" class="auth-error" style="display: none;"></div>
+                <div id="register-success" class="auth-success" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Whitepaper Modal -->
+    <div id="whitepaper-modal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeWhitepaperModal()">×</button>
+            
+            <div class="modal-header">
+                <h2 class="modal-title">Descargar Whitepaper</h2>
+                <p class="modal-subtitle">Selecciona el idioma</p>
+            </div>
+            
+            <div class="wp-modal-buttons">
+                <button class="wp-lang-btn" onclick="downloadWhitepaperLang('es')">
+                    Español
+                </button>
+                <button class="wp-lang-btn" onclick="downloadWhitepaperLang('en')">
+                    English
+                </button>
+            </div>
+        </div>
+    </div> 
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeContactModal()">×</button>
+            
+            <div class="modal-header">
+                <h2 class="modal-title">Contacto para inversores</h2>
+                <p class="modal-subtitle">Elige cómo contactarnos</p>
+            </div>
+            
+            <div class="contact-methods">
+                <a href="https://www.linkedin.com/in/carlosjuana" target="_blank" rel="noopener noreferrer" class="contact-method-btn">
+                    <div class="method-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-title">LinkedIn</div>
+                        <div class="method-desc">Conecta con nosotros</div>
+                    </div>
+                </a>
+                
+                <button class="contact-method-btn" onclick="copyEmail()">
+                    <div class="method-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="5" width="18" height="14" rx="2"/>
+                            <polyline points="3 7 12 13 21 7"/>
+                        </svg>
+                    </div>
+                    <div class="method-content">
+                        <div class="method-title">Email</div>
+                        <div class="method-desc">chainfeed@chainfeed.space</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        // ========== AUTH MODAL ==========
+        
+        function openAuthModal() {
+            document.getElementById('auth-modal-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            showSelectorView();
+        }
+        
+        function closeAuthModal() {
+            document.getElementById('auth-modal-overlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            resetForms();
+        }
+        
+        function showSelectorView() {
+            hideAllViews();
+            document.getElementById('auth-selector-view').classList.add('active');
+        }
+        
+        function showLoginView() {
+            hideAllViews();
+            document.getElementById('auth-login-view').classList.add('active');
+            setTimeout(() => document.getElementById('login-email')?.focus(), 100);
+        }
+        
+        function showRegisterView() {
+            hideAllViews();
+            document.getElementById('auth-register-view').classList.add('active');
+            setTimeout(() => document.getElementById('register-username')?.focus(), 100);
+        }
+        
+        function hideAllViews() {
+            document.querySelectorAll('.auth-view').forEach(v => v.classList.remove('active'));
+        }
+        
+        function resetForms() {
+            document.getElementById('login-form')?.reset();
+            document.getElementById('register-form')?.reset();
+            document.querySelectorAll('.auth-error, .auth-success').forEach(el => el.style.display = 'none');
+        }
+        
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+        
+        function authenticateWithProtonFromModal() {
+            closeAuthModal();
+            setTimeout(() => {
+                if (typeof window.authenticateWithProton === 'function') {
+                    window.authenticateWithProton();
+                }
+            }, 200);
+        }
+        
+        // Close on overlay click
+        document.getElementById('auth-modal-overlay')?.addEventListener('click', (e) => {
+            if (e.target.id === 'auth-modal-overlay') closeAuthModal();
+        });
+        
+        // ========== WHITEPAPER MODAL ==========
+        
+function openWhitepaperModal() {
+    const modal = document.getElementById('whitepaper-modal');
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+        
+function closeWhitepaperModal() {
+    const modal = document.getElementById('whitepaper-modal');
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+        
+        function downloadWhitepaper() {
+            openWhitepaperModal();
+        }
+        
+        function downloadWhitepaperLang(lang) {
+            const url = lang === 'es' ? '/docs/whitepaper.pdf' : '/docs/whitepaper_en.pdf';
+            window.open(url, '_blank');
+            closeWhitepaperModal();
+        }
+        
+        // ========== CONTACT MODAL ==========
+
+function openContactModal() {
+    const modal = document.getElementById('contact-modal');
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeContactModal() {
+    const modal = document.getElementById('contact-modal');
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function copyEmail() {
+    const email = 'chainfeed@chainfeed.space';
+    navigator.clipboard.writeText(email).then(() => {
+        // Crear toast directamente sin usar showToast()
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast success';
+        toast.innerHTML = `
+            <div class="toast-icon">✓</div>
+            <div class="toast-content">
+                <div class="toast-title">Correo copiado con éxito</div>
+                <div class="toast-message">El correo ha sido copiado al portapapeles</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('hiding');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+        
+        closeContactModal();
+    }).catch(err => {
+        console.error('Error copiando email:', err);
+    });
+}
+
+// Close on overlay click
+document.getElementById('contact-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'contact-modal') closeContactModal();
+});
+
+        // Close on overlay click
+        document.getElementById('whitepaper-modal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'whitepaper-modal') closeWhitepaperModal();
+        });
+        
+        // ========== INTERCEPT AUTH BUTTONS ==========
+
+function interceptAuthButtons() {
+    const selectors = ['.nav-cta', '.btn-hero-primary', '.btn-claim', '.btn-cta-main'];
+    
+    selectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(btn => {
+            if (btn.dataset.intercepted === 'true') return;
+            
+            btn.dataset.intercepted = 'true';
+            btn.addEventListener('click', (e) => {
+                // 🔥 VERIFICAR SI ESTÁ LOGUEADO
+                const isLoggedIn = window.appState?.isLoggedIn || 
+                                   localStorage.getItem('chainfeed_user') !== null;
+                
+                if (isLoggedIn) {
+                    // 🔥 NUEVO: Si el botón tiene onclick personalizado, permitir que se ejecute
+                    if (btn.onclick && btn.onclick !== authenticateWithProton) {
+                        console.log('✅ Permitiendo redirección personalizada');
+                        return; // Dejar que el onclick se ejecute normalmente
+                    }
+                    
+                    // Si no tiene onclick o es el de autenticación, no hacer nada
+                    return;
+                }
+                
+                // Usuario NO logueado: verificar si es botón de auth
+                const text = btn.textContent.toLowerCase();
+                const isAuthBtn = text.includes('conectate') || text.includes('connect') || 
+                                  text.includes('comenzar') || text.includes('reclama') || 
+                                  text.includes('claim') || text.includes('crear cuenta');
+                
+                if (isAuthBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAuthModal();
+                }
+            }, true);
+        });
+    });
+}
+        
+        // ========== TOAST ==========
+        
+        function showToast(type, title, message, duration = 5000) {
+            const container = document.getElementById('toast-container');
+            const icons = { success: '✓', error: '✕', info: 'i' };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || '•'}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        // ========== INIT ==========
+        
+        document.addEventListener('DOMContentLoaded', interceptAuthButtons);
+        setTimeout(interceptAuthButtons, 1000);
+        setTimeout(interceptAuthButtons, 3000);
+    </script>
+
+    <script>
+        // Horizontal scroll for features
+        const track = document.getElementById('featuresTrack');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const cardWidth = 380;
+        
+        prevBtn.addEventListener('click', () => {
+            track.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            track.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        });
+        
+        // Drag to scroll
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        
+        track.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - track.offsetLeft;
+            scrollLeft = track.scrollLeft;
+        });
+        
+        track.addEventListener('mouseleave', () => isDown = false);
+        track.addEventListener('mouseup', () => isDown = false);
+        
+        track.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - track.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            track.scrollLeft = scrollLeft - walk;
+        });
+    </script>
+   <script>
+// Parallax mejorado - más movimiento, menos superposición
+window.addEventListener('scroll', () => {
+    document.querySelectorAll('.parallax-item').forEach(item => {
+        const rect = item.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (isVisible) {
+            const speed = parseFloat(item.dataset.speed) || 1;
+            const relativeScroll = (window.innerHeight - rect.top) / window.innerHeight;
+            
+            // Aumenté el multiplicador de 20 a 60 para más movimiento
+            // Centrado en 0 para que se mueva hacia arriba y abajo
+            const yPos = (relativeScroll - 0.5) * speed * 60;
+            
+            item.style.transform = `translateY(${yPos}px)`;
+        }
+    });
+});
+
+        // Intersection Observer for stats
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-item').forEach(stat => {
+            observer.observe(stat);
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+ /**
+ * Sistema de Stats de Preventa (SIN CONTADOR)
+ */
+
+let preventaState = {
+    stats: null
+};
+
+/**
+ * Inicializa el sistema de preventa
+ */
+async function initPreventaCountdown() {
+    console.log('🚀 Inicializando sistema de preventa');
+    
+    // Cargar stats iniciales
+    await loadPreventaStats();
+    
+    // Actualizar stats cada 30 segundos
+    setInterval(loadPreventaStats, 30000);
+}
+
+/**
+ * Carga las estadísticas desde el servidor
+ */
+async function loadPreventaStats() {
+    try {
+        console.log('📊 Cargando stats de preventa...');
+        
+        const response = await fetch('https://chainfeed.space/php/obtener_tokens_todos.php', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Error cargando stats');
+        }
+        
+        preventaState.stats = data;
+        updatePreventaUI(data);
+        
+        console.log('✅ Stats cargadas:', data);
+        
+    } catch (error) {
+        console.error('❌ Error cargando stats:', error);
+        updatePreventaUI({
+            preventa: {
+                tokens_disponibles: 10000000,
+                porcentaje_vendido: 0,
+                total_vendido: 0,
+                total_tokens: 10000000
+            },
+            usuario: null,
+            is_logged_in: false
+        });
+    }
+}
+
+function updatePreventaUI(data) {
+    const preventa = data.preventa;
+    const plataforma = data.plataforma;
+    const usuario = data.usuario;
+    const isLoggedIn = data.is_logged_in;
+    
+    // ✅ CALCULAR TOKENS OTORGADOS (usar dato de plataforma si existe, sino calcular)
+    let tokensOtorgados;
+    if (plataforma && plataforma.total_tokens_otorgados) {
+        tokensOtorgados = parseFloat(plataforma.total_tokens_otorgados);
+    } else {
+        tokensOtorgados = parseFloat(preventa.total_tokens) - parseFloat(preventa.tokens_disponibles);
+    }
+    
+    // ✅ Actualizar TOKENS OTORGADOS
+    const tokensOtorgadosEl = document.getElementById('tokens-otorgados');
+    if (tokensOtorgadosEl) {
+        tokensOtorgadosEl.innerHTML = formatNumber(tokensOtorgados) + ' CFT';
+    }
+    
+    // Actualizar barra de progreso (basada en preventa)
+    const progressBar = document.getElementById('progress-bar-fill');
+    if (progressBar) {
+        progressBar.style.width = preventa.porcentaje_vendido + '%';
+    }
+    
+    // Actualizar texto de progreso
+    const progressText = document.getElementById('progress-text');
+    if (progressText) {
+        progressText.textContent = `${formatNumber(tokensOtorgados)} CFT otorgados en total`;
+    }
+    
+// Actualizar cantidad de usuarios
+    const usuariosActivos = document.getElementById('usuarios-activos');
+    if (usuariosActivos && plataforma && plataforma.usuarios_con_tokens) {
+        usuariosActivos.innerHTML = formatNumber(plataforma.usuarios_con_tokens);
+    }
+    
+    // Actualizar usuarios nuevos (7 días)
+    const usuariosNuevos = document.getElementById('usuarios-nuevos');
+    if (usuariosNuevos && plataforma && plataforma.usuarios_nuevos_7d !== undefined) {
+        usuariosNuevos.textContent = plataforma.usuarios_nuevos_7d;
+    }
+    
+    // Actualizar panel de usuario
+    const userNotLogged = document.getElementById('user-not-logged');
+    const userLogged = document.getElementById('user-logged');
+    
+    if (isLoggedIn && usuario) {
+        // Mostrar datos de usuario
+        if (userNotLogged) userNotLogged.style.display = 'none';
+        if (userLogged) userLogged.style.display = 'flex';
+        
+        // Avatar
+        const avatarImg = document.getElementById('user-avatar-img');
+        if (avatarImg && usuario.avatar_url) {
+            avatarImg.src = usuario.avatar_url;
+            avatarImg.alt = usuario.display_name;
+        }
+        
+        // Nombre
+        const userName = document.getElementById('user-name');
+        if (userName) {
+            userName.textContent = usuario.display_name;
+        }
+        
+        // Username
+        const userUsername = document.getElementById('user-username');
+        if (userUsername) {
+            userUsername.textContent = '@' + usuario.username;
+        }
+        
+        // Balance
+        const userBalance = document.getElementById('user-balance');
+        if (userBalance) {
+            userBalance.textContent = formatNumber(usuario.token_balance) + ' CFT';
+        }
+        
+        // 🔥 CRÍTICO: Disparar evento para sistema de referidos
+        console.log('📢 Disparando evento preventaStatsLoaded con usuario:', usuario);
+        window.dispatchEvent(new CustomEvent('preventaStatsLoaded', {
+            detail: { usuario: usuario }
+        }));
+        
+    } else {
+        // Mostrar botón de participar
+        if (userLogged) userLogged.style.display = 'none';
+        if (userNotLogged) userNotLogged.style.display = 'flex';
+        
+        // 🔥 CRÍTICO: Disparar evento SIN usuario (para ocultar cards)
+        console.log('📢 Disparando evento preventaStatsLoaded SIN usuario');
+        window.dispatchEvent(new CustomEvent('preventaStatsLoaded', {
+            detail: { usuario: null }
+        }));
+    }
+}
+
+/**
+ * Formatea números con comas
+ */
+function formatNumber(num) {
+    return parseFloat(num).toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
+
+/**
+ * Función para refrescar stats después de una compra exitosa
+ */
+window.refreshPreventaStats = async function() {
+    console.log('🔄 Refrescando stats después de compra...');
+    await loadPreventaStats();
+};
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPreventaCountdown);
+} else {
+    initPreventaCountdown();
+}
+
+console.log('✨ Sistema de stats de preventa cargado');
+
+function downloadWhitepaper() {
+    openWhitepaperModal();
+}
+
+    </script>
+    
+     <script src="/js/block-check.js?v2"></script>
+     
+<script src="/js/iniciar_se.js?v3"></script>
+<script src="/js/registro_inic_mail.js"></script>
+<script src="/js/idiomas.js"></script>
+<script src="/js/ocultar_botones_index.js"></script>
+<script src="/js/referidos_front.js"></script>
+<script src="/js/reedirigirbotones_index.js"></script>
+
+      <!-- Service Worker Registration -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')  // ✅ CORRECTO
+                .then(registration => {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ Error registrando Service Worker:', error);
+                });
+        });
+    }
+</script>
+
+<script src="/js/terms-modal.js"></script>
+
+<script src="/js/whitepaper-download.js"></script>
+
+<script src="/js/listing-config.js?v5"></script>
+<script src="/js/modal-translations.js?v2"></script>
+<script src="/js/alcor-listing-alert.js?v25"></script>
+
+<script src="/js/coingecko-countdown-timer.js"></script>
+
+<script src="/js/alcor-listing-handler.js?v15"></script>
+
+
+</body>
+</html>

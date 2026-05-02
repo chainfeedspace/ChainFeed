@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verificado - ChainFeed</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --text: #ffffff;
+            --text-secondary: #a0aec0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a24 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .verification-container {
+            max-width: 600px;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(26, 26, 36, 0.98), rgba(15, 15, 20, 0.98));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .icon-container {
+            font-size: 80px;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.5));
+            animation: bounce 1s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 32px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            line-height: 1.2;
+            background: linear-gradient(135deg, var(--success), #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        
+        .btn-primary {
+            display: inline-block;
+            padding: 16px 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.6);
+        }
+        
+        .redirect-info {
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .features {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            text-align: left;
+        }
+        
+        .features h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: var(--text);
+            text-align: center;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            padding: 12px 0;
+            color: var(--text-secondary);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .features li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 900;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .verification-container {
+                padding: 32px 24px;
+            }
+            
+            .icon-container {
+                font-size: 60px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            p {
+                font-size: 16px;
+            }
+            
+            .btn-primary {
+                padding: 14px 32px;
+                font-size: 16px;
+            }
+        }
+    </style>
+    <script>
+        // Redirección automática después de 5 segundos
+        setTimeout(function() {
+            window.location.href = 'https://chainfeed.space';
+        }, 5000);
+    </script>
+</head>
+<body>
+    <div class="verification-container">
+        <div class="logo">🔗 ChainFeed</div>
+        
+        <div class="icon-container">
+            🎉
+        </div>
+        
+        <h1>¡Email verificado exitosamente!</h1>
+        <p>¡Bienvenido a ChainFeed! Tu cuenta ha sido activada y ya puedes comenzar a ganar tokens CFT.</p>
+        
+        <a href="https://chainfeed.space" class="btn-primary">
+            Iniciar Sesión
+        </a>
+        
+        <div class="redirect-info">
+            Serás redirigido automáticamente en 5 segundos...
+        </div>
+        
+        <div class="features">
+            <h3>🎁 ¿Qué puedes hacer ahora?</h3>
+            <ul>
+                <li>Ganar tokens CFT por cada post, comentario y like</li>
+                <li>Participar en Chain Events y desafíos comunitarios</li>
+                <li>Comprar y vender contenido en el marketplace</li>
+                <li>Conectar tu wallet Proton para gestionar tus tokens</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

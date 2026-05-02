@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Colores v6 - ChainFeed (HSL Inteligente)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.8em; margin-bottom: 5px; }
+        .header p { opacity: 0.9; font-size: 0.95em; }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
+        .content { padding: 25px; }
+        
+        .mode-selector {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .mode-selector h3 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .mode-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .mode-option {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .mode-option:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(5px);
+        }
+        .mode-option.active {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+        }
+        .mode-option input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .mode-option label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        .mode-option .mode-description {
+            margin-left: 30px;
+            margin-top: 5px;
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        
+        .input-section { margin-bottom: 20px; }
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        textarea:focus { outline: none; border-color: #667eea; }
+        .existing-colors-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px dashed #667eea;
+        }
+        .existing-colors-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+        .existing-colors-section small {
+            display: block;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 140px;
+        }
+        .btn-extract { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-copy { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+        .btn-copy:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .output-section { margin-top: 20px; display: none; }
+        .output-section.active { display: block; }
+        .section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+        .colors-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .color-pair {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .color-box {
+            width: 50px;
+            height: 30px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .color-label { font-size: 10px; font-family: monospace; }
+        .arrow { font-size: 16px; align-self: center; }
+        .output-code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .stats {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-item strong {
+            color: #667eea;
+            font-size: 1.5em;
+            display: block;
+        }
+        .stat-item.warning strong { color: #ff9800; }
+        .stat-item.success strong { color: #11998e; }
+        .stat-item.info strong { color: #2196f3; }
+        .stat-item.danger strong { color: #f44336; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.warning { background: #ff9800; }
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        .instructions h4 { margin-bottom: 10px; color: #856404; }
+        .instructions ol { margin-left: 20px; color: #856404; }
+        .instructions li { margin-bottom: 5px; }
+        .instructions code { background: #ffeaba; padding: 2px 6px; border-radius: 3px; }
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .alert.show { display: block; }
+        .alert.error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .mapping-info {
+            background: #e7f3ff;
+            border: 2px solid #2196f3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        .mapping-info.show { display: block; }
+        .mapping-list {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .mapping-item {
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 3px;
+            line-height: 1.5;
+        }
+        .mapping-item.omitted {
+            background: #ffcdd2;
+        }
+        .mapping-item.closest {
+            background: #fff9c4;
+        }
+        .mapping-item.hsl {
+            background: #c8e6c9;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+        .info-box ul {
+            margin-left: 20px;
+            color: #1565c0;
+        }
+        .info-box li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Editor de Colores v6</h1>
+            <p>Conversión inteligente HSL - Mantiene tonos semánticos</p>
+            <span class="badge">🧠 HSL + Color cercano</span>
+        </div>
+        <div class="content">
+            
+            <div class="info-box">
+                <h4>✨ Nueva conversión HSL inteligente:</h4>
+                <ul>
+                    <li>✅ Rojo de error → Rojo claro (mantiene el tono)</li>
+                    <li>✅ Verde de éxito → Verde claro (mantiene el tono)</li>
+                    <li>✅ Naranja de advertencia → Naranja claro (mantiene el tono)</li>
+                    <li>❌ Ya NO invierte RGB (adiós a cyan, magenta, etc.)</li>
+                </ul>
+            </div>
+            
+            <div class="mode-selector">
+                <h3>⚙️ Selecciona el modo de conversión:</h3>
+                <div class="mode-options">
+                    <div class="mode-option" onclick="toggleMode('skipDuplicates')">
+                        <label>
+                            <input type="checkbox" id="skipDuplicates" checked>
+                            <span><strong>🚫 Omitir duplicados</strong></span>
+                        </label>
+                        <div class="mode-description">
+                            Si un color ya existe en tus referencias, NO se incluirá en el resultado
+                        </div>
+                    </div>
+                    
+                    <div class="mode-option" onclick="toggleMode('useClosest')">
+                        <label>
+                            <input type="checkbox" id="useClosest">
+                            <span><strong>🎯 Usar color más cercano</strong></span>
+                        </label>
+                        <div class="mode-description">
+                            Si un color no existe, busca el más similar en tus referencias
+                        </div>
+                    </div>
+                    
+                    <div class="mode-option active" onclick="toggleMode('convertHSL')">
+                        <label>
+                            <input type="checkbox" id="convertHSL" checked>
+                            <span><strong>🌈 Conversión HSL (RECOMENDADO)</strong></span>
+                        </label>
+                        <div class="mode-description">
+                            Convierte ajustando luminosidad manteniendo el tono. IGNORA referencias y genera conversiones limpias HSL.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="existing-colors-section">
+                <label>📚 Colores de referencia (opcional):</label>
+                <small>Pega aquí tus conversiones existentes del colorMap</small>
+                <textarea id="existingColors" placeholder='Ejemplo:
+"#1a1a24": "#e5e5db",
+"#f59e0b": "#fcd34d"'></textarea>
+            </div>
+
+            <div class="input-section">
+                <label>Pega tu código CSS/JS/HTML nuevo:</label>
+                <textarea id="codeInput" placeholder="Pega aquí el código de tu página..."></textarea>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn-extract" onclick="extractColors()">🔍 Analizar y Convertir</button>
+                <button class="btn-copy" id="copyBtn" onclick="copyCode()" disabled>📋 Copiar Conversiones</button>
+            </div>
+
+            <div class="alert" id="alert"></div>
+            
+            <div class="output-section" id="output">
+                <div class="stats" id="stats"></div>
+                <div class="mapping-info" id="mappingInfo"></div>
+                <div class="section-title">Vista Previa de Conversiones</div>
+                <div class="colors-preview" id="preview"></div>
+                <div class="section-title">Código para pegar en temas.js</div>
+                <div class="output-code" id="outputCode"></div>
+                <div class="instructions">
+                    <h4>📖 Instrucciones:</h4>
+                    <ol>
+                        <li>Copia las conversiones generadas</li>
+                        <li>Abre <code>temas.js</code></li>
+                        <li>Busca <code>var colorMap = {</code></li>
+                        <li>Pega al final (agrega coma antes)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        var generatedCode = '';
+        var existingColorMap = {};
+        
+        function toggleMode(modeId) {
+            var checkbox = document.getElementById(modeId);
+            checkbox.checked = !checkbox.checked;
+            updateModeUI();
+        }
+        
+        function updateModeUI() {
+            var options = document.querySelectorAll('.mode-option');
+            options.forEach(function(option) {
+                var checkbox = option.querySelector('input[type="checkbox"]');
+                if (checkbox.checked) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+        }
+        
+        updateModeUI();
+        
+        function showToast(msg, type) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast';
+            if (type === 'warning') t.classList.add('warning');
+            t.classList.add('show');
+            setTimeout(function() { t.classList.remove('show'); }, 3000);
+        }
+        
+        function showAlert(msg, type) {
+            var alert = document.getElementById('alert');
+            alert.textContent = msg;
+            alert.className = 'alert show';
+            if (type === 'error') alert.classList.add('error');
+        }
+        
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            
+            var max = Math.max(r, g, b);
+            var min = Math.min(r, g, b);
+            var h, s, l = (max + min) / 2;
+            
+            if (max === min) {
+                h = s = 0; // Acromático (gris)
+            } else {
+                var d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                
+                switch (max) {
+                    case r: 
+                        h = ((g - b) / d + (g < b ? 6 : 0));
+                        break;
+                    case g: 
+                        h = ((b - r) / d + 2);
+                        break;
+                    case b: 
+                        h = ((r - g) / d + 4);
+                        break;
+                }
+                h /= 6;
+            }
+            
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100),
+                l: Math.round(l * 100)
+            };
+        }
+        
+        function hslToRgb(h, s, l) {
+            // Normalizar valores
+            h = h / 360;
+            s = s / 100;
+            l = l / 100;
+            
+            var r, g, b;
+            
+            if (s === 0) {
+                // Acromático
+                r = g = b = l;
+            } else {
+                var hue2rgb = function(p, q, t) {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                
+                var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                var p = 2 * l - q;
+                
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
+        }
+        
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(function(x) {
+                var hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+        
+        function hexToRgb(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+        
+        function convertToLightThemeHSL(color) {
+            var rgb = normalizeToRgb(color);
+            if (!rgb) return null;
+            var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+            var newL = hsl.l < 50 ? 75 + (hsl.s / 10) : Math.min(90, hsl.l + 20);
+            var newS = Math.max(30, hsl.s * 0.85);
+            var newRgb = hslToRgb(hsl.h, newS, newL);
+            return rgbToHex(newRgb.r, newRgb.g, newRgb.b);
+        }
+        
+        function normalizeToHex(color) {
+            var div = document.createElement('div');
+            div.style.color = color;
+            document.body.appendChild(div);
+            var computed = window.getComputedStyle(div).color;
+            document.body.removeChild(div);
+            var m = computed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (m) return rgbToHex(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
+            return color;
+        }
+        
+        function normalizeToRgb(color) {
+            var div = document.createElement('div');
+            div.style.color = color;
+            document.body.appendChild(div);
+            var computed = window.getComputedStyle(div).color;
+            document.body.removeChild(div);
+            var m = computed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (m) return { r: parseInt(m[1]), g: parseInt(m[2]), b: parseInt(m[3]) };
+            return null;
+        }
+        
+        function colorDistance(rgb1, rgb2) {
+            var dr = rgb1.r - rgb2.r, dg = rgb1.g - rgb2.g, db = rgb1.b - rgb2.b;
+            return Math.sqrt(dr*dr + dg*dg + db*db);
+        }
+        
+        function normalizeColor(color) {
+            var div = document.createElement('div');
+            div.style.color = color;
+            document.body.appendChild(div);
+            var computed = window.getComputedStyle(div).color;
+            document.body.removeChild(div);
+            return computed.toLowerCase().replace(/\s+/g, '');
+        }
+        
+        function parseExistingColors() {
+            var text = document.getElementById('existingColors').value.trim();
+            existingColorMap = {};
+            if (!text) return;
+            var regex = /["']([^"']+)["']\s*:\s*["']([^"']+)["']/g;
+            var match;
+            while ((match = regex.exec(text)) !== null) {
+                var key = match[1], value = match[2];
+                var normalized = normalizeColor(key);
+                var rgb = normalizeToRgb(key);
+                existingColorMap[normalized] = { original: key, value: value, rgb: rgb };
+            }
+        }
+        
+        function findClosestColor(targetColor) {
+            var targetRgb = normalizeToRgb(targetColor);
+            if (!targetRgb) return null;
+            var targetNormalized = normalizeColor(targetColor);
+            if (existingColorMap.hasOwnProperty(targetNormalized)) {
+                return {
+                    type: 'exact',
+                    original: targetColor,
+                    reference: existingColorMap[targetNormalized].original,
+                    conversion: existingColorMap[targetNormalized].value,
+                    distance: 0
+                };
+            }
+            var minDistance = Infinity, closest = null;
+            for (var key in existingColorMap) {
+                var ref = existingColorMap[key];
+                if (!ref.rgb) continue;
+                var dist = colorDistance(targetRgb, ref.rgb);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closest = ref;
+                }
+            }
+            if (closest) {
+                return {
+                    type: 'closest',
+                    original: targetColor,
+                    reference: closest.original,
+                    conversion: closest.value,
+                    distance: Math.round(minDistance)
+                };
+            }
+            return null;
+        }
+        
+        function extractColors() {
+            var code = document.getElementById('codeInput').value;
+            if (!code.trim()) {
+                showAlert('⚠️ Pega código primero', 'error');
+                return;
+            }
+            
+            var skipDuplicates = document.getElementById('skipDuplicates').checked;
+            var useClosest = document.getElementById('useClosest').checked;
+            var convertHSL = document.getElementById('convertHSL').checked;
+            
+            if (!skipDuplicates && !useClosest && !convertHSL) {
+                showAlert('⚠️ Debes seleccionar al menos un modo', 'error');
+                return;
+            }
+            
+            parseExistingColors();
+            
+            var patterns = [
+                /#[0-9A-Fa-f]{6}\b/g,
+                /#[0-9A-Fa-f]{3}\b/g,
+                /rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*[\d.]+\s*)?\)/g,
+                /hsla?\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*(?:,\s*[\d.]+\s*)?\)/g
+            ];
+            
+            var found = {};
+            for (var i = 0; i < patterns.length; i++) {
+                var matches = code.match(patterns[i]);
+                if (matches) {
+                    for (var j = 0; j < matches.length; j++) {
+                        found[matches[j]] = true;
+                    }
+                }
+            }
+            
+            var colorList = Object.keys(found);
+            if (colorList.length === 0) {
+                showAlert('❌ No se encontraron colores', 'error');
+                return;
+            }
+            
+            var conversions = [];
+            var omittedCount = 0, closestCount = 0, hslCount = 0;
+            var mappingDetails = [];
+            var processedColors = {}; // Para evitar duplicados en el output
+            
+            for (var i = 0; i < colorList.length; i++) {
+                var color = colorList[i];
+                
+                // Verificar si ya lo procesamos (evitar duplicados en output)
+                var colorNormalized = normalizeColor(color);
+                if (processedColors[colorNormalized]) {
+                    continue; // Ya procesado, skip
+                }
+                processedColors[colorNormalized] = true;
+                
+                var added = false;
+                
+                // ============================================
+                // PRIORIDAD 1: CONVERSIÓN HSL (INDEPENDIENTE)
+                // ============================================
+                if (convertHSL) {
+                    var lightColor = convertToLightThemeHSL(color);
+                    if (lightColor) {
+                        conversions.push({
+                            original: color,
+                            conversion: lightColor,
+                            type: 'hsl'
+                        });
+                        hslCount++;
+                        var rgb = normalizeToRgb(color);
+                        var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+                        var newL = hsl.l < 50 ? Math.round(75 + (hsl.s / 10)) : Math.round(Math.min(90, hsl.l + 20));
+                        mappingDetails.push({
+                            type: 'hsl',
+                            text: '🌈 ' + color + ' → ' + lightColor + ' (HSL: H=' + hsl.h + '° S=' + hsl.s + '% L=' + hsl.l + '% → L=' + newL + '%)'
+                        });
+                        added = true;
+                        continue; // ✅ IMPORTANTE: Saltar al siguiente, no buscar en referencias
+                    }
+                }
+                
+                // ============================================
+                // PRIORIDAD 2: OMITIR DUPLICADOS (Solo si HSL NO está activo)
+                // ============================================
+                if (!added && skipDuplicates) {
+                    var result = findClosestColor(color);
+                    if (result && result.type === 'exact') {
+                        omittedCount++;
+                        mappingDetails.push({
+                            type: 'omitted',
+                            text: '❌ ' + color + ' (ya existe en colorMap: ' + result.reference + ' → ' + result.conversion + ')'
+                        });
+                        continue; // No agregar, ya existe
+                    }
+                }
+                
+                // ============================================
+                // PRIORIDAD 3: USAR COLOR MÁS CERCANO (Solo si HSL NO está activo)
+                // ============================================
+                if (!added && useClosest) {
+                    var result = findClosestColor(color);
+                    if (result && result.type === 'closest') {
+                        conversions.push({
+                            original: color,
+                            conversion: result.conversion,
+                            type: 'closest'
+                        });
+                        closestCount++;
+                        mappingDetails.push({
+                            type: 'closest',
+                            text: '⚠️ ' + color + ' → ' + result.conversion + ' (cercano a ' + result.reference + ', distancia: ' + result.distance + ')'
+                        });
+                        added = true;
+                    }
+                }
+                
+                // ============================================
+                // PRIORIDAD 4: SIN CONVERSIÓN DISPONIBLE
+                // ============================================
+                if (!added) {
+                    omittedCount++;
+                    mappingDetails.push({
+                        type: 'omitted',
+                        text: '❌ ' + color + ' (sin conversión disponible - activa HSL o agrega referencias)'
+                    });
+                }
+            }
+            
+            var statsHTML = '<div class="stats-row">';
+            statsHTML += '<div class="stat-item"><strong>' + colorList.length + '</strong><div>Encontrados</div></div>';
+            statsHTML += '<div class="stat-item danger"><strong>' + omittedCount + '</strong><div>Omitidos</div></div>';
+            statsHTML += '<div class="stat-item warning"><strong>' + closestCount + '</strong><div>Cercanos</div></div>';
+            statsHTML += '<div class="stat-item success"><strong>' + hslCount + '</strong><div>HSL</div></div>';
+            statsHTML += '<div class="stat-item info"><strong>' + conversions.length + '</strong><div>Generados</div></div>';
+            statsHTML += '</div>';
+            document.getElementById('stats').innerHTML = statsHTML;
+            
+            var mappingInfo = document.getElementById('mappingInfo');
+            if (mappingDetails.length > 0) {
+                var mappingHTML = '<strong>🔍 Detalles:</strong><div class="mapping-list">';
+                for (var i = 0; i < mappingDetails.length; i++) {
+                    mappingHTML += '<div class="mapping-item ' + mappingDetails[i].type + '">' + mappingDetails[i].text + '</div>';
+                }
+                mappingHTML += '</div>';
+                mappingInfo.innerHTML = mappingHTML;
+                mappingInfo.classList.add('show');
+            }
+            
+            if (conversions.length === 0) {
+                showAlert('⚠️ No se generaron conversiones', 'error');
+                document.getElementById('output').classList.add('active');
+                document.getElementById('copyBtn').disabled = true;
+                document.getElementById('preview').innerHTML = '<p style="text-align:center;color:#999;padding:20px;">Sin conversiones</p>';
+                document.getElementById('outputCode').textContent = '// Sin conversiones';
+                return;
+            }
+            
+            var mapLines = [];
+            var previewHTML = '';
+            
+            for (var i = 0; i < conversions.length; i++) {
+                var conv = conversions[i];
+                var key = JSON.stringify(conv.original);
+                mapLines.push('    ' + key + ': "' + conv.conversion + '"');
+                
+                previewHTML += '<div class="color-pair">';
+                previewHTML += '<div class="color-box" style="background:' + conv.original + '"></div>';
+                previewHTML += '<div class="color-label">DARK</div>';
+                previewHTML += '<div class="color-label">' + conv.original.substring(0, 10) + '</div>';
+                
+                // Mostrar HSL del color original
+                if (conv.type === 'hsl') {
+                    var rgbOrig = normalizeToRgb(conv.original);
+                    if (rgbOrig) {
+                        var hslOrig = rgbToHsl(rgbOrig.r, rgbOrig.g, rgbOrig.b);
+                        previewHTML += '<div class="color-label" style="color:#666;font-size:9px;">H:' + hslOrig.h + '° L:' + hslOrig.l + '%</div>';
+                    }
+                    previewHTML += '<div class="color-label" style="color:#4caf50;">🌈 HSL</div>';
+                } else if (conv.type === 'closest') {
+                    previewHTML += '<div class="color-label" style="color:#ff9800;">⚠️ cercano</div>';
+                }
+                
+                previewHTML += '</div>';
+                previewHTML += '<span class="arrow">→</span>';
+                previewHTML += '<div class="color-pair">';
+                previewHTML += '<div class="color-box" style="background:' + conv.conversion + '"></div>';
+                previewHTML += '<div class="color-label">LIGHT</div>';
+                previewHTML += '<div class="color-label">' + conv.conversion.substring(0, 10) + '</div>';
+                
+                // Mostrar HSL del color convertido
+                if (conv.type === 'hsl') {
+                    var rgbConv = normalizeToRgb(conv.conversion);
+                    if (rgbConv) {
+                        var hslConv = rgbToHsl(rgbConv.r, rgbConv.g, rgbConv.b);
+                        previewHTML += '<div class="color-label" style="color:#666;font-size:9px;">H:' + hslConv.h + '° L:' + hslConv.l + '%</div>';
+                    }
+                }
+                
+                previewHTML += '</div>';
+            }
+            
+            generatedCode = mapLines.join(',\n');
+            
+            document.getElementById('preview').innerHTML = previewHTML;
+            document.getElementById('outputCode').textContent = generatedCode;
+            document.getElementById('output').classList.add('active');
+            document.getElementById('copyBtn').disabled = false;
+            
+            var summary = conversions.length + ' conversiones';
+            if (closestCount > 0) summary += ' (' + closestCount + ' cercanos)';
+            if (hslCount > 0) summary += ' (' + hslCount + ' HSL)';
+            if (omittedCount > 0) summary += ' | ' + omittedCount + ' omitidos';
+            
+            showToast('✅ ' + summary);
+        }
+        
+        function copyCode() {
+            if (!generatedCode) return;
+            navigator.clipboard.writeText(generatedCode).then(function() {
+                showToast('¡Código copiado! Pégalo en temas.js');
+            });
+        }
+    </script>
+</body>
+</html>

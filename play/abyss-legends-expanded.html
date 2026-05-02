@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Abyss Legends - Premium TCG</title>
+    
+    <script src="abyss/abyss-patch.js"></script>
+    
+    <!-- ✅ NUEVO: API Module — debe ir ANTES de los JSX -->
+<script src="abyss/abyss_api.js"></script>
+<script src="abyss/abyss_api_bridge.js"></script> 
+
+<!-- Migrador de instancias — debe ir ANTES de React -->
+<script>
+(function() {
+  const raw = localStorage.getItem('abyssLegendsCollection');
+  if (!raw) return;
+
+  const col = JSON.parse(raw);
+  const instancesMap = JSON.parse(localStorage.getItem('abyssCardInstances') || '{}');
+  let changed = false;
+
+  Object.entries(col).forEach(([cardId, data]) => {
+    const count = data.count || 0;
+    if (count === 0) return;
+
+    const existing = instancesMap[cardId];
+    if (existing?.length === count) return;
+
+    const instances = [];
+    for (let i = 0; i < count; i++) {
+      if (existing?.[i]) { instances.push(existing[i]); continue; }
+      let atkBonus = 0, hpBonus = 0, upgCount = 0;
+      if (i === 0 && !existing?.length) {
+        const saved = localStorage.getItem('abyssCardUpgrades_' + cardId);
+        if (saved) {
+          const upgs = JSON.parse(saved);
+          atkBonus = upgs.atkBonus || 0;
+          hpBonus  = upgs.hpBonus  || 0;
+          upgCount = upgs.upgCount || 0;
+        }
+      }
+      instances.push({
+        iid: cardId + '_' + i + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        atkBonus, hpBonus, upgCount,
+      });
+    }
+    instancesMap[cardId] = instances;
+    changed = true;
+  });
+
+  if (changed) {
+    localStorage.setItem('abyssCardInstances', JSON.stringify(instancesMap));
+    console.log('✅ Instancias guardadas en abyssCardInstances');
+  }
+})();
+</script>
+<!-- React & Babel -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ✅ CSS Móvil Responsive -->
+    <link rel="stylesheet" href="abyss/mobile-fixes.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        #root {
+            width: 100%;
+            min-height: 100vh;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #a855f7, #ec4899);
+            border-radius: 6px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #c026d3, #f472b6);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- Base de datos de cartas -->
+    <script src="abyss/cards-database.js?v=2"></script>
+    
+    <script type="text/babel" src="abyss/abyss_migrator.jsx"></script>
+    
+    <!-- JSX principal -->
+    <script type="text/babel" src="abyss/abyss-legends-expanded.jsx?v=5"></script>
+    
+    <!-- Gauntlet -->
+    <script type="text/babel" src="abyss/gauntlet.jsx?v=5"></script>
+    <script type="text/babel" src="abyss/gauntlet-battle.jsx"></script>
+    
+</body>
+</html>

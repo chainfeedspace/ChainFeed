@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <title>Marketplace P2P - ChainFeed</title>
+
+<script>
+    (function() {
+        var theme = localStorage.getItem('chainfeed_theme') || 'dark';
+        document.documentElement.className = theme + '-theme';
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        if (theme === 'light') {
+            var s = document.createElement('style');
+            s.id = 'preload-theme';
+            s.textContent = ':root{--dark:#f0f0eb;--dark-secondary:#e5e5db;--dark-tertiary:#dadacd;--text-primary:#875ba9;--primary:#4f46e5}body,html{background:#f0f0eb!important}';
+            document.head.appendChild(s);
+        }
+    })();
+    </script>
+    
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/logo512.png">
+    <link rel="apple-touch-icon" href="/icons/logo192.png">
+
+    <link rel="manifest" href="/manifest.json">
+<!-- Theme color para modo oscuro (default) -->
+<meta name="theme-color" content="#0F0F14">
+
+<!-- Theme color para modo claro -->
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+
+<!-- Theme color para modo oscuro (explícito) -->
+<meta name="theme-color" content="#0F0F14" media="(prefers-color-scheme: dark)">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/@tailwindcss/forms/dist/forms.min.css" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@proton/web-sdk@4.2.20"></script>
+    
+<script src="https://www.paypal.com/sdk/js?client-id=ARAgxn0XlQaAPBxp7h2Q1YVVUEF43fKbr6ccOAlNTh8_5jnhOvhDbIhoMZuKSQWlaXZPz3PyxXh3bDy6&currency=USD"></script>
+
+    <script src="/js/i18n-auto-translate.js"></script>
+    <script src="/js/noscroll.js"></script>
+
+<!-- Chart.js para gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+
+<script src="/js/pwa-block.js"></script>
+
+<style>
+
+body {
+    transition: opacity 0.15s ease-in;
+}
+
+/* Mientras carga el tema, ocultar brevemente */
+body:not(.light-theme):not(.dark-theme) {
+    opacity: 0;
+}
+
+body.light-theme,
+body.dark-theme {
+    opacity: 1;
+}
+
+html, body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+body {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #6366f1;
+    --secondary: #a855f7;
+    --accent: #ec4899;
+    --dark: #0f0f14;
+    --dark-secondary: #1a1a24;
+    --dark-tertiary: #252532;
+    --text: #ffffff;
+    --text-secondary: #a0a0b8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --buy-gradient: linear-gradient(135deg, #10b981, #059669);
+    --sell-gradient: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: rgba(1, 1, 1, 1);
+    min-height: 100vh;
+    color: var(--text);
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 20px));
+}
+/* Fix para barra inferior en APK - Solo esta página */
+@media (max-width: 768px) {
+    .bottom-nav {
+        bottom: env(safe-area-inset-bottom, 0px) !important;
+                height: 55px !important;
+                padding-bottom: max(env(safe-area-inset-bottom, 0px), 10px) !important;
+    }
+    
+    .bottom-nav.hidden {
+        transform: translateY(calc(100% + env(safe-area-inset-bottom, 20px))) !important;
+    }
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.nav-header {
+    background: rgb(15 15 20 / 16%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-button {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    border-radius: 15px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #dddfffe3;
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgb(15 15 20 / 16%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    overflow-x: auto; /* Scroll horizontal */
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+}
+
+/* Scrollbar para tabs */
+.tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tabs::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5);
+    border-radius: 2px;
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.2rem 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Evita que el texto se parta en dos líneas */
+    flex-shrink: 0; /* Evita que se compriman */
+}
+
+.tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+}
+
+.filters {
+    background: rgb(15 15 20 / 16%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-item label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.filter-item select,
+.filter-item input {
+    width: 100%;
+    background: var(--dark-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: white;
+}
+
+.offer-card {
+    background: rgb(15 15 20 / 16%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.offer-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* LÍNEA 1: Datos del usuario */
+.offer-line-1 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.offer-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(99, 102, 241, 0.3);
+}
+
+.offer-user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.offer-user-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.offer-user-stats {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.offer-type-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.offer-type-badge.venta {
+    background: var(--sell-gradient);
+    color: white;
+}
+
+.offer-type-badge.compra {
+    background: var(--buy-gradient);
+    color: white;
+}
+
+/* LÍNEA 2: Detalles de compra/venta */
+.offer-line-2 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.offer-detail-compact {
+    background: var(--dark-tertiary);
+    padding: 0.5rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.offer-detail-label {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.offer-detail-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+}
+
+.offer-action-btn {
+    min-width: 120px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .offer-line-2 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .offer-action-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+    
+    .offer-detail-compact:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 480px) {
+    .offer-line-1 {
+        gap: 0.5rem;
+    }
+    
+    .offer-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .offer-user-name {
+        font-size: 0.85rem;
+    }
+    
+    .offer-user-stats {
+        font-size: 0.7rem;
+        gap: 0.5rem;
+    }
+    
+    .offer-line-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+}
+
+.btn-success {
+    background: var(--buy-gradient);
+}
+
+.btn-danger {
+    background: var(--sell-gradient);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: rgba(1, 1, 1, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.close-modal {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    background: var(--dark-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: white;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state-text {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0.5rem;
+    }
+
+    .nav-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .tabs {
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tab {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem; /* Texto ligeramente más pequeño */
+        min-width: fit-content;
+    }
+
+    .back-button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .page-title {
+        font-size: 1.25rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .offer-details {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* Spinner para botones de procesamiento */
+.btn-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.btn-primary.processing {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.modal {
+    cursor: pointer;
+}
+
+.modal-content {
+    cursor: default;
+}
+
+/* Gráfico de Mercado */
+.market-chart-container {
+    background: rgb(15 15 20 / 16%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.chart-title h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: #bebfe3;
+}
+
+.chart-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.chart-filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.filter-group select {
+    background: var(--dark-tertiary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    color: white;
+    cursor: pointer;
+}
+
+.period-buttons {
+    display: flex;
+    gap: 0.5rem;
+    background: var(--dark-tertiary);
+    padding: 0.25rem;
+    border-radius: 10px;
+}
+
+.period-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.period-btn:hover {
+    color: white;
+}
+
+.period-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+}
+
+.chart-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    overflow-x: auto; /* Scroll horizontal */
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+}
+
+/* Ocultar scrollbar en webkit pero mantener funcionalidad */
+.chart-stats::-webkit-scrollbar {
+    height: 4px;
+}
+
+.chart-stats::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chart-stats::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5);
+    border-radius: 2px;
+}
+
+.stat-item {
+    background: var(--dark-tertiary);
+    padding: 0.8rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+}
+
+.stat-value.positive {
+    color: var(--success);
+}
+
+.stat-value.negative {
+    color: var(--error);
+}
+
+.chart-canvas-wrapper {
+    position: relative;
+    height: 400px;
+    background: var(--dark-tertiary);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+@media (max-width: 768px) {
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .chart-stats {
+        gap: 0.5rem;
+        padding-bottom: 0.5rem; /* Espacio para el scrollbar */
+    }
+    
+    .stat-item {
+        min-width: 90px; /* Ancho mínimo para cada stat */
+        flex-shrink: 0; /* Evita que se compriman */
+        padding: 0.5rem; /* Padding más pequeño */
+    }
+    
+    .stat-label {
+        font-size: 0.65rem; /* Texto más pequeño */
+        margin-bottom: 0.3rem;
+    }
+    
+    .stat-value {
+        font-size: 0.85rem; /* Valor más compacto */
+    }
+    
+    .chart-canvas-wrapper {
+        height: 300px;
+    }
+}
+
+/* Estilos para elementos colapsables */
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.collapse-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.collapse-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+}
+
+.collapse-toggle.active {
+    transform: rotate(45deg);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.collapsible-content.active {
+    max-height: 2000px;
+    transition: max-height 0.6s ease-in;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: #c0bdef;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.chart-title {
+    margin-right: 2rem;
+    margin-left: 0.5rem;
+}
+
+/* Scrollbar personalizada para el modal de crear oferta */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #6366f1, #8b5cf6);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #818cf8, #a78bfa);
+    background-clip: padding-box;
+}
+
+/* Firefox */
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #6366f1 rgba(255, 255, 255, 0.05);
+}
+
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="container">
+    <div class="nav-header">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+<button class="back-button" onclick="window.location.href='/perfil'">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
+    </svg>
+</button>
+
+<h1 class="page-title"> Marketplace P2P</h1>  
+
+      </div>
+        <button class="btn-primary" onclick="openCreateOfferModal()" style="width: 100%;">
+            + Crear Oferta
+        </button>
+    </div>
+
+<!-- Gráfico de Mercado P2P -->
+<div class="market-chart-container">
+    <!-- Header colapsable -->
+    <div class="collapsible-header" onclick="toggleCollapse('marketChart')">
+        <img src="/icons/logo72.png" alt="ChainFeed logo" data-translated="true">
+        <div class="chart-title">
+            <h2> Precio de Mercado CFT</h2>
+            <div class="chart-subtitle">Evolución del precio en el mercado P2P</div>
+        </div>
+        <button class="collapse-toggle" id="marketChartToggle">+</button>
+    </div>
+    
+    <!-- Contenido colapsable -->
+    <div class="collapsible-content" id="marketChartContent">
+        <div style="padding-top: 1.5rem;">
+            <!-- Filtros del gráfico -->
+            <div class="chart-filters" style="margin-bottom: 1.5rem;">
+                <div class="filter-group">
+                    <label>Moneda:</label>
+                    <select id="chartMoneda" onchange="updateMarketChart()">
+                        <option value="">Todas</option>
+                        <option value="USDT">USDT</option>
+                        <option value="USDC">USDC</option>
+                    </select>
+                </div>
+                
+                <div class="period-buttons">
+                    <button class="period-btn" data-period="24h" onclick="changePeriod('24h')">24h</button>
+                    <button class="period-btn active" data-period="7d" onclick="changePeriod('7d')">7d</button>
+                    <button class="period-btn" data-period="30d" onclick="changePeriod('30d')">30d</button>
+                </div>
+            </div>
+            
+            <!-- Estadísticas rápidas -->
+            <div class="chart-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Precio Actual</div>
+                    <div class="stat-value" id="chartPrecioActual">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Variación</div>
+                    <div class="stat-value" id="chartVariacion">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Mínimo</div>
+                    <div class="stat-value" id="chartMinimo">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Máximo</div>
+                    <div class="stat-value" id="chartMaximo">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Promedio</div>
+                    <div class="stat-value" id="chartPromedio">-</div>
+                </div>
+            </div>
+            
+            <!-- Canvas del gráfico -->
+            <div class="chart-canvas-wrapper">
+                <canvas id="marketPriceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+    <button class="tab active" data-tab="ofertas" onclick="switchTab('ofertas')">
+        Ofertas Disponibles
+    </button>
+    <button class="tab" data-tab="mis-ofertas" onclick="switchTab('mis-ofertas')">
+        Mis Ofertas
+    </button>
+    <button class="tab" data-tab="historial" onclick="switchTab('historial')">
+        Historial
+    </button>
+    <button class="tab" data-tab="estadisticas" onclick="switchTab('estadisticas')">
+        Mis Estadísticas
+    </button>
+</div>
+
+<!-- Filtros -->
+<div class="filters" id="filtersSection">
+    <!-- Header colapsable -->
+    <div class="collapsible-header" onclick="toggleCollapse('filters')">
+        <h3 class="filtro-ofertas" style="font-size: 1.3rem; font-weight: 700; color: #bebfe3;">🔍 Filtros</h3>
+        <button class="collapse-toggle" id="filtersToggle">+</button>
+    </div>
+    
+    <!-- Contenido colapsable -->
+    <div class="collapsible-content" id="filtersContent">
+        <div class="filter-grid" style="padding-top: 1rem;">
+            <div class="filter-item">
+                <label>Tipo</label>
+                <select id="filterTipo" onchange="applyFilters()">
+                    <option value="">Todos</option>
+                    <option value="venta">Venta</option>
+                    <option value="compra">Compra</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>Moneda</label>
+                <select id="filterMoneda" onchange="applyFilters()">
+                    <option value="">Todas</option>
+                    <option value="USDT">USDT</option>
+                    <option value="USDC">USDC</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>Precio Mínimo</label>
+                <input type="number" id="filterPrecioMin" placeholder="0.00" onchange="applyFilters()">
+            </div>
+            <div class="filter-item">
+                <label>Precio Máximo</label>
+                <input type="number" id="filterPrecioMax" placeholder="0.00" onchange="applyFilters()">
+            </div>
+            <div class="filter-item">
+                <label>Ordenar por</label>
+                <select id="filterSort" onchange="applyFilters()">
+                    <option value="newest">Más recientes</option>
+                    <option value="oldest">Más antiguos</option>
+                    <option value="price_low">Precio menor</option>
+                    <option value="price_high">Precio mayor</option>
+                    <option value="amount_high">Mayor cantidad</option>
+                    <option value="amount_low">Menor cantidad</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Contenido de tabs -->
+        <div id="ofertasTab" class="tab-content">
+            <div class="offers-grid" id="offersContainer">
+                <!-- Las ofertas se cargarán dinámicamente aquí -->
+            </div>
+        </div>
+
+        <div id="misOfertasTab" class="tab-content" style="display: none;">
+            <div class="offers-grid" id="myOffersContainer">
+                <!-- Mis ofertas se cargarán aquí -->
+            </div>
+        </div>
+
+        <div id="historialTab" class="tab-content" style="display: none;">
+            <div class="offers-grid" id="historyContainer">
+                <!-- El historial se cargará aquí -->
+            </div>
+        </div>
+
+<!-- DESPUÉS de historialTab, ANTES de los modales -->
+<div id="estadisticasTab" class="tab-content" style="display: none;">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total CFT Vendidos</div>
+            <div class="stat-value" id="statCftVendido">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total CFT Comprados</div>
+            <div class="stat-value" id="statCftComprado">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Transacciones Completadas</div>
+            <div class="stat-value" id="statTransacciones">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Tasa de Éxito</div>
+            <div class="stat-value" id="statSuccessRate">0%</div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <!-- Modal Crear Oferta -->
+    <div id="createOfferModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Crear Oferta P2P</h2>
+                <button class="close-modal" onclick="closeCreateOfferModal()">×</button>
+            </div>
+            <form id="createOfferForm" onsubmit="handleCreateOffer(event)">
+                <div class="form-group">
+                    <label>Tipo de Oferta</label>
+                    <select id="offerTipo" required>
+                        <option value="venta">Vender CFT</option>
+                        <option value="compra">Comprar CFT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad de CFT</label>
+                    <input type="number" id="offerCantidad" step="0.0001" required placeholder="100">
+                </div>
+                <div class="form-group">
+                    <label>Precio Unitario</label>
+                    <input type="number" id="offerPrecio" step="0.000001" required placeholder="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Moneda de Pago</label>
+                    <select id="offerMoneda" required>
+                        <option value="USDT">USDT</option>
+                        <option value="USDC">USDC</option>
+                    </select>
+                </div>
+            
+                <div class="form-group">
+                    <div style="background: var(--dark-tertiary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Monto Total:</span>
+                            <span id="offerMontoTotal">0.00</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                            * La plataforma cobra 5% de comisión al vendedor
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Crear Oferta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Comprar CFT -->
+    <div id="buyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Comprar CFT</h2>
+                <button class="close-modal" onclick="closeBuyModal()">×</button>
+            </div>
+            <div id="buyModalContent">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+<script src="/js/block-check.js"></script>
+
+    <!-- Scripts -->
+    <script src="/js/verificar_sesion.js"></script>
+    <script src="/js/menu_universal.js"></script>
+    <script src="/js/barra-inferior.js"></script>
+    <script src="/js/market/p2p-alert-interceptor.js"></script>
+    <script src="/js/market/p2p-notifications.js"></script>
+    <script src="/js/market/p2p-wallet-integration.js"></script>
+    <script src="/js/market/marketplace-p2p.js?v2"></script>
+
+<script src="/js/market/p2p-chart.js"></script>
+
+<script>
+// Sistema de colapso para gráfico y filtros
+function toggleCollapse(section) {
+    const content = document.getElementById(section + 'Content');
+    const toggle = document.getElementById(section + 'Toggle');
+    
+    if (content && toggle) {
+        content.classList.toggle('active');
+        toggle.classList.toggle('active');
+        
+        if (content.classList.contains('active')) {
+            // Usar SVG de X cuando está expandido
+            toggle.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+            </svg>`;
+        } else {
+            toggle.innerHTML = '+';
+        }
+    }
+}
+</script>
+
+<!-- Script para compra directa -->
+<script src="/js/compra-directa.js"></script>
+
+<script>
+// Agregar botón de compra directa después de verificar acceso P2P
+document.addEventListener('DOMContentLoaded', async function() {
+    // Esperar a que checkP2PAccess() se ejecute primero
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const navHeader = document.querySelector('.nav-header');
+    if (!navHeader) return;
+    
+    // Crear botón de compra directa
+    const compraDirectaBtn = document.createElement('button');
+    compraDirectaBtn.className = 'btn-primary';
+    compraDirectaBtn.style.cssText = 'width: 100%; margin-top: 1rem; background: linear-gradient(135deg, #10b981, #059669);';
+    compraDirectaBtn.innerHTML = '💎 Comprar CFT Directamente ($0.01)';
+    compraDirectaBtn.onclick = () => openCompraDirectaModal();
+    
+    // Buscar si existe el badge de restricción P2P
+    const p2pBadge = document.getElementById('p2pAccessBadge');
+    
+    if (p2pBadge) {
+        // Usuario sin acceso: agregar después del badge
+        p2pBadge.after(compraDirectaBtn);
+    } else {
+        // Usuario con acceso: agregar después del botón "Crear Oferta"
+        const crearOfertaBtn = navHeader.querySelector('button.btn-primary');
+        if (crearOfertaBtn) {
+            crearOfertaBtn.after(compraDirectaBtn);
+        } else {
+            navHeader.appendChild(compraDirectaBtn);
+        }
+    }
+    
+    console.log('✅ Botón de compra directa agregado');
+});
+</script>
+
+<script src="/js/temas.js"></script>
+
+<script src="/js/auto-modal-handler.js"></script>
+
+<script src="/js/terms-modal.js"></script>
+
+</body>
+</html>

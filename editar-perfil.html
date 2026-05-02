@@ -1,0 +1,3619 @@
+<!DOCTYPE html>
+<html lang="es" id="html-root">
+    <head>
+    <meta charset="UTF-8">
+    <script>
+// 🔥 Aplicar idioma ANTES de que cargue i18n
+(function() {
+    const savedLang = localStorage.getItem('preferred_language');
+    if (savedLang && ['es', 'en'].includes(savedLang)) {
+        document.documentElement.lang = savedLang;
+        console.log('⚡ Pre-inicialización: idioma establecido a', savedLang);
+    }
+})();
+</script>
+   
+   <script>
+// 🎨 Aplicar tema ANTES de que cargue la página
+(function() {
+    // Prioridad: localStorage > usuario guardado > default
+    var theme = localStorage.getItem('chainfeed_theme');
+    
+    if (!theme) {
+        try {
+            var user = JSON.parse(localStorage.getItem('chainfeed_user') || '{}');
+            theme = user.theme || 'dark';
+        } catch(e) {
+            theme = 'dark';
+        }
+    }
+    
+    document.documentElement.className = theme + '-theme';
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    if (theme === 'light') {
+        var s = document.createElement('style');
+        s.id = 'preload-theme';
+        s.textContent = ':root{--dark:#f0f0eb;--dark-secondary:#e5e5db;--dark-tertiary:#dadacd;--text-primary:#875ba9;--primary:#4f46e5}body,html{background:#f0f0eb!important}';
+        document.head.appendChild(s);
+    }
+    
+    console.log('⚡ Pre-inicialización: tema establecido a', theme);
+})();
+</script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+    
+    <title>ChainFeed - Configuración</title>
+    
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/logo512.png">
+<link rel="apple-touch-icon" href="/icons/logo192.png">
+ 
+    <script src="https://unpkg.com/@proton/web-sdk@4.2.20"></script>
+
+        <script src="/js/i18n-auto-translate.js"></script>
+
+ <script src="/js/noscroll.js"></script>
+
+    <style>
+    
+    /* Prevenir flash de tema */
+body {
+    transition: opacity 0.15s ease-in;
+}
+
+/* Mientras carga el tema, ocultar brevemente */
+body:not(.light-theme):not(.dark-theme) {
+    opacity: 0;
+}
+
+body.light-theme,
+body.dark-theme {
+    opacity: 1;
+}
+        html, body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+body {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Reglas globales para quitar efectos de parpadeo */
+        button, a, .clickable {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        button:focus, a:focus, .clickable:focus {
+            outline: none;
+        }
+
+        button:active, a:active, .clickable:active {
+            outline: none;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --dark: #0f0f14;
+            --dark-secondary: #1a1a24;
+            --dark-tertiary: #252532;
+            --text: #ffffff;
+            --text-secondary: #a0a0b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: rgba(1, 1, 1, 1);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 4px;
+        }
+
+        /* Fondo animado */
+        .bg-animation {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            /* background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #c471f5 75%, #667eea 100%); */
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            opacity: 0.05;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Navbar Fija */
+        .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: #000000bd;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    padding: 1rem 2rem;
+    transition: all 0.3s 
+ease;
+        }
+
+        .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.5rem;
+        }
+
+        .logo {
+font-size: 0.95rem;
+    font-weight: 800;
+    background: var(--text-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s 
+ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
+        }
+
+        .nav-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+        }
+
+        .nav-btn {
+    background: rgb(99 102 241 / 3%);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: var(--primary);
+    padding: 0 0.4rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s 
+ease;
+    font-size: 0.9rem;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+        }
+
+        .logo img {
+    height: 34px;
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+        .nav-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding-top: 120px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .settings-container {
+            max-width: 800px;
+            width: 100%;
+            padding: 0 2rem;
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .settings-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .current-user-info {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .settings-form {
+            background: rgb(15 15 20 / 16%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+
+        /* Avatar Section */
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .current-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            border: 4px solid var(--dark);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3);
+            position: relative;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .current-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .current-avatar:hover .avatar-overlay {
+            opacity: 1;
+        }
+
+        .change-avatar-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: rgb(246, 244, 255);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .change-avatar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .avatar-input {
+            display: none;
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(37, 37, 50, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+            background: rgba(37, 37, 50, 0.7);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .input-hint {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .character-count {
+            text-align: right;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .character-count.warning {
+            color: var(--warning);
+        }
+
+        .character-count.error {
+            color: var(--error);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: rgb(246, 244, 255);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--primary);
+            padding: 0.6rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Loading State */
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-left: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .success-message.show {
+            transform: translateX(0);
+        }
+
+        /* Error Message */
+        .error-message {
+            color: var(--error);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 15, 20, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+               padding: 2px 1rem 2px 2px;
+            }
+
+            .settings-container {
+                padding: 0 1rem;
+            }
+
+            .settings-form {
+                padding: 1.5rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--error);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 2px solid var(--dark);
+    opacity: 0; /* ⬅️ Invisible por defecto */
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+}
+
+.notification-badge:not(.empty) {
+    opacity: 1; /* ⬅️ Solo visible cuando NO tiene clase 'empty' */
+    visibility: visible;
+}
+
+
+/* Language Selector Section */
+.language-selector-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.language-label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Estilos para los botones generados automáticamente */
+#language-selector {
+    display: flex;
+    gap: 1.2rem;
+    justify-content: center;
+    align-items: center;
+}
+
+#language-selector .lang-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    background: rgba(37, 37, 50, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* Efecto de brillo al hover */
+#language-selector .lang-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+#language-selector .lang-btn:hover::before {
+    left: 100%;
+}
+
+#language-selector .lang-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+
+/* Botón activo */
+#language-selector .lang-btn.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+    border: 2px solid var(--primary);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px) scale(1.08);
+}
+
+/* Animación de pulso para el botón activo */
+#language-selector .lang-btn.active::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary);
+    border-radius: 16px;
+    transform: translate(-50%, -50%);
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0;
+    }
+}
+
+/* Imagen de la bandera */
+#language-selector .lang-btn img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+#language-selector .lang-btn:hover img {
+    transform: scale(1.1) rotate(2deg);
+}
+
+#language-selector .lang-btn.active img {
+    transform: scale(1.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #language-selector {
+        gap: 1rem;
+    }
+    
+    #language-selector .lang-btn {
+        width: 60px;
+        height: 60px;
+    }
+    
+    #language-selector .lang-btn img {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* ============================================
+   ESTILOS PARA VINCULACIÓN DE WALLET
+   ============================================ */
+
+.wallet-link-section,
+.wallet-linked-section {
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 0.6s ease;
+}
+
+.wallet-card {
+    background: rgba(26, 26, 36, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.wallet-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+}
+
+.wallet-card.linked {
+    border-color: var(--success);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.wallet-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+}
+
+.wallet-card.linked .wallet-icon {
+    background: linear-gradient(135deg, var(--success), #059669);
+}
+
+.wallet-content {
+    flex: 1;
+}
+
+.wallet-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.wallet-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+}
+
+.wallet-description strong {
+    color: var(--warning);
+}
+
+.wallet-address {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.btn-link-wallet {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-link-wallet::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-link-wallet:hover::before {
+    left: 100%;
+}
+
+.btn-link-wallet:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+}
+
+.btn-link-wallet:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.wallet-btn-icon {
+    font-size: 1.3rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.btn-link-wallet.loading .wallet-btn-text {
+    opacity: 0;
+}
+
+.btn-link-wallet.loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-left: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wallet-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+    
+    .wallet-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+    }
+}
+
+
+
+/* ============================================
+   ESTILOS PARA REGISTRO DE EMAIL
+   ============================================ */
+
+.email-register-section {
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 0.6s ease;
+}
+
+.email-card {
+    background: rgba(26, 26, 36, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.email-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+}
+
+.email-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+}
+
+.email-content {
+    flex: 1;
+}
+
+.email-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.email-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+}
+
+.email-description strong {
+    color: var(--warning);
+}
+
+.btn-register-email {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-register-email::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-register-email:hover::before {
+    left: 100%;
+}
+
+.btn-register-email:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+}
+
+.email-btn-icon {
+    font-size: 1.3rem;
+}
+
+/* ============================================
+   MODAL DE REGISTRO
+   ============================================ */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-container {
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.modal-overlay.show .modal-container {
+    transform: scale(1);
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.modal-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.5rem;
+    color: var(--text);
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-with-icon {
+    width: 100%;
+    background: rgba(37, 37, 50, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem 3rem 1rem 1.2rem;
+    color: var(--text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.input-with-icon:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    background: rgba(37, 37, 50, 0.7);
+}
+
+.input-with-icon::placeholder {
+    color: var(--text-secondary);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    padding: 0.5rem;
+    transition: transform 0.2s ease;
+    outline: none;
+}
+
+.password-toggle:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+.validation-message {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn-modal-cancel {
+    flex: 1;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: var(--primary);
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.btn-modal-cancel:hover {
+    background: rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-modal-submit {
+    flex: 1;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    outline: none;
+}
+
+.btn-modal-submit::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-modal-submit:hover::before {
+    left: 100%;
+}
+
+.btn-modal-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+}
+
+.btn-modal-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .email-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+    
+    .email-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+    }
+    
+    .modal-container {
+        padding: 2rem 1.5rem;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+/* Sección de email pendiente de verificación */
+.email-pending-section {
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 0.6s ease;
+}
+
+/* ============================================
+   ESTILOS PARA CAMBIO DE EMAIL Y CONTRASEÑA
+   ============================================ */
+
+.change-credentials-section {
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 0.6s ease;
+}
+
+.credentials-card {
+    background: rgba(26, 26, 36, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.credentials-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+}
+
+.credentials-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.credentials-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.credentials-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.current-value {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1rem;
+    font-family: 'Courier New', monospace;
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.credentials-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.6;
+}
+
+.btn-change-credential {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: rgb(246, 244, 255);
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.btn-change-credential:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+}
+
+.btn-change-credential:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.attempts-info {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.8rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .credentials-card {
+        padding: 1.5rem;
+    }
+    
+    .credentials-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Theme Selector Section */
+.theme-selector-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeInUp 0.6s ease;
+}
+
+.theme-selector-container {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.theme-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    min-height: 120px;
+    background: rgb(15 15 20 / 16%);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem;
+}
+
+/* Efecto de brillo al hover */
+.theme-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.theme-btn:hover::before {
+    left: 100%;
+}
+
+.theme-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.5);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+
+/* Botón activo */
+.theme-btn.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+    border: 2px solid var(--primary);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px) scale(1.05);
+}
+
+/* Animación de pulso para el botón activo */
+.theme-btn.active::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    transform: translate(-50%, -50%);
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+.theme-icon {
+    font-size: 2.5rem;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+}
+
+.theme-btn:hover .theme-icon {
+    transform: scale(1.15) rotate(-5deg);
+}
+
+.theme-btn.active .theme-icon {
+    transform: scale(1.2);
+    animation: iconBounce 0.6s ease;
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.3); }
+}
+
+.theme-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.theme-btn:hover .theme-label {
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+.theme-btn.active .theme-label {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .theme-selector-container {
+        gap: 1rem;
+    }
+    
+    .theme-btn {
+        min-height: 10px;
+        padding: 0.5rem;
+    }
+    
+    .theme-icon {
+        font-size: 1.5rem;
+    }
+    
+    .theme-label {
+        font-size: 0.95rem;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <!-- Fondo animado -->
+    <div class="bg-animation"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+           <div class="logo" onclick="goToHome()" data-translated="true">
+  <img src="/icons/logo72.png" alt="ChainFeed logo" data-translated="true">
+  <span data-translated="true">ChainFeed</span>
+</div>
+<!-- Navbar actualizada con iconos SVG -->
+<div class="nav-actions">
+
+            <a href="https://chainfeed.space/market" class="nav-btn" style="height: 25px;" title="Market">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+    </a>
+    <a href="https://chainfeed.space/juegos" class="nav-btn" style="height: 25px;" title="Juegos">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 5h3.5a5 5 0 0 1 0 10h-5.5l-4.015 4.227a2.3 2.3 0 0 1 -3.923 -2.035l1.634 -8.173a5 5 0 0 1 4.904 -4.019h3.4" />
+        <path d="M14 15l4.07 4.284a2.3 2.3 0 0 0 3.925 -2.023l-1.6 -8.232" />
+        <path d="M8 9v2" />
+        <path d="M7 10h2" />
+        <path d="M14 10h2" />
+    </svg>
+</a>
+    <a href="https://chainfeed.space/chat" class="nav-btn" style="height: 25px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span class="notification-badge empty" id="messagesBadge">0</span>
+    </a>
+    <a href="https://chainfeed.space/notificaciones" class="nav-btn" style="height: 25px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="notification-badge empty" id="notificationsBadge">0</span>
+    </a>
+</div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="settings-container">
+            <!-- Header -->
+            <div class="settings-header">
+                <h1 class="settings-title">Configuración del Perfil</h1>
+                <p class="settings-subtitle">Personaliza tu información y actualiza tu perfil</p>
+                <div class="current-user-info" id="currentUserInfo">
+                    Editando perfil de:  <strong id="currentUserDisplay"> Cargando...</strong>
+                </div>
+            </div>
+
+            <!-- Theme Selector Section -->
+<div class="theme-selector-section">
+    <div class="theme-selector-container">
+        <button class="theme-btn" id="lightModeBtn" data-theme="light">
+            <div class="theme-icon">☀️</div>
+            <span class="theme-label">Claro</span>
+        </button>
+        
+        <button class="theme-btn active" id="darkModeBtn" data-theme="dark">
+            <div class="theme-icon">🌙</div>
+            <span class="theme-label">Oscuro</span>
+        </button>
+    </div>
+</div>
+
+                        <!-- ✅ NUEVO: Sección de Vinculación de Wallet -->
+            <div class="wallet-link-section" id="walletLinkSection" style="display: none;">
+                <div class="wallet-card">
+                    <div class="wallet-icon">🔐</div>
+                    <div class="wallet-content">
+                        <h3 class="wallet-title">Vincular Wallet WebAuth</h3>
+                        <p class="wallet-description">
+                            Conecta tu billetera Proton para acceder a funciones avanzadas de blockchain.
+                            <strong>Una vez vinculada, no podrás cambiarla.</strong>
+                        </p>
+                        <button type="button" class="btn-link-wallet" id="linkWalletBtn" onclick="linkProtonWallet()">
+                            <span class="wallet-btn-icon">⚡</span>
+                            <span class="wallet-btn-text">Conectar Billetera</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="email-register-section" id="emailRegisterSection" style="display: none;">
+    <div class="email-card">
+        <div class="email-icon">📧</div>
+        <div class="email-content">
+            <h3 class="email-title">Registrar Email y Contraseña</h3>
+            <p class="email-description">
+                Vincula un email a tu cuenta de wallet para poder iniciar sesión con email.
+                <strong>Podrás alternar entre ambos métodos de login.</strong>
+            </p>
+            <button type="button" class="btn-register-email" onclick="openEmailRegisterModal()">
+                <span class="email-btn-icon">✉️</span>
+                <span>Registrar Email</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="email-pending-section" id="emailPendingSection" style="display: none;">
+    <div class="email-card" style="border-color: var(--warning); background: rgba(245, 158, 11, 0.05);">
+        <div class="email-icon" style="background: linear-gradient(135deg, var(--warning), #d97706);">⚠️</div>
+        <div class="email-content">
+            <h3 class="email-title">Email Pendiente de Verificación</h3>
+            <p class="email-description">
+                Tu email está registrado pero aún no ha sido verificado.
+            </p>
+            
+            <!-- Email registrado -->
+            <div style="background: rgba(245, 158, 11, 0.1); padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 1.2rem;">
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem;">📧 Email registrado:</p>
+                <p style="font-family: 'Courier New', monospace; font-size: 1rem; color: var(--warning); font-weight: 600; margin-bottom: 0;" id="pendingEmailAddress">Loading...</p>
+            </div>
+            
+            <p class="email-description" style="margin-bottom: 1.2rem;">
+                Revisa tu bandeja de entrada y haz clic en el enlace de verificación. Si no lo encuentras, revisa tu carpeta de spam.
+            </p>
+            
+            <!-- Botón de reenvío -->
+            <button 
+                type="button" 
+                class="btn-register-email" 
+                id="resendCodeBtnFixed"
+                onclick="resendVerificationCodeFixed()"
+            >
+                <span class="email-btn-icon">📬</span>
+                <span>Reenviar Código</span>
+            </button>
+            
+            <!-- Contador de intentos -->
+            <p id="resendAttemptsTextFixed" style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.8rem; text-align: center;">
+                Intentos restantes: 3/3
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="wallet-linked-section" id="walletEmailVerifiedSection" style="display: none;">
+    <div class="wallet-card linked">
+        <div class="wallet-icon">✅</div>
+        <div class="wallet-content">
+            <h3 class="wallet-title">Cuenta Completamente Verificada</h3>
+            <p class="wallet-description" style="margin-bottom: 1rem;">
+                Tu cuenta tiene ambos métodos de acceso configurados:
+            </p>
+            
+            <!-- Wallet Info -->
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 0.8rem;">
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem;">🔐 Wallet vinculada:</p>
+                <p class="wallet-address" id="verifiedWalletAddress" style="margin-bottom: 0;">Loading...</p>
+            </div>
+            
+            <!-- Email Info -->
+            <div style="background: rgba(99, 102, 241, 0.1); padding: 0.8rem 1rem; border-radius: 8px;">
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem;">📧 Email registrado:</p>
+                <p style="font-family: 'Courier New', monospace; font-size: 1rem; color: var(--primary); font-weight: 600; margin-bottom: 0;" id="verifiedEmail">Loading...</p>
+            </div>
+            
+            <p class="wallet-description" style="margin-top: 1.2rem; margin-bottom: 0;">
+                Puedes iniciar sesión con cualquiera de los dos métodos.
+            </p>
+        </div>
+    </div>
+</div>
+
+            <!-- Settings Form -->
+            <form class="settings-form" id="settingsForm">
+                <!-- Avatar Section -->
+                <div class="avatar-section">
+                    <div class="current-avatar" id="currentAvatar" onclick="document.getElementById('avatarInput').click()">
+                        <img src="" alt="" class="avatar-preview" id="avatarPreview" style="display: none;">
+                        <span id="avatarInitial">U</span>
+                        <div class="avatar-overlay">
+                            <span style="font-size: 1.5rem;">📷</span>
+                        </div>
+                    </div>
+                    <button type="button" class="change-avatar-btn" onclick="document.getElementById('avatarInput').click()">
+                        Cambiar Foto
+                    </button>
+                    <input type="file" id="avatarInput" class="avatar-input" accept="image/*" onchange="handleAvatarChange(event)">
+                </div>
+
+
+<!-- Language Selector Section -->
+<div class="language-selector-section">
+    <label class="language-label">Idioma / Language</label>
+    <div id="language-selector"></div>
+</div>
+
+<!-- 🔔 Sección de Notificaciones Push -->
+<!-- 🔔 Sección de Notificaciones Push -->
+<div class="notification-settings-section" style="margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+    <div style="text-align: center;">
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            Notificaciones Push
+        </h3>
+        
+        <div id="pushStatusContainer">
+            <!-- Estado: No soportado -->
+            <div id="pushNotSupported" style="display: none;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+                    ⚠️ Tu navegador no soporta notificaciones push
+                </p>
+            </div>
+            
+            <!-- Estado: Activadas -->
+            <div id="pushEnabled" style="display: none;">
+                
+                <button 
+                    type="button" 
+                    onclick="disablePushNotifications()" 
+                    id="disablePushBtn"
+                    style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--error); padding: 0.8rem 1.5rem; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem; outline: none;"
+                    onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'; this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.transform='translateY(0)'"
+                >
+                    <span style="font-size: 1.2rem;">🔕</span>
+                    <span>Desactivar Notificaciones</span>
+                </button>
+            </div>
+            
+            <!-- Estado: Desactivadas -->
+            <div id="pushDisabled" style="display: none;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.2rem;">
+                    Recibe notificaciones en tiempo real de tu actividad en ChainFeed
+                </p>
+                <button 
+                    type="button" 
+                    onclick="enablePushNotifications()" 
+                    id="enablePushBtn"
+                    style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.8rem; outline: none;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(99, 102, 241, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                >
+                    <span style="font-size: 1.3rem;">🔔</span>
+                    <span>Activar Notificaciones</span>
+                </button>
+            </div>
+            
+            <!-- Estado: Bloqueadas -->
+            <div id="pushBlocked" style="display: none;">
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;">
+                    <p style="color: var(--error); font-size: 0.95rem; margin: 0 0 0.5rem 0; font-weight: 600;">
+                        🚫 Notificaciones bloqueadas
+                    </p>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0; line-height: 1.5;">
+                        Para activarlas, debes permitirlas desde la configuración de tu navegador
+                    </p>
+                </div>
+                <div style="background: rgba(37, 37, 50, 0.5); border-radius: 12px; padding: 1.2rem; text-align: left;">
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.8; margin: 0;">
+                        <strong style="color: var(--text);">Chrome/Edge:</strong> Click en el candado 🔒 → Permisos → Notificaciones → Permitir<br>
+                        <strong style="color: var(--text);">Firefox:</strong> Click en el candado 🔒 → Permisos → Notificaciones → Permitir<br>
+                        <strong style="color: var(--text);">Safari:</strong> Preferencias → Sitios web → Notificaciones
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+function showConfirmModal(title, message, cancelText, confirmText) {
+    return new Promise((resolve) => {
+        // Crear overlay del modal
+        const modal = document.createElement('div');
+        modal.className = 'confirm-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        `;
+        
+        // Crear contenedor del modal
+        modal.innerHTML = `
+            <div class="confirm-modal-content" style="
+                background: var(--dark-secondary);
+                border-radius: 20px;
+                padding: 2rem;
+                max-width: 400px;
+                width: 90%;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                transform: scale(0.9);
+                transition: transform 0.3s ease;
+            ">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.3rem; font-weight: 700; color: var(--text);">${title}</h3>
+                <p style="margin: 0 0 2rem 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">${message}</p>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="modal-cancel-btn" style="
+                        background: rgba(255, 255, 255, 0.1);
+                        color: var(--text-secondary);
+                        border: none;
+                        padding: 0.8rem 1.5rem;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-weight: 600;
+                        font-size: 0.95rem;
+                    ">${cancelText}</button>
+                    <button class="modal-confirm-btn" style="
+                        background: linear-gradient(135deg, var(--error), #dc2626);
+                        color: white;
+                        border: none;
+                        padding: 0.8rem 1.5rem;
+                        border-radius: 10px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-weight: 600;
+                        font-size: 0.95rem;
+                    ">${confirmText}</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Animar entrada
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.querySelector('.confirm-modal-content').style.transform = 'scale(1)';
+        }, 10);
+        
+        // Agregar efectos hover
+        const cancelBtn = modal.querySelector('.modal-cancel-btn');
+        const confirmBtn = modal.querySelector('.modal-confirm-btn');
+        
+        cancelBtn.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(255, 255, 255, 0.15)';
+            this.style.transform = 'translateY(-2px)';
+        });
+        cancelBtn.addEventListener('mouseleave', function() {
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+            this.style.transform = 'translateY(0)';
+        });
+        
+        confirmBtn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.4)';
+        });
+        confirmBtn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+        
+        // Función para cerrar modal
+        function closeModal(result) {
+            modal.style.opacity = '0';
+            modal.querySelector('.confirm-modal-content').style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                modal.remove();
+                resolve(result);
+            }, 300);
+        }
+        
+        // Event listeners
+        cancelBtn.addEventListener('click', () => closeModal(false));
+        confirmBtn.addEventListener('click', () => closeModal(true));
+        
+        // Cerrar al hacer click fuera del modal
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(false);
+            }
+        });
+        
+        // Cerrar con tecla ESC
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                closeModal(false);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    });
+}
+
+async function checkPushStatus() {
+    if (!window.pushManager || !window.pushManager.isSupported) {
+        document.getElementById('pushNotSupported').style.display = 'block';
+        return;
+    }
+    
+    // 🔥 Cargar estado desde BD primero
+    console.log('🔄 Verificando estado de notificaciones...');
+    const dbState = await loadNotificationStateFromDB();
+    console.log('📊 Estado desde BD:', dbState);
+    
+    const status = await window.pushManager.checkSubscriptionStatus();
+    console.log('📊 Estado local:', status);
+    
+    // Ocultar todos primero
+    document.getElementById('pushEnabled').style.display = 'none';
+    document.getElementById('pushDisabled').style.display = 'none';
+    document.getElementById('pushBlocked').style.display = 'none';
+    
+    if (status.permission === 'denied') {
+        console.log('🚫 Notificaciones bloqueadas por el navegador');
+        document.getElementById('pushBlocked').style.display = 'block';
+    } else if (dbState.enabled && status.isActive) {
+        // 🔥 Verificar tanto BD como estado local
+        console.log('✅ Notificaciones ACTIVADAS');
+        document.getElementById('pushEnabled').style.display = 'block';
+    } else {
+        console.log('⚠️ Notificaciones DESACTIVADAS');
+        document.getElementById('pushDisabled').style.display = 'block';
+    }
+}
+
+// Activar notificaciones desde el botón
+async function enablePushNotifications() {
+    console.log('🟢 [DEBUG] Iniciando enablePushNotifications()');
+    const btn = document.getElementById('enablePushBtn');
+    
+    if (!btn) {
+        console.error('❌ [DEBUG] Botón enablePushBtn no encontrado');
+        return;
+    }
+    
+    const originalHTML = btn.innerHTML;
+    console.log('📝 [DEBUG] HTML original del botón:', originalHTML);
+    
+    try {
+        console.log('⏳ [DEBUG] Cambiando estado del botón a "Activando..."');
+        btn.innerHTML = '<span>⏳</span><span>Activando...</span>';
+        btn.disabled = true;
+        
+        console.log('🔔 [DEBUG] Llamando a window.pushManager.requestPermission()...');
+        const success = await window.pushManager.requestPermission();
+        console.log('📊 [DEBUG] Resultado de requestPermission:', success);
+        
+        if (success) {
+            console.log('✅ [DEBUG] Notificaciones activadas exitosamente');
+            
+            // 🔥 RESTAURAR BOTÓN ANTES de cambiar la vista
+            console.log('🔄 [DEBUG] Restaurando estado del botón antes de checkPushStatus');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+            
+            showNotification('✅ Notificaciones activadas correctamente', 'success');
+            
+            console.log('⏱️ [DEBUG] Esperando 500ms para sincronización...');
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            console.log('🔍 [DEBUG] Llamando a checkPushStatus()...');
+            await checkPushStatus();
+            console.log('✅ [DEBUG] checkPushStatus() completado');
+        } else {
+            console.warn('⚠️ [DEBUG] Permisos denegados por el usuario');
+            showNotification('⚠️ Permisos denegados', 'error');
+            
+            console.log('🔄 [DEBUG] Restaurando botón (permisos denegados)');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+            
+            await checkPushStatus();
+        }
+    } catch (error) {
+        console.error('❌ [DEBUG] Error en enablePushNotifications:', error);
+        console.error('❌ [DEBUG] Stack trace:', error.stack);
+        showNotification('❌ Error activando notificaciones', 'error');
+        
+        console.log('🔄 [DEBUG] Restaurando botón (error)');
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    }
+}
+
+// Desactivar notificaciones
+// Desactivar notificaciones
+async function disablePushNotifications() {
+    console.log('🔴 [DEBUG] Iniciando disablePushNotifications()');
+    
+    // Mostrar modal de confirmación personalizado
+    const confirmed = await showConfirmModal(
+        '🔕 Desactivar Notificaciones',
+        '¿Estás seguro de que quieres desactivar las notificaciones push? Dejarás de recibir alertas en tiempo real.',
+        'Cancelar',
+        'Desactivar'
+    );
+    
+    if (!confirmed) {
+        console.log('❌ [DEBUG] Usuario canceló la desactivación');
+        return;
+    }
+    
+    const btn = document.getElementById('disablePushBtn');
+    
+    if (!btn) {
+        console.error('❌ [DEBUG] Botón disablePushBtn no encontrado');
+        return;
+    }
+    
+    const originalHTML = btn.innerHTML;
+    console.log('📝 [DEBUG] HTML original del botón:', originalHTML);
+    
+    try {
+        console.log('⏳ [DEBUG] Cambiando estado del botón a "Desactivando..."');
+        btn.innerHTML = '<span>⏳</span><span>Desactivando...</span>';
+        btn.disabled = true;
+        
+        console.log('🔕 [DEBUG] Llamando a window.pushManager.disableNotifications()...');
+        const success = await window.pushManager.disableNotifications();
+        console.log('📊 [DEBUG] Resultado de disableNotifications:', success);
+        
+        if (success) {
+            console.log('✅ [DEBUG] Notificaciones desactivadas exitosamente');
+            
+            // 🔥 RESTAURAR BOTÓN ANTES de cambiar la vista
+            console.log('🔄 [DEBUG] Restaurando estado del botón antes de checkPushStatus');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+            
+            showNotification('✅ Notificaciones desactivadas correctamente', 'success');
+            
+            console.log('⏱️ [DEBUG] Esperando 500ms para sincronización...');
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            console.log('🔍 [DEBUG] Llamando a checkPushStatus()...');
+            await checkPushStatus();
+            console.log('✅ [DEBUG] checkPushStatus() completado');
+        } else {
+            console.warn('⚠️ [DEBUG] disableNotifications() retornó false');
+            showNotification('❌ Error al desactivar notificaciones', 'error');
+            
+            console.log('🔄 [DEBUG] Restaurando botón (error en desactivación)');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error('❌ [DEBUG] Error en disablePushNotifications:', error);
+        console.error('❌ [DEBUG] Stack trace:', error.stack);
+        showNotification('❌ Error al desactivar notificaciones', 'error');
+        
+        console.log('🔄 [DEBUG] Restaurando botón (excepción capturada)');
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    }
+}
+
+// Verificar al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(checkPushStatus, 1000);
+});
+</script>
+
+                <!-- Username Field -->
+                <div class="form-group">
+                    <label for="username" class="form-label">Nombre de Usuario</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        class="form-input" 
+                        placeholder="Ej: juan_perez"
+                        maxlength="30"
+                        readonly
+                        style="background: rgba(37, 37, 50, 0.3); cursor: not-allowed;"
+                    >
+                    <div class="input-hint">El nombre de usuario no se puede cambiar</div>
+                </div>
+
+                <!-- Display Name Field -->
+                <div class="form-group">
+                    <label for="displayName" class="form-label">Nombre Público</label>
+                    <input 
+                        type="text" 
+                        id="displayName" 
+                        class="form-input" 
+                        placeholder="Ej: Juan Pérez"
+                        maxlength="50"
+                        oninput="updateCharacterCount('displayName', 'nameCount', 50); updateAvatarInitial()"
+                    >
+                    <div class="input-hint">Este es tu nombre público que otros verán en tu perfil</div>
+                    <div class="character-count" id="nameCount">0/50</div>
+                    <div class="error-message" id="nameError">El nombre público es requerido</div>
+                </div>
+
+                <div class="change-credentials-section" id="changeEmailSection" style="display: none;">
+    <div class="credentials-card">
+        <div class="credentials-header">
+            <div class="credentials-icon">📧</div>
+            <h3 class="credentials-title">Cambiar Email</h3>
+        </div>
+        
+        <div class="current-value">
+            <strong>Email actual:</strong> <span id="currentEmailDisplay">Cargando...</span>
+        </div>
+        
+        <p class="credentials-description">
+            Puedes cambiar tu email actual. Se enviará un código de verificación al nuevo email para confirmar el cambio.
+        </p>
+        
+        <button type="button" class="btn-change-credential" id="changeEmailBtn" onclick="openChangeEmailModal()">
+            <span>✉️</span>
+            <span>Cambiar Email</span>
+        </button>
+        
+        <p class="attempts-info" id="emailChangeAttemptsText">Intentos restantes: 3/3</p>
+    </div>
+</div>
+
+<!-- Sección de Cambiar Contraseña -->
+<div class="change-credentials-section" id="changePasswordSection" style="display: none;">
+    <div class="credentials-card">
+        <div class="credentials-header">
+            <div class="credentials-icon">🔑</div>
+            <h3 class="credentials-title">Cambiar Contraseña</h3>
+        </div>
+        
+        <p class="credentials-description">
+            Actualiza tu contraseña para mantener tu cuenta segura. Necesitarás tu contraseña actual para confirmar el cambio.
+        </p>
+        
+        <button type="button" class="btn-change-credential" id="changePasswordBtn" onclick="openChangePasswordModal()">
+            <span>🔐</span>
+            <span>Cambiar Contraseña</span>
+        </button>
+        
+        <p class="attempts-info" id="passwordChangeAttemptsText">Intentos restantes: 3/3</p>
+    </div>
+</div>
+
+
+                <!-- Bio Field -->
+                <div class="form-group">
+                    <label for="bio" class="form-label">Descripción</label>
+                    <textarea 
+                        id="bio" 
+                        class="form-input form-textarea" 
+                        placeholder="Cuéntanos sobre ti... Puedes incluir tus intereses, profesión, o lo que te apasiona del mundo crypto y blockchain."
+                        maxlength="160"
+                        oninput="updateCharacterCount('bio', 'bioCount', 160)"
+                    ></textarea>
+                    <div class="input-hint">Describe brevemente quién eres y qué te interesa</div>
+                    <div class="character-count" id="bioCount">0/160</div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="#" class="btn-secondary" onclick="cancelEdit()">Cancelar</a>
+                    <button type="submit" class="btn-primary" id="saveBtn">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        ✅ Perfil actualizado correctamente
+    </div>
+
+    <script>
+        // ============================================
+        // SISTEMA DE AUTENTICACIÓN Y PERFIL CON BD
+        // ============================================
+
+        // Variables globales
+        let currentUser = null;
+        let originalUserData = null;
+        let currentUserData = null;
+        let hasAvatarChanged = false;
+
+        // ============================================
+        // FUNCIONES DE AUTENTICACIÓN
+        // ============================================
+
+        /**
+         * Obtener usuario logueado desde localStorage
+         */
+        function getCurrentUser() {
+            try {
+                const savedUser = localStorage.getItem('chainfeed_user');
+                const savedSession = localStorage.getItem('chainfeed_session');
+                
+                if (savedUser && savedSession) {
+                    const sessionData = JSON.parse(savedSession);
+                    const sessionAge = Date.now() - sessionData.timestamp;
+                    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 días
+                    
+                    if (sessionAge < maxAge) {
+                        const userData = JSON.parse(savedUser);
+                        return userData.username;
+                    } else {
+                        // Sesión expirada
+                        localStorage.removeItem('chainfeed_user');
+                        localStorage.removeItem('chainfeed_session');
+                        return null;
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error obteniendo usuario actual:', error);
+                return null;
+            }
+        }
+
+        /**
+         * Obtener datos del perfil del usuario desde la BD
+         */
+        async function getUserProfile() {
+            try {
+                showLoadingOverlay(true);
+                
+                const response = await fetch('php/obtener_perfil.php', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    return {
+                        id: data.profile.id,
+                        username: data.profile.username,
+                        displayName: data.profile.display_name,
+                        bio: data.profile.bio,
+                        avatar: data.profile.avatar_url,
+                        website: data.profile.website,
+                        location: data.profile.location,
+                        verified: data.profile.verified,
+                        tokenBalance: data.profile.token_balance,
+                        stats: data.profile.stats,
+                        memberSince: data.profile.member_since,
+                        lastUpdated: data.profile.last_updated
+                    };
+                } else {
+                    throw new Error(data.message || 'Error al obtener perfil');
+                }
+            } catch (error) {
+                console.error('Error obteniendo perfil del usuario:', error);
+                showNotification('❌ Error al cargar el perfil: ' + error.message, 'error');
+                return null;
+            } finally {
+                showLoadingOverlay(false);
+            }
+        }
+
+        /**
+         * Generar avatar usando DiceBear
+         */
+        function generateAvatar(seed, size = 120) {
+            const styles = ['avataaars', 'bottts', 'fun-emoji', 'micah', 'miniavs'];
+            const style = styles[Math.floor(Math.random() * styles.length)];
+            return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}&backgroundColor=6366f1,a855f7,ec4899`;
+        }
+
+        /**
+         * Generar iniciales para avatar
+         */
+        function generateAvatarInitials(name) {
+            if (!name) return 'U';
+            
+            const words = name.trim().split(' ');
+            let initials = '';
+            
+            if (words.length >= 2) {
+                initials = words[0][0] + words[1][0];
+            } else if (words.length === 1 && words[0].length >= 2) {
+                initials = words[0][0] + words[0][1];
+            } else {
+                initials = words[0][0] + 'U';
+            }
+            
+            return initials.toUpperCase();
+        }
+
+        // ============================================
+        // INICIALIZACIÓN DE LA APP
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            // Obtener usuario actual
+            currentUser = getCurrentUser();
+            
+            if (!currentUser) {
+                showNotification('⚠️ Debes iniciar sesión para editar tu perfil', 'error');
+                setTimeout(() => {
+                    window.location.href = 'https://chainfeed.space/';
+                }, 2000);
+                return;
+            }
+
+            // Cargar interfaz
+            loadUserInterface();
+
+            // Obtener datos del perfil desde la BD
+            originalUserData = await getUserProfile();
+            
+            if (!originalUserData) {
+                showNotification('❌ Error al cargar los datos del perfil', 'error');
+                return;
+            }
+
+            currentUserData = { ...originalUserData }; // Copia para edición
+            loadUserData();
+
+             await checkWalletLink();
+             await checkEmailRegistrationMain();
+        }
+
+        function loadUserInterface() {
+            document.getElementById('currentUserDisplay').textContent = ` @${currentUser}`;
+        }
+
+        function loadUserData() {
+            // Cargar avatar
+            loadAvatar();
+            
+            // Cargar campos del formulario
+            document.getElementById('username').value = currentUserData.username || '';
+            document.getElementById('displayName').value = currentUserData.displayName || '';
+            document.getElementById('bio').value = currentUserData.bio || '';
+            
+            // Actualizar contadores
+            updateCharacterCount('displayName', 'nameCount', 50);
+            updateCharacterCount('bio', 'bioCount', 160);
+            
+            // Actualizar iniciales del avatar
+            updateAvatarInitial();
+        }
+
+        function loadAvatar() {
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarInitial = document.getElementById('avatarInitial');
+            
+            if (currentUserData.avatar) {
+                avatarPreview.src = currentUserData.avatar;
+                avatarPreview.style.display = 'block';
+                avatarInitial.style.display = 'none';
+                
+                avatarPreview.onerror = function() {
+                    this.style.display = 'none';
+                    avatarInitial.style.display = 'flex';
+                    avatarInitial.textContent = generateAvatarInitials(currentUserData.displayName || currentUserData.username);
+                };
+            } else {
+                // Usar avatar generado o iniciales
+                const generatedAvatar = generateAvatar(currentUserData.username);
+                avatarPreview.src = generatedAvatar;
+                avatarPreview.style.display = 'block';
+                avatarInitial.style.display = 'none';
+                
+                avatarPreview.onerror = function() {
+                    this.style.display = 'none';
+                    avatarInitial.style.display = 'flex';
+                    avatarInitial.textContent = generateAvatarInitials(currentUserData.displayName || currentUserData.username);
+                };
+            }
+        }
+
+        // ============================================
+        // FUNCIONES DE EDICIÓN
+        // ============================================
+
+async function handleAvatarChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+        showNotification('❌ Por favor selecciona un archivo de imagen válido', 'error');
+        return;
+    }
+
+    try {
+        // 🔥 USAR IMAGECOMPRESSOR PARA AVATARES
+        const compressor = new ImageCompressor({
+            maxHeight: 600,  // Avatares más pequeños
+            quality: 0.80,   // Buena calidad
+            format: 'image/jpeg',
+            forceVertical: false  // Mantener proporción original
+        });
+
+        showNotification('⏳ Comprimiendo imagen...', 'info');
+        
+        const { file: compressedFile, stats } = await compressor.compress(file);
+        
+        console.log('📊 Estadísticas:', stats);
+        
+        // Validar tamaño comprimido
+        if (compressedFile.size > 2 * 1024 * 1024) {
+            showNotification('❌ La imagen sigue siendo muy pesada. Intenta con una más pequeña.', 'error');
+            return;
+        }
+
+        // Actualizar input con archivo comprimido
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(compressedFile);
+        document.getElementById('avatarInput').files = dataTransfer.files;
+
+        // Mostrar preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarInitial = document.getElementById('avatarInitial');
+            
+            avatarPreview.src = e.target.result;
+            avatarPreview.style.display = 'block';
+            avatarInitial.style.display = 'none';
+            
+            hasAvatarChanged = true;
+            
+            // Mostrar estadísticas
+            const savings = stats.savingsPercent;
+            const originalSize = (stats.originalSize / 1024 / 1024).toFixed(2);
+            const finalSize = (stats.compressedSize / 1024 / 1024).toFixed(2);
+            
+            showNotification(
+                `✅ Avatar optimizado\n${originalSize}MB → ${finalSize}MB (${savings}% menor)`,
+                'success'
+            );
+        };
+        
+        reader.readAsDataURL(compressedFile);
+
+    } catch (error) {
+        console.error('Error comprimiendo:', error);
+        showNotification('❌ ' + error.message, 'error');
+    }
+}
+
+        function updateCharacterCount(inputId, countId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(countId);
+            const currentLength = input.value.length;
+            
+            counter.textContent = `${currentLength}/${maxLength}`;
+            
+            // Cambiar color según proximidad al límite
+            counter.className = 'character-count';
+            if (currentLength > maxLength * 0.9) {
+                counter.classList.add('warning');
+            }
+            if (currentLength === maxLength) {
+                counter.classList.add('error');
+            }
+        }
+
+        function updateAvatarInitial() {
+            const displayName = document.getElementById('displayName').value;
+            const avatarInitial = document.getElementById('avatarInitial');
+            
+            if (displayName && avatarInitial.style.display !== 'none') {
+                avatarInitial.textContent = generateAvatarInitials(displayName);
+            }
+        }
+
+        // ============================================
+        // VALIDACIÓN Y GUARDADO
+        // ============================================
+
+        function validateForm() {
+            let isValid = true;
+            
+            // Validar nombre público
+            const displayName = document.getElementById('displayName').value.trim();
+            const nameError = document.getElementById('nameError');
+            
+            if (!displayName) {
+                nameError.textContent = 'El nombre público es requerido';
+                nameError.classList.add('show');
+                isValid = false;
+            } else if (displayName.length < 2) {
+                nameError.textContent = 'El nombre debe tener al menos 2 caracteres';
+                nameError.classList.add('show');
+                isValid = false;
+            } else {
+                nameError.classList.remove('show');
+            }
+            
+            return isValid;
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.textContent;
+            
+            // Mostrar estado de carga
+            saveBtn.classList.add('btn-loading');
+            saveBtn.disabled = true;
+            
+            try {
+                const avatarFile = document.getElementById('avatarInput').files[0];
+                const displayName = document.getElementById('displayName').value.trim();
+                const bio = document.getElementById('bio').value.trim();
+                
+                let response;
+                
+                if (avatarFile) {
+                    // Enviar con archivo usando FormData
+                    const formData = new FormData();
+                    formData.append('display_name', displayName);
+                    formData.append('bio', bio);
+                    formData.append('avatar', avatarFile);
+                    
+                    response = await fetch('php/actualizar_perfil.php', {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                } else {
+                    // Enviar sin archivo usando JSON
+                    response = await fetch('php/actualizar_perfil.php', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            display_name: displayName,
+                            bio: bio
+                        })
+                    });
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar localStorage con los nuevos datos
+                    if (data.user_data) {
+                        localStorage.setItem('chainfeed_user', JSON.stringify(data.user_data));
+                    }
+                    
+                    // Actualizar datos locales
+                    originalUserData = {
+                        ...originalUserData,
+                        displayName: data.profile.display_name,
+                        bio: data.profile.bio,
+                        avatar: data.profile.avatar_url
+                    };
+                    
+                    currentUserData = { ...originalUserData };
+                    hasAvatarChanged = false;
+                    
+                    // Limpiar input de archivo
+                    document.getElementById('avatarInput').value = '';
+                    
+                    showSuccessMessage();
+                    
+                    setTimeout(() => {
+                        goToProfile();
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Error al actualizar perfil');
+                }
+                
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                showNotification('❌ Error al guardar los cambios: ' + error.message, 'error');
+            } finally {
+                // Restaurar botón
+                saveBtn.classList.remove('btn-loading');
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+            }
+        });
+
+        // ============================================
+        // NAVEGACIÓN
+        // ============================================
+
+        function goToHome() {
+            window.location.href = 'https://chainfeed.space/inicio';
+        }
+
+        function goToProfile() {
+            window.location.href = `https://chainfeed.space/perfil?user=${currentUser}`;
+        }
+
+async function cancelEdit() {
+    if (hasUnsavedChanges()) {
+        const confirmed = await showConfirmModal(
+            '⚠️ Cambios sin Guardar',
+            'Tienes cambios sin guardar en tu perfil. ¿Estás seguro de que quieres salir sin guardar?',
+            'Seguir Editando',
+            'Salir sin Guardar'
+        );
+        
+        if (confirmed) {
+            goToProfile();
+        }
+    } else {
+        goToProfile();
+    }
+}
+
+        function hasUnsavedChanges() {
+            const currentDisplayName = document.getElementById('displayName').value.trim();
+            const currentBio = document.getElementById('bio').value.trim();
+            const avatarFile = document.getElementById('avatarInput').files[0];
+            
+            return (
+                currentDisplayName !== (originalUserData.displayName || '') ||
+                currentBio !== (originalUserData.bio || '') ||
+                hasAvatarChanged ||
+                avatarFile
+            );
+        }
+
+        // ============================================
+        // FUNCIONES AUXILIARES
+        // ============================================
+
+        function showLoadingOverlay(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.classList.add('show');
+            } else {
+                overlay.classList.remove('show');
+            }
+        }
+
+        function showSuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.add('show');
+            
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        function showNotification(message, type = "info") {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 2rem;
+                background: rgba(26, 26, 36, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                color: white;
+                animation: slideInRight 0.3s ease;
+                z-index: 10000;
+                max-width: 350px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                ${type === 'error' ? 'border-left: 4px solid #ef4444;' : ''}
+                ${type === 'success' ? 'border-left: 4px solid #10b981;' : ''}
+            `;
+            
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">${icon}</div>
+                    <div style="font-size: 0.95rem;">${message}</div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Añadir estilos para las animaciones
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Efectos de scroll para navbar
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Animación suave para los campos de formulario
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.transition = 'transform 0.3s ease';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Advertir sobre cambios no guardados
+        window.addEventListener('beforeunload', function(e) {
+            if (hasUnsavedChanges()) {
+                e.preventDefault();
+                e.returnValue = 'Tienes cambios no guardados. ¿Estás seguro de que quieres salir?';
+                return e.returnValue;
+            }
+        });
+    </script>
+
+    <script src="/js/block-check.js"></script>
+<script src="/js/contador_mensaje.js"></script>
+<script src="/js/contador_notificaciones.js"></script>
+<script src="/js/barra-inferior.js"></script>
+
+<script src="/js/idiomas.js"></script>
+
+<script>
+// Mejorar calidad de banderas al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para mejorar banderas
+    function upgradeFlagImages() {
+        const langButtons = document.querySelectorAll('#language-selector .lang-btn img');
+        
+        console.log('Botones de idioma encontrados:', langButtons.length); // Debug
+        
+        langButtons.forEach(img => {
+            console.log('URL original:', img.src); // Debug
+            
+            // Detectar idioma por el atributo data-lang del botón padre
+            const button = img.closest('.lang-btn');
+            if (button) {
+                const lang = button.getAttribute('data-lang');
+                console.log('Idioma detectado:', lang); // Debug
+                
+                if (lang === 'es') {
+                    img.src = 'https://flagcdn.com/es.svg';
+                    console.log('Cambiado a bandera ES en SVG');
+                } else if (lang === 'en') {
+                    img.src = 'https://flagcdn.com/gb.svg';
+                    console.log('Cambiado a bandera GB en SVG');
+                }
+                
+                // Asegurar tamaño correcto
+                img.style.width = '36px';
+                img.style.height = '36px';
+            }
+        });
+    }
+    
+    // Intentar varias veces por si los botones tardan en generarse
+    setTimeout(upgradeFlagImages, 100);
+    setTimeout(upgradeFlagImages, 300);
+    setTimeout(upgradeFlagImages, 500);
+    
+    // También observar cambios en el DOM
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                upgradeFlagImages();
+            }
+        });
+    });
+    
+    const languageSelector = document.getElementById('language-selector');
+    if (languageSelector) {
+        observer.observe(languageSelector, { childList: true, subtree: true });
+    }
+});
+
+// ============================================
+// SISTEMA DE VINCULACIÓN DE WALLET
+// ============================================
+
+/**
+ * Verificar si el usuario tiene wallet vinculada (consultando BD)
+ */
+async function checkWalletLink() {
+    try {
+        console.log('🔍 Verificando estado de wallet y email...');
+        
+        // Consultar servidor para datos actualizados
+        const response = await fetch('php/obtener_perfil.php', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            console.error('Error obteniendo perfil:', response.status);
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Error en respuesta:', data.message);
+            return;
+        }
+        
+const userData = JSON.parse(localStorage.getItem('chainfeed_user'));
+const loginMethod = userData?.login_method || 'wallet';
+const walletAddress = data.profile.wallet_address; // Desde BD
+const hasWalletLinked = data.profile.has_wallet_linked; // Desde BD ← AGREGAR ESTA
+const email = data.profile.email; // Desde BD
+const username = currentUser;
+const emailVerified = data.profile.email_verified; // Desde BD
+
+        const isRealWallet = hasWalletLinked === true;
+
+console.log('📊 Estado actual:');
+console.log('  - Login method:', loginMethod);
+console.log('  - Username:', username);
+console.log('  - Wallet address:', walletAddress);
+console.log('  - Has wallet linked (BD):', hasWalletLinked);
+console.log('  - Email:', email);
+console.log('  - Email verified:', emailVerified);
+console.log('  - Wallet real:', isRealWallet);
+        
+        // 🔥 DETERMINAR ESTADO Y MOSTRAR SECCIONES CORRECTAS
+        
+        if (loginMethod === 'email') {
+            // Usuario inició con EMAIL
+            if (isRealWallet) {
+                console.log('✅ Usuario EMAIL con wallet vinculada');
+                document.getElementById('walletLinkSection').style.display = 'none';
+            } else {
+                console.log('⚠️ Usuario EMAIL sin wallet');
+                document.getElementById('walletLinkSection').style.display = 'block';
+            }
+        } else {
+            // Usuario inició con WALLET
+            console.log('✅ Usuario WALLET');
+            document.getElementById('walletLinkSection').style.display = 'none';
+        }
+        
+    } catch (error) {
+        console.error('❌ Error verificando wallet:', error);
+    }
+}
+
+async function checkEmailRegistrationMain() {
+    try {
+        console.log('🔍 Verificando estado de email...');
+        
+        const response = await fetch('php/obtener_perfil.php', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            console.error('Error obteniendo perfil:', response.status);
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Error en respuesta:', data.message);
+            return;
+        }
+        
+        const userData = JSON.parse(localStorage.getItem('chainfeed_user'));
+        const loginMethod = userData?.login_method || 'wallet';
+        const email = data.profile.email;
+        const emailVerified = data.profile.email_verified;
+        const walletAddress = data.profile.wallet_address;
+        
+        
+const username = currentUser;
+const hasWalletLinked = data.profile.has_wallet_linked; // 🔥 AGREGAR ESTA
+
+// Validar wallet real usando el flag de la BD
+const isRealWallet = hasWalletLinked === true; // 🔥 CAMBIAR ESTA
+        
+console.log('📧 Estado de email:');
+console.log('  - Login method:', loginMethod);
+console.log('  - Username:', username); // 🔥 AGREGAR
+console.log('  - Wallet address:', walletAddress);
+console.log('  - Has wallet linked (BD):', hasWalletLinked); // 🔥 AGREGAR
+console.log('  - Email:', email);
+console.log('  - Email verified:', emailVerified);
+console.log('  - Wallet real:', isRealWallet); // 🔥 AGREGAR
+        
+        // Ocultar todas las secciones primero
+        document.getElementById('emailRegisterSection').style.display = 'none';
+        document.getElementById('emailPendingSection').style.display = 'none';
+        document.getElementById('walletEmailVerifiedSection').style.display = 'none';
+        document.getElementById('changeEmailSection').style.display = 'none';
+        document.getElementById('changePasswordSection').style.display = 'none';
+        
+        // 🔥 LÓGICA DE ESTADOS
+        
+        if (loginMethod === 'wallet') {
+            // Usuario WALLET
+            if (!email) {
+                // Sin email → Mostrar registro
+                console.log('⚠️ Usuario WALLET sin email');
+                document.getElementById('emailRegisterSection').style.display = 'block';
+            } else if (!emailVerified) {
+                // Email pendiente → Mostrar pending
+                console.log('⚠️ Usuario WALLET con email pendiente');
+                document.getElementById('emailPendingSection').style.display = 'block';
+                document.getElementById('pendingEmailAddress').textContent = email;
+            } else {
+                // Email verificado → Mostrar completado
+                console.log('✅ Usuario WALLET con email verificado');
+              // ⬇️ COMENTAR ESTAS 3 LÍNEAS:
+    // document.getElementById('walletEmailVerifiedSection').style.display = 'block';
+    // document.getElementById('verifiedWalletAddress').textContent = walletAddress;
+    // document.getElementById('verifiedEmail').textContent = email;
+                
+                // Mostrar opciones de cambio
+                document.getElementById('changeEmailSection').style.display = 'block';
+                document.getElementById('changePasswordSection').style.display = 'block';
+                document.getElementById('currentEmailDisplay').textContent = email;
+            }
+        } else {
+            // Usuario EMAIL
+            if (isRealWallet && emailVerified) {
+                // Ambos verificados → Mostrar completado
+                console.log('✅ Usuario EMAIL con todo verificado');
+              // ⬇️ COMENTAR ESTAS 3 LÍNEAS:
+        // document.getElementById('walletEmailVerifiedSection').style.display = 'block';
+        // document.getElementById('verifiedWalletAddress').textContent = walletAddress;
+        // document.getElementById('verifiedEmail').textContent = email;
+                
+                // Mostrar opciones de cambio
+                document.getElementById('changeEmailSection').style.display = 'block';
+                document.getElementById('changePasswordSection').style.display = 'block';
+                document.getElementById('currentEmailDisplay').textContent = email;
+            } else if (emailVerified) {
+                // Solo email verificado → Mostrar opciones de cambio
+                console.log('✅ Usuario EMAIL verificado sin wallet');
+                document.getElementById('changeEmailSection').style.display = 'block';
+                document.getElementById('changePasswordSection').style.display = 'block';
+                document.getElementById('currentEmailDisplay').textContent = email;
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error verificando email:', error);
+    }
+}
+
+/**
+ * Vincular Proton Wallet
+ */
+async function linkProtonWallet() {
+    const btn = document.getElementById('linkWalletBtn');
+    const originalHTML = btn.innerHTML;
+    
+    try {
+        console.log("🔐 Iniciando vinculación de wallet...");
+        
+        // Estado de carga
+        btn.classList.add('loading');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="wallet-btn-icon">⏳</span><span class="wallet-btn-text">Conectando...</span>';
+        
+        // Verificar ProtonWebSDK
+        if (typeof ProtonWebSDK === 'undefined') {
+            throw new Error("ProtonWebSDK no está disponible");
+        }
+        
+        // Configuración de Proton
+        const { link, session } = await ProtonWebSDK({
+            linkOptions: {
+                endpoints: ["https://proton.greymass.com"],
+                chainId: "384da888112027f0321850a169f737c33e53b388aad48b5adace4bab97f437e0"
+            },
+            transportOptions: {
+                requestAccount: "chainfeed"
+            },
+            selectorOptions: {
+                appName: "ChainFeed",
+                appLogo: "https://chainfeed.space/icons/logo96.png",
+                customStyleOptions: {
+                    modalBackgroundColor: "#0f0f14",
+                    logoBackgroundColor: "#6366f1",
+                    isLogoRound: true,
+                    optionBackgroundColor: "#1a1a24",
+                    optionFontColor: "#ffffff",
+                    primaryFontColor: "#ffffff",
+                    secondaryFontColor: "#a0a0b8",
+                    linkColor: "#6366f1"
+                }
+            }
+        });
+        
+        if (session && session.auth) {
+            const walletAddress = session.auth.actor.toString();
+            console.log("✅ Wallet conectada:", walletAddress);
+            
+            // Enviar al servidor
+            const response = await fetch('php/vincular_wallet.php', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    wallet_address: walletAddress
+                })
+            });
+            
+            const data = await response.json();
+            
+if (data.success) {
+    // Actualizar localStorage con los nuevos datos
+    localStorage.setItem('chainfeed_user', JSON.stringify(data.user_data));
+    
+    // Actualizar variable global con el nuevo username
+    currentUser = data.user_data.username;
+    
+    // Ocultar sección de vinculación
+    const walletLinkSection = document.getElementById('walletLinkSection');
+    if (walletLinkSection) {
+        walletLinkSection.style.display = 'none';
+    }
+    
+    showNotification(`✅ Wallet vinculada exitosamente. Tu nuevo username es @${data.user_data.username}. Redirigiendo...`, 'success');
+    
+    // ✅ Redirigir al perfil con el NUEVO username después de 2 segundos
+    setTimeout(() => {
+        window.location.href = `https://chainfeed.space/perfil?user=${data.user_data.username}`;
+    }, 2000);
+} else {
+                throw new Error(data.message || 'Error al vincular wallet');
+            }
+        } else {
+            throw new Error("No se pudo obtener la sesión de Proton");
+        }
+        
+    } catch (error) {
+        console.error("❌ Error vinculando wallet:", error);
+        showNotification('❌ ' + error.message, 'error');
+        
+        // Restaurar botón
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
+}
+
+</script>
+
+<!-- Script de registro de email -->
+<script src="/js/regis_mail_edit.js"></script>
+<script src="/js/cambio_credenciales.js"></script>
+
+    <script src="/js/ImageCompressor.js"></script>
+
+<div class="modal-overlay" id="emailRegisterModal">
+    <div class="modal-container">
+        <button class="modal-close" onclick="closeEmailRegisterModal()">✕</button>
+        
+        <div class="modal-header">
+            <h2 class="modal-title">Registrar Email</h2>
+            <p class="modal-subtitle">Vincula un email para acceder con contraseña</p>
+        </div>
+        
+        <form class="modal-form" onsubmit="submitEmailRegistration(event)">
+            <!-- Email -->
+            <div class="form-group">
+                <label for="registerEmailInput" class="form-label">Email</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="email" 
+                        id="registerEmailInput" 
+                        class="input-with-icon" 
+                        placeholder="tu@email.com"
+                        required
+                        oninput="validateEmailInput()"
+                    >
+                </div>
+                <div class="validation-message" id="emailError"></div>
+            </div>
+            
+            <!-- Contraseña -->
+            <div class="form-group">
+                <label for="registerPasswordInput" class="form-label">Contraseña</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="registerPasswordInput" 
+                        class="input-with-icon" 
+                        placeholder="Mínimo 8 caracteres"
+                        required
+                        minlength="8"
+                        oninput="validatePasswordsMatch()"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="togglePassword1"
+                        onclick="togglePasswordVisibility('registerPasswordInput', 'togglePassword1')"
+                    >👁️</button>
+                </div>
+                <div class="validation-message" id="passwordError"></div>
+            </div>
+            
+            <!-- Confirmar Contraseña -->
+            <div class="form-group">
+                <label for="registerConfirmPasswordInput" class="form-label">Confirmar Contraseña</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="registerConfirmPasswordInput" 
+                        class="input-with-icon" 
+                        placeholder="Repite tu contraseña"
+                        required
+                        minlength="8"
+                        oninput="validatePasswordsMatch()"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="togglePassword2"
+                        onclick="togglePasswordVisibility('registerConfirmPasswordInput', 'togglePassword2')"
+                    >👁️</button>
+                </div>
+                <div class="validation-message" id="confirmPasswordError"></div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeEmailRegisterModal()">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-modal-submit" id="submitEmailRegisterBtn">
+                    Registrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Cambio de Email -->
+<div class="modal-overlay" id="changeEmailModal">
+    <div class="modal-container">
+        <button class="modal-close" onclick="closeChangeEmailModal()">✕</button>
+        
+        <div class="modal-header">
+            <h2 class="modal-title">Cambiar Email</h2>
+            <p class="modal-subtitle">Ingresa tu nuevo email y confirma con tu contraseña</p>
+        </div>
+        
+        <form class="modal-form" onsubmit="submitEmailChange(event)">
+            <!-- Nuevo Email -->
+            <div class="form-group">
+                <label for="newEmailInput" class="form-label">Nuevo Email</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="email" 
+                        id="newEmailInput" 
+                        class="input-with-icon" 
+                        placeholder="nuevo@email.com"
+                        required
+                        oninput="validateNewEmailInput()"
+                    >
+                </div>
+                <div class="validation-message" id="newEmailError"></div>
+            </div>
+            
+            <!-- Contraseña Actual -->
+            <div class="form-group">
+                <label for="emailChangePasswordInput" class="form-label">Contraseña Actual</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="emailChangePasswordInput" 
+                        class="input-with-icon" 
+                        placeholder="Tu contraseña actual"
+                        required
+                        minlength="8"
+                        oninput="validateEmailChangePasswords()"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="toggleEmailChangePassword1"
+                        onclick="togglePasswordVisibility('emailChangePasswordInput', 'toggleEmailChangePassword1')"
+                    >👁️</button>
+                </div>
+            </div>
+            
+            <!-- Confirmar Contraseña Actual -->
+            <div class="form-group">
+                <label for="emailChangePasswordConfirmInput" class="form-label">Confirmar Contraseña</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="emailChangePasswordConfirmInput" 
+                        class="input-with-icon" 
+                        placeholder="Repite tu contraseña actual"
+                        required
+                        minlength="8"
+                        oninput="validateEmailChangePasswords()"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="toggleEmailChangePassword2"
+                        onclick="togglePasswordVisibility('emailChangePasswordConfirmInput', 'toggleEmailChangePassword2')"
+                    >👁️</button>
+                </div>
+                <div class="validation-message" id="emailChangePasswordConfirmError"></div>
+            </div>
+            
+            <!-- Info de seguridad -->
+            <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--warning); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="color: var(--warning); font-size: 0.85rem; margin: 0;">
+                    ⚠️ Se enviará un email de confirmación a tu nuevo correo. Deberás hacer clic en el enlace para completar el cambio.
+                </p>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeChangeEmailModal()">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-modal-submit" id="submitEmailChangeBtn">
+                    Cambiar Email
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Cambio de Contraseña -->
+<div class="modal-overlay" id="changePasswordModal">
+    <div class="modal-container">
+        <button class="modal-close" onclick="closeChangePasswordModal()">✕</button>
+        
+        <div class="modal-header">
+            <h2 class="modal-title">Cambiar Contraseña</h2>
+            <p class="modal-subtitle">Actualiza tu contraseña de acceso</p>
+        </div>
+        
+        <form class="modal-form" onsubmit="submitPasswordChange(event)">
+
+            <!-- Email para verificación -->
+<div class="form-group">
+    <label for="passwordChangeEmailInput" class="form-label">Email</label>
+    <div class="input-wrapper">
+        <input 
+            type="email" 
+            id="passwordChangeEmailInput" 
+            class="input-with-icon" 
+            placeholder="Cargando..."
+            required
+            readonly
+            style="background: rgba(37, 37, 50, 0.3); cursor: not-allowed; color: var(--text-secondary);"
+        >
+    </div>
+    <div class="input-hint" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">
+        📧 Este es tu email actual registrado
+    </div>
+</div>
+            
+            <!-- Contraseña Actual -->
+            <div class="form-group">
+                <label for="currentPasswordInput" class="form-label">Contraseña Actual</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="currentPasswordInput" 
+                        class="input-with-icon" 
+                        placeholder="Tu contraseña actual"
+                        required
+                        minlength="8"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="toggleCurrentPassword"
+                        onclick="togglePasswordVisibility('currentPasswordInput', 'toggleCurrentPassword')"
+                    >👁️</button>
+                </div>
+            </div>
+            
+            <!-- Nueva Contraseña -->
+            <div class="form-group">
+                <label for="newPasswordInput" class="form-label">Nueva Contraseña</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="newPasswordInput" 
+                        class="input-with-icon" 
+                        placeholder="Mínimo 8 caracteres"
+                        required
+                        minlength="8"
+                        oninput="validateNewPasswords()"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="toggleNewPassword"
+                        onclick="togglePasswordVisibility('newPasswordInput', 'toggleNewPassword')"
+                    >👁️</button>
+                </div>
+                <div class="validation-message" id="newPasswordError"></div>
+            </div>
+            
+            <!-- Confirmar Nueva Contraseña -->
+            <div class="form-group">
+                <label for="newPasswordConfirmInput" class="form-label">Confirmar Nueva Contraseña</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="password" 
+                        id="newPasswordConfirmInput" 
+                        class="input-with-icon" 
+                        placeholder="Repite tu nueva contraseña"
+                        required
+                        minlength="8"
+                        oninput="validateNewPasswords()"
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle" 
+                        id="toggleNewPasswordConfirm"
+                        onclick="togglePasswordVisibility('newPasswordConfirmInput', 'toggleNewPasswordConfirm')"
+                    >👁️</button>
+                </div>
+                <div class="validation-message" id="newPasswordConfirmError"></div>
+            </div>
+            
+            <!-- Info de seguridad -->
+            <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--success); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p style="color: var(--success); font-size: 0.85rem; margin: 0;">
+                    ✅ La contraseña se actualizará inmediatamente después de confirmar.
+                </p>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeChangePasswordModal()">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-modal-submit" id="submitPasswordChangeBtn">
+                    Cambiar Contraseña
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 🔥 Scripts de Notificaciones Push -->
+<script src="/js/push-notifications.js"></script>
+<script>
+// Auto-inicializar notificaciones cuando carga la página
+document.addEventListener('DOMContentLoaded', async function() {
+    // Verificar si ya tiene permisos
+    const permission = window.pushManager?.getPermissionStatus();
+    
+    if (permission === 'granted') {
+        console.log('✅ Notificaciones ya activadas');
+        // Intentar obtener token si no existe
+        const token = localStorage.getItem('fcm_token');
+        if (!token) {
+            await window.pushManager.getToken();
+        }
+    } else if (permission === 'default') {
+        // Mostrar banner para activar notificaciones después de 5 segundos
+        setTimeout(showPushNotificationBanner, 5000);
+    }
+});
+
+// Mostrar banner de notificaciones
+function showPushNotificationBanner() {
+    const permission = Notification.permission;
+    
+    // No mostrar si ya fue concedido o denegado
+    if (permission !== 'default') return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'pushNotificationBanner';
+    banner.style.cssText = `
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(26, 26, 36, 0.98);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(99, 102, 241, 0.5);
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+        z-index: 10001;
+        animation: slideInUp 0.5s ease;
+    `;
+    
+    banner.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="font-size: 2.5rem;">🔔</div>
+            <div style="flex: 1;">
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: var(--text);">
+                    Activa las Notificaciones
+                </h3>
+                <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;">
+                    Recibe alertas de likes, comentarios, nuevos seguidores y más
+                </p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1.2rem;">
+            <button 
+                onclick="dismissPushBanner()" 
+                style="flex: 1; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--primary); padding: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+            >
+                Ahora No
+            </button>
+            <button 
+                onclick="activatePushNotifications()" 
+                style="flex: 1; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 0.8rem; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+            >
+                Activar
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(banner);
+    
+    // Añadir animación
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 100px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Activar notificaciones
+async function activatePushNotifications() {
+    const banner = document.getElementById('pushNotificationBanner');
+    const btn = banner.querySelector('button:last-child');
+    const originalText = btn.textContent;
+    
+    try {
+        btn.textContent = 'Activando...';
+        btn.disabled = true;
+        
+        const success = await window.pushManager.requestPermission();
+        
+        if (success) {
+            showNotification('✅ Notificaciones activadas correctamente', 'success');
+            if (banner) banner.remove();
+            
+            // Guardar en localStorage que ya aceptó
+            localStorage.setItem('push_permission_asked', 'true');
+        } else {
+            showNotification('⚠️ Permisos denegados. Puedes activarlos desde la configuración del navegador.', 'error');
+            if (banner) banner.remove();
+        }
+    } catch (error) {
+        console.error('Error activando notificaciones:', error);
+        showNotification('❌ Error activando notificaciones', 'error');
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+}
+
+// Cerrar banner
+function dismissPushBanner() {
+    const banner = document.getElementById('pushNotificationBanner');
+    if (banner) {
+        banner.style.animation = 'slideInUp 0.3s ease reverse';
+        setTimeout(() => banner.remove(), 300);
+    }
+    
+    // Guardar en localStorage que rechazó (para no molestar de nuevo en esta sesión)
+    localStorage.setItem('push_permission_asked', 'true');
+}
+</script>
+
+<script src="/js/push-notifications.js"></script>
+<script src="/js/temas.js"></script>
+
+<script src="/js/auto-modal-handler.js"></script>
+
+</body>
+</html>

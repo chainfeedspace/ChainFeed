@@ -1,0 +1,4780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+        <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
+    <script>
+    (function() {
+        var theme = localStorage.getItem('chainfeed_theme') || 'dark';
+        document.documentElement.className = theme + '-theme';
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        if (theme === 'light') {
+            var s = document.createElement('style');
+            s.id = 'preload-theme';
+            s.textContent = ':root{--dark:#f0f0eb;--dark-secondary:#e5e5db;--dark-tertiary:#dadacd;--text-primary:#875ba9;--primary:#4f46e5}body,html{background:#f0f0eb!important}';
+            document.head.appendChild(s);
+        }
+    })();
+    </script>
+    
+    <title>Mi Billetera - Red Social</title>
+    
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/logo192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icons/logo512.png">
+<link rel="apple-touch-icon" href="/icons/logo192.png">
+  
+  <link rel="stylesheet" href="/css/notificaciones-ui.css">
+  
+  <link rel="manifest" href="/manifest.json">
+<!-- Theme color para modo oscuro (default) -->
+<meta name="theme-color" content="#0F0F14">
+
+<!-- Theme color para modo claro -->
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+
+<!-- Theme color para modo oscuro (explícito) -->
+<meta name="theme-color" content="#0F0F14" media="(prefers-color-scheme: dark)">
+
+    <!-- Chart.js desde CDN estable -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.2.1/dist/chartjs-plugin-zoom.min.js"></script>
+
+<!-- Añadir después de Chart.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/@tailwindcss/forms/dist/forms.min.css" rel="stylesheet">
+    
+    <!-- Required for proton -->
+<script src="https://unpkg.com/@proton/web-sdk@4.2.20"></script>
+
+<script src="https://www.paypal.com/sdk/js?client-id=ARAgxn0XlQaAPBxp7h2Q1YVVUEF43fKbr6ccOAlNTh8_5jnhOvhDbIhoMZuKSQWlaXZPz3PyxXh3bDy6&currency=USD"></script>
+
+    <script src="/js/i18n-auto-translate.js"></script>
+    
+ <script src="/js/noscroll.js"></script>
+
+<script src="/js/notificaciones-ui.js"></script>
+
+    <script src="/js/block-check.js"></script>
+      
+      <script src="/js/pwa-block.js"></script>
+      
+<style>
+
+/* Prevenir flash de tema */
+body {
+    transition: opacity 0.15s ease-in;
+}
+
+/* Mientras carga el tema, ocultar brevemente */
+body:not(.light-theme):not(.dark-theme) {
+    opacity: 0;
+}
+
+body.light-theme,
+body.dark-theme {
+    opacity: 1;
+}
+    html, body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+body {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow-x: hidden;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #6366f1;
+    --secondary: #a855f7;
+    --accent: #ec4899;
+    --dark: #0f0f14;
+    --dark-secondary: #1a1a24;
+    --dark-tertiary: #252532;
+    --text: #ffffff;
+    --text-secondary: #a0a0b8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: rgba(1, 1, 1, 1);
+    min-height: 100vh;
+    color: var(--text);
+}
+
+.wallet-quick-action {
+    background: rgb(15 15 20 / 16%) !important;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.nav-header {
+    background: rgba(15, 15, 20, 0.16);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-button {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    border-radius: 15px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #dddfffe3;
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.back-button svg {
+    width: 24px;
+    height: 24px;
+}
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+.page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: #c0bdef;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+/* Header */
+.wallet-header {
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    font-weight: bold;
+}
+
+.user-details h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #cecbdf;
+}
+
+.user-details p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.balance-display {
+    text-align: right;
+}
+
+.balance-amount {
+    font-size: 3rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--success), #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+/* Grid principal */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 0.5rem;
+    display: flex;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s 
+ease, box-shadow 0.3s 
+ease;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: column;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    padding: 0 1rem;
+}
+
+.stat-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #c3c5db;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.icon-sales { background: linear-gradient(135deg, var(--success), #059669); }
+.icon-purchases { background: linear-gradient(135deg, var(--warning), #d97706); }
+.icon-chart { background: linear-gradient(135deg, var(--primary), #4f46e5); }
+.icon-collection { background: linear-gradient(135deg, var(--accent), #db2777); }
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Sección de gráficos */
+.charts-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.chart-container {
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 0.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.chart-title {
+font-size: 1.2rem;
+    font-weight: 600;
+    padding: 0.5rem 1em;
+    margin-bottom: 1.5rem;
+    color: #c3c5db;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+.chart-canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Lista de transacciones */
+.transactions-section {
+background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 0.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #c3c5db;
+    padding: 0.5rem 1rem;
+}
+
+.transactions-container {
+    max-height: 300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--dark-secondary);
+    scroll-behavior: smooth;
+}
+
+.transactions-container::-webkit-scrollbar {
+    width: 8px; 
+}
+
+.transactions-container::-webkit-scrollbar-track {
+    background: var(--dark-secondary);
+    border-radius: 10px;
+}
+
+.transactions-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+}
+
+.transactions-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.transactions-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;               
+    padding: 0.5rem;
+    gap: 0.75rem;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    min-height: 70px;
+}
+
+.transaction-item:hover {
+    background: rgba(37, 37, 50, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.transaction-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.transaction-avatar img {
+    transition: opacity 0.3s ease;
+}
+
+.transaction-avatar img:hover {
+    opacity: 0.9;
+}
+
+.transaction-content {
+    flex: 1;
+    min-width: 0;
+    margin-right: 1rem;
+}
+
+.transaction-title {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.transaction-details {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.transaction-amount {
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 100px;
+}
+
+.amount-value {
+    font-weight: bold;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+.amount-income { color: var(--success); }
+.amount-expense { color: var(--warning); }
+
+.amount-date {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-top: 0.2rem;
+    white-space: nowrap;
+}
+
+/* Top Posts Section */
+.top-posts-container {
+    max-height: 350px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 15px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--dark-secondary);
+    scroll-behavior: smooth;
+}
+
+.top-posts-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.top-posts-container::-webkit-scrollbar-track {
+    background: var(--dark-secondary);
+    border-radius: 10px;
+}
+
+.top-posts-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+}
+
+.top-posts-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.top-posts-grid {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    height: 100%;
+    padding: 0.5rem;
+}
+
+.post-card {
+    background: linear-gradient(135deg, rgba(37, 37, 50, 0.95), rgba(26, 26, 36, 0.95));
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 320px;
+    height: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+.post-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+.post-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.post-card:hover::before {
+    opacity: 1;
+}
+
+.post-preview {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(15, 15, 20, 0.8), rgba(26, 26, 36, 0.8));
+    flex-shrink: 0;
+}
+
+.post-preview-image,
+.post-preview-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.post-card:hover .post-preview-image,
+.post-card:hover .post-preview-video {
+    transform: scale(1.08);
+}
+
+/* Overlay con degradado para mejor legibilidad */
+.post-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(to top, rgba(15, 15, 20, 0.95), transparent);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Badge de tipo de contenido (Video/Imagen) */
+.post-type-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.post-type-badge.video {
+    background: rgba(239, 68, 68, 0.85);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.post-type-badge.image {
+    background: rgba(99, 102, 241, 0.85);
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+/* Badge de silenciado - Discreto en esquina superior derecha */
+.post-muted-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(245, 158, 11, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 0.35rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    z-index: 2;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: white;
+    font-weight: 600;
+}
+
+.post-preview-text {
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+    position: relative;
+}
+
+.post-preview-fallback {
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+    position: relative;
+}
+
+/* Contenido de la card con overlay visible */
+.post-card-content {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, transparent, rgba(15, 15, 20, 0.6));
+}
+
+.post-content {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+/* Información de earnings mejorada - SIEMPRE VISIBLE */
+.post-earnings {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(15, 15, 20, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.earnings-amount {
+    font-weight: bold;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.sales-count {
+    background: rgba(99, 102, 241, 0.25);
+    color: #a5b4fc;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+/* Filtros de período */
+.period-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.period-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(37, 37, 50, 0.8);
+    color: var(--text);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.period-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-color: var(--primary);
+}
+
+.period-btn:hover {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.2);
+}
+
+/* Estados vacíos */
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.empty-message {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Responsive para avatares en transacciones */
+@media (max-width: 768px) {
+    .transaction-avatar {
+        width: 35px;
+        height: 35px;
+        margin-right: 0.75rem;
+    }
+    
+    .transaction-details {
+        font-size: 0.75rem;
+        gap: 0.3rem;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .nav-header {
+        padding: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .back-button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .wallet-header {
+        text-align: center;
+    }
+    
+    .balance-display {
+        text-align: center;
+    }
+    
+    .balance-amount {
+        font-size: 2rem;
+    }
+    
+    .transactions-container {
+        max-height: 420px;
+    }
+    
+    .transaction-item {
+        padding: 0.75rem;
+        min-height: 60px;
+    }
+    
+    .transaction-title {
+        font-size: 0.85rem;
+    }
+    
+    .transaction-details {
+        font-size: 0.75rem;
+    }
+    
+    .amount-value {
+        font-size: 0.9rem;
+    }
+    
+    .transaction-amount {
+        min-width: 85px;
+    }
+    
+  .post-card {
+        width: 290px;
+        height: 260px;
+    }
+    
+    .post-preview {
+        height: 160px;
+    }
+    
+    .post-type-badge {
+        top: 10px;
+        left: 10px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+    }
+    
+    .post-muted-badge {
+        top: 10px;
+        right: 10px;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.8rem;
+    }
+    
+    .post-card-content {
+        padding: 1rem;
+    }
+    
+    .post-content {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 1;
+    }
+    
+    .earnings-amount {
+        font-size: 0.9rem;
+    }
+    
+    .sales-count {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+}
+
+.withdraw-button {
+    background: linear-gradient(135deg, var(--success), #059669);
+    border: none;
+    border-radius: 15px;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 50px;
+}
+
+.withdraw-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.withdraw-button:before {
+    content: "💰";
+    font-size: 1.2rem;
+}
+/* Modal de retirar fondos */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: rgba(1, 1, 1, 1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+        padding: 0.5rem 2rem 2rem;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #d4d5f5;
+    -webkit-background-clip: text;
+    margin-left: -5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+.balance-info {
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.current-balance-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.current-balance-amount {
+    font-size: 2rem;
+    font-weight: bold;
+    background: #b9b6db;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.amount-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.amount-preset {
+    padding: 0.4rem 0.8rem;
+    background: rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 8px;
+    color: #a5b4fc;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.amount-preset:hover {
+    background: rgba(99, 102, 241, 0.3);
+    border-color: var(--primary);
+}
+
+.warning-box {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.warning-title {
+    color: var(--warning);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.warning-text {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: rgba(37, 37, 50, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-withdraw {
+    flex: 2;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--success), #059669);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-withdraw:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-withdraw:disabled {
+    background: rgba(107, 114, 128, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive para modal */
+@media (max-width: 768px) {
+    
+    .modal-title {
+        font-size: 1.3rem;
+    }
+    
+    .current-balance-amount {
+        font-size: 1.5rem;
+    }
+    
+    .amount-buttons {
+        justify-content: center;
+    }
+}
+/* Estilos para conexión de billetera */
+.wallet-connection {
+    margin-bottom: 1.5rem;
+}
+
+.wallet-status {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.wallet-status.disconnected {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.wallet-status.connected {
+background: rgb(16 37 185 / 10%);
+    border-color: rgb(16 21 185 / 30%);
+}
+
+.status-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.status-text {
+    flex: 1;
+}
+
+.status-title {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.status-description {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+
+.connect-wallet-btn {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.connect-wallet-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+}
+
+.disconnect-wallet-btn {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    color: #fca5a5;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.disconnect-wallet-btn:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.conversion-info {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.conversion-info small {
+    color: #a5b4fc;
+    font-size: 0.8rem;
+}
+
+/* Estados del botón de retiro */
+.btn-withdraw:disabled {
+    background: rgba(107, 114, 128, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-withdraw.wallet-not-connected:disabled {
+    background: rgba(245, 158, 11, 0.3);
+    color: #fbbf24;
+}
+
+.btn-withdraw.processing {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    pointer-events: none;
+}
+
+.btn-withdraw.processing::before {
+    content: "⏳";
+    margin-right: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wallet-status {
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .status-text {
+        order: -1;
+    }
+    
+    .connect-wallet-btn,
+    .disconnect-wallet-btn {
+        width: 100%;
+        padding: 0.75rem;
+    }
+}
+/* Estilos adicionales para el modal CFT mejorado */
+.input-help {
+    margin-top: 0.5rem;
+}
+
+.input-help small {
+    color: #a0a0b8;
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-input:invalid {
+    border-color: #ef4444;
+}
+
+.form-input:invalid:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Estado de procesamiento del botón */
+.btn-withdraw.processing {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    pointer-events: none;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Responsive mejorado */
+@media (max-width: 768px) {
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .amount-buttons {
+        justify-content: space-between;
+    }
+    
+    .amount-preset {
+        flex: 1;
+        margin: 0 0.25rem;
+    }
+}
+/* Estilos para el campo de cuenta Proton mejorado */
+.proton-account-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.user-avatar-small {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    font-weight: bold;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.account-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.form-input.account-readonly {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #d3cfff;
+    cursor: default;
+}
+
+.form-input.account-readonly:focus {
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+.account-name {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.proton-account-display:hover {
+    background: rgba(37, 37, 50, 0.9);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive para el campo de cuenta */
+@media (max-width: 768px) {
+    .proton-account-display {
+        gap: 0.75rem;
+        padding: 0.6rem 1rem;
+    }
+    
+    .user-avatar-small {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .form-input.account-readonly {
+        font-size: 1rem;
+    }
+    
+    .account-name {
+        font-size: 0.8rem;
+    }
+}
+/* Estilos para información de nivel */
+.level-info-box {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.level-current {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.level-next {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .level-info-box {
+        padding: 0.75rem;
+    }
+    
+    .level-current {
+        font-size: 0.85rem;
+    }
+    
+    .level-next {
+        font-size: 0.75rem;
+    }
+}
+
+.balance-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.balance-item {
+    min-width: 200px;
+}
+
+.balance-amount {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--success), #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.balance-amount.stf-balance {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Responsive para balances */
+@media (max-width: 768px) {
+    .wallet-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .balance-display {
+        text-align: center;
+    }
+    
+    .balance-row {
+        align-items: center;
+    }
+    
+    .balance-amount {
+        font-size: 2rem;
+    }
+    
+    .balance-amount.stf-balance {
+        font-size: 1.5rem;
+    }
+}
+/* Estilos para balance total y saldos individuales */
+.balance-display {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.total-balance {
+    text-align: center;
+}
+
+.total-amount {
+    font-size: 3.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.total-label {
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.individual-balances {
+    display: flex;
+    gap: 2rem;
+    justify-content: flex-end;
+}
+
+.balance-item {
+    text-align: center;
+    min-width: 150px;
+}
+
+.balance-amount {
+    font-size: 1.8rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, var(--success), #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.3rem;
+}
+
+.balance-amount.stf-balance {
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.balance-label {
+color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Responsive para balances */
+@media (max-width: 768px) {
+    .wallet-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .balance-display {
+        align-items: center;
+        text-align: center;
+    }
+    
+    .total-amount {
+        font-size: 2.5rem;
+    }
+    
+    .individual-balances {
+        flex-direction: row; /* ✅ MANTENER HORIZONTAL */
+        gap: 1.5rem; /* ✅ SEPARACIÓN ENTRE SALDOS */
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .balance-item {
+        min-width: 120px;
+        flex: 1; /* ✅ DISTRIBUCIÓN EQUITATIVA */
+        max-width: 150px;
+    }
+    
+    .balance-amount {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .total-amount {
+        font-size: 2rem;
+    }
+    
+    .individual-balances {
+        gap: 1rem; /* ✅ SEPARACIÓN MENOR EN PANTALLAS MUY PEQUEÑAS */
+        padding: 0 0.5rem;
+    }
+    
+    .balance-item {
+        min-width: 100px;
+        max-width: 130px;
+    }
+    
+    .balance-amount {
+        font-size: 1.2rem;
+    }
+    
+    .balance-label {
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+}
+
+/* Para pantallas muy pequeñas (menos de 360px) */
+@media (max-width: 360px) {
+    .individual-balances {
+        gap: 0.75rem;
+    }
+    
+    .balance-item {
+        min-width: 85px;
+        max-width: 110px;
+    }
+    
+    .balance-amount {
+        font-size: 1.1rem;
+    }
+    
+    .balance-label {
+        font-size: 0.7rem;
+    }
+}
+
+.actions-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+}
+
+.icon-wallet { 
+    background: linear-gradient(135deg, #8b5cf6, #ec4899); 
+}
+
+.wallet-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.action-btn {
+    padding: 0.875rem 1.25rem;
+    border: none;
+    border-radius: 15px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 50px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.withdraw-action-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.withdraw-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.deposit-action-btn {
+    background: linear-gradient(135deg, var(--success), #059669);
+}
+
+.deposit-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.deposit-action-btn:disabled {
+    background: rgba(107, 114, 128, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive para acciones */
+@media (max-width: 768px) {
+    .wallet-actions {
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+    
+    .action-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+        min-height: 45px;
+    }
+}
+
+/* Estilos para Panel de Promociones */
+.promo-tab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.promo-tab:hover {
+    color: white;
+    border-bottom-color: rgba(245, 158, 11, 0.5);
+}
+
+.promo-tab.active {
+    color: #f59e0b;
+    border-bottom-color: #f59e0b;
+}
+
+.promo-card-active {
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+}
+
+.promo-card-active:hover {
+    border-color: rgba(245, 158, 11, 0.5);
+    transform: translateY(-2px);
+}
+
+.promo-card-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.promo-card-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.promo-card-content {
+    flex: 1;
+}
+
+.promo-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.promo-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.promo-card-badge {
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.promo-card-info {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.promo-card-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.promo-countdown {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+    color: #10b981;
+    font-weight: 600;
+}
+
+.promo-historial-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.promo-historial-item:hover {
+    background: rgba(37, 37, 50, 0.9);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.promo-status-badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.promo-status-active {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.promo-status-completed {
+    background: rgba(99, 102, 241, 0.2);
+    color: #6366f1;
+}
+
+.promo-status-cancelled {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* ============================================
+   INDICADOR DE REPORTES Y SANCIONES (ESTILO STAT-CARD)
+   ============================================ */
+
+/* Modificaciones para la stat-card de reportes */
+#reportesWarning.stat-card {
+    border: 2px solid rgba(245, 158, 11, 0.3);
+    background: rgba(15, 15, 20, 0.16);
+    transition: all 0.3s ease;
+}
+
+#reportesWarning.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.5);
+}
+
+/* Colores según nivel de riesgo */
+#reportesWarning.nivel-ninguno {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+#reportesWarning.nivel-ninguno:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 30px 60px rgba(16, 185, 129, 0.2);
+}
+
+#reportesWarning.nivel-bajo {
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+#reportesWarning.nivel-bajo:hover {
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 30px 60px rgba(16, 185, 129, 0.3);
+}
+
+#reportesWarning.nivel-medio {
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+#reportesWarning.nivel-medio:hover {
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 30px 60px rgba(245, 158, 11, 0.3);
+}
+
+#reportesWarning.nivel-alto {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+#reportesWarning.nivel-alto:hover {
+    border-color: rgba(239, 68, 68, 0.7);
+    box-shadow: 0 30px 60px rgba(239, 68, 68, 0.3);
+}
+
+#reportesWarning.nivel-critico {
+    border-color: rgba(220, 38, 38, 0.6);
+    animation: pulseCard 2s infinite;
+}
+
+#reportesWarning.nivel-critico:hover {
+    border-color: rgba(220, 38, 38, 0.8);
+    box-shadow: 0 30px 60px rgba(220, 38, 38, 0.4);
+}
+
+@keyframes pulseCard {
+    0%, 100% {
+        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.3), 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.3), 0 0 20px 10px rgba(239, 68, 68, 0);
+    }
+}
+
+/* Iconos de colores según nivel */
+#reportesWarning.nivel-ninguno #reportesIconCard {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+}
+
+#reportesWarning.nivel-bajo #reportesIconCard {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+}
+
+#reportesWarning.nivel-medio #reportesIconCard {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+
+#reportesWarning.nivel-alto #reportesIconCard,
+#reportesWarning.nivel-critico #reportesIconCard {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+}
+
+/* Contenedor de información principal */
+.reportes-main-info {
+    padding: 0 1rem;
+}
+
+/* Colores del contador según nivel */
+#reportesWarning.nivel-ninguno #reportesCount,
+#reportesWarning.nivel-bajo #reportesCount {
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#reportesWarning.nivel-medio #reportesCount {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#reportesWarning.nivel-alto #reportesCount,
+#reportesWarning.nivel-critico #reportesCount {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Sección de progreso */
+.reportes-progress-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reportes-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+}
+
+.reportes-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.reportes-next {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.reportes-next strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #reportesWarning.stat-card {
+        padding: 0.5rem;
+    }
+    
+    .reportes-progress-section {
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+    }
+    
+    .reportes-next {
+        font-size: 0.8rem;
+    }
+}
+
+/* ============================================
+   FULLSCREEN VIEWER PARA BILLETERA
+   ============================================ */
+
+.wfv-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.wfv-container.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.wfv-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.wfv-posts-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.wfv-post {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease-out;
+}
+
+.wfv-media-only {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+.wfv-video,
+.wfv-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wfv-text-content {
+    max-width: 800px;
+    padding: 2rem;
+    font-size: 1.5rem;
+    line-height: 1.8;
+    color: #fff;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+/* Navegación lateral (Desktop) */
+.wfv-navigation {
+    position: absolute;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.wfv-container.active .wfv-navigation {
+    opacity: 1;
+}
+
+.wfv-nav-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.wfv-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.wfv-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Botón de cerrar */
+.wfv-close-btn {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.wfv-close-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wfv-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Botón de sonido */
+.wfv-sound-btn {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.wfv-sound-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.wfv-sound-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.wfv-sound-btn.muted {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.wfv-sound-off {
+    display: none;
+}
+
+/* Barra inferior deslizable */
+.wfv-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.8));
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 2rem 2rem;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 10;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.wfv-bottom-bar.visible {
+    transform: translateY(0);
+}
+
+.wfv-bar-handle {
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    cursor: grab;
+}
+
+.wfv-bar-handle:active {
+    cursor: grabbing;
+}
+
+.wfv-bar-content {
+    margin-top: 1rem;
+}
+
+.wfv-post-content {
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    word-wrap: break-word;
+}
+
+.wfv-post-stats {
+display: flex;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: space-around;
+}
+
+.wfv-stat-item {
+        background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 20px;
+    padding: 0 0.5rem;
+display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-around;
+}
+
+.wfv-stat-icon {
+    font-size: 1.5rem;
+}
+
+.wfv-stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.wfv-stat-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Scrollbar personalizado para barra inferior */
+.wfv-bottom-bar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.wfv-bottom-bar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.wfv-bottom-bar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.wfv-bottom-bar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wfv-navigation {
+        display: none;
+    }
+    
+    .wfv-close-btn,
+    .wfv-sound-btn {
+        width: 44px;
+        height: 44px;
+        top: 1rem;
+    }
+    
+    .wfv-close-btn {
+        left: 1rem;
+    }
+    
+    .wfv-sound-btn {
+        right: 1rem;
+    }
+    
+    .wfv-bottom-bar {
+        padding: 1.5rem 1.5rem 2rem;
+    }
+    
+    .wfv-text-content {
+        padding: 1.5rem;
+    }
+    
+    .wfv-post-stats {
+        gap: 1rem;
+    }
+    
+    .wfv-stat-item {
+        gap: 0.3rem;
+    }
+    
+    .wfv-stat-icon {
+        font-size: 1.2rem;
+    }
+    
+    .wfv-stat-value {
+        font-size: 1rem;
+    }
+    
+    .wfv-stat-label {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .wfv-post-content {
+        font-size: 0.9rem;
+    }
+    
+    .wfv-text-content {
+        font-size: 1rem;
+        padding: 1rem;
+    }
+}
+
+
+/* ============================================
+   SISTEMA DE REFERIDOS EN BILLETERA
+   ============================================ */
+
+.referral-wallet-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.referral-code-section {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.referral-code-display {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.referral-code-value {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    padding: 0.75rem;
+    background-color: rgba(37, 37, 50, 0.5);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loading-shimmer {
+    color: rgba(255, 255, 255, 0.3);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+.share-code-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.share-code-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(236, 72, 153, 0.4);
+}
+
+.share-code-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.referral-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.referral-stat-item {
+    background: rgba(37, 37, 50, 0.5);
+    display: flex;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s 
+ease;
+    justify-content: space-around;
+    align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.referral-stat-item:hover {
+    background: rgba(37, 37, 50, 0.7);
+    border-color: rgba(236, 72, 153, 0.3);
+    transform: translateY(-2px);
+}
+
+.referral-stat-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.referral-stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #a9a9bd, var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+}
+
+.referral-stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.referral-input-section {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.referral-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.referral-code-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-align: center;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.referral-code-input:focus {
+    outline: none;
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+    background: rgba(37, 37, 50, 0.95);
+}
+
+.referral-code-input::placeholder {
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: none;
+    font-weight: 400;
+}
+
+.apply-code-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.apply-code-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.apply-code-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .referral-code-value {
+        font-size: 1.4rem;
+        letter-spacing: 2px;
+    }
+    
+    .referral-stats-grid {
+        gap: 0.75rem;
+    }
+    
+    .referral-stat-item {
+        padding: 0.75rem;
+    }
+    
+    .referral-stat-icon {
+        font-size: 1.5rem;
+    }
+    
+    .referral-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .share-code-btn,
+    .apply-code-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+    
+    .referral-code-input {
+        font-size: 0.9rem;
+        padding: 0.65rem 0.85rem;
+    }
+}
+
+/* ============================================
+   SISTEMA DE STAKE - ESTILOS
+   ============================================ */
+
+.stake-wallet-section {
+    background: rgba(15, 15, 20, 0.16);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    display: none; /* Oculto por defecto */
+}
+
+.stake-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stake-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #c2c0e5;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stake-stats-summary {
+    display: flex;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: space-around;
+}
+
+.stake-stat-box {
+    background: rgba(37, 37, 50, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stake-stat-box:hover {
+    background: rgba(37, 37, 50, 0.7);
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.stake-stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+}
+
+.stake-stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.stake-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stake-plan-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stake-plan-card:hover {
+    border-color: rgba(139, 92, 246, 0.6);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+}
+
+.stake-plan-card.selected {
+    border-color: #8b5cf6;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+}
+
+.stake-plan-header {
+text-align: center;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.stake-plan-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.stake-plan-apy {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+}
+
+.stake-plan-period {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stake-plan-details {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: space-around;
+}
+
+.stake-plan-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+}
+
+.stake-form {
+    background: rgba(37, 37, 50, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stake-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.stake-input-label {
+    display: block;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.stake-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(37, 37, 50, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.stake-input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.stake-amount-presets {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.stake-preset-btn {
+    padding: 0.4rem 0.8rem;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 8px;
+    color: #c4b5fd;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.stake-preset-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+    border-color: #8b5cf6;
+}
+
+.stake-calculator {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.stake-calc-title {
+    color: #10b981;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.stake-calc-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stake-calc-row {
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.stake-calc-row.total {
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(16, 185, 129, 0.3);
+    font-weight: bold;
+    color: #10b981;
+    font-size: 1.1rem;
+}
+
+.stake-submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+}
+
+.stake-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+}
+
+.stake-submit-btn:disabled {
+    background: rgba(107, 114, 128, 0.5);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.stakes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stake-item {
+    background: rgba(37, 37, 50, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.stake-item:hover {
+    background: rgba(37, 37, 50, 0.7);
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.stake-item.completado {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stake-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stake-item-title {
+    font-weight: 600;
+    color: white;
+    font-size: 1rem;
+}
+
+.stake-item-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.stake-badge-activo {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+.stake-badge-completado {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.stake-badge-reclamado {
+    background: rgba(99, 102, 241, 0.2);
+    color: #6366f1;
+}
+
+.stake-item-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stake-detail-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.stake-detail-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.stake-detail-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.stake-progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.stake-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #ec4899);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.stake-progress-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.stake-claim-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.stake-claim-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+}
+
+.stake-claim-btn:disabled {
+    background: rgba(107, 114, 128, 0.5);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.stake-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.stake-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.stake-empty-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.stake-empty-message {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.stake-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.stake-tab {
+    padding: 0.75rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.stake-tab:hover {
+    color: white;
+    border-bottom-color: rgba(139, 92, 246, 0.5);
+}
+
+.stake-tab.active {
+    color: #8b5cf6;
+    border-bottom-color: #8b5cf6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stake-plans-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stake-item-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .stake-tabs {
+        overflow-x: auto;
+    }
+}
+
+/* Estilos compartidos para ambas cards de seguridad */
+.security-warning-card,
+.connect-wallet-card {
+    background: linear-gradient(135deg, #1a1a24 0%, #252530 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(245, 158, 11, 0.15);
+    animation: pulseWarning 2s ease-in-out infinite;
+}
+
+@keyframes pulseWarning {
+    0%, 100% {
+        box-shadow: 0 8px 32px rgba(245, 158, 11, 0.15);
+    }
+    50% {
+        box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
+    }
+}
+
+.security-warning-header,
+.connect-wallet-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.security-icon,
+.connect-wallet-icon {
+    font-size: 3rem;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.security-title,
+.connect-wallet-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f59e0b;
+}
+
+.security-message,
+.connect-wallet-message {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.security-blocked-features,
+.connect-wallet-benefits {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 1rem 0;
+    justify-content: space-around;
+    gap: 1rem;
+}
+
+.security-blocked-features li,
+.connect-wallet-benefits li {
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+}
+
+.security-email-info {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    margin: 1.5rem 0;
+}
+
+.email-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.email-value {
+    color: #6366f1;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.verify-email-btn,
+.connect-wallet-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.verify-email-btn:hover,
+.connect-wallet-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+}
+
+.connect-wallet-btn-disabled {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: not-allowed;
+    margin-top: 1rem;
+}
+
+.connect-wallet-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.connect-wallet-divider::before,
+.connect-wallet-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.connect-wallet-divider span {
+    padding: 0 1rem;
+    font-size: 0.9rem;
+}
+
+.security-note {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+.stake-summary-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.stake-summary-item {
+    text-align: center;
+}
+
+.stake-summary-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.stake-summary-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.stake-action-btn {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+}
+
+.stake-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+}
+
+
+/* Animación para loading de referidos */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+    .wallet-quick-action {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 1.25rem !important;
+    }
+    
+    .wallet-quick-action button {
+        width: 100% !important;
+        padding: 0.875rem 1.5rem !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .wallet-quick-action h3 {
+        font-size: 1.1rem !important;
+        justify-content: center !important;
+    }
+
+
+/* =====================================================
+   SELECTOR DE TOKENS PERSONALIZADO
+   ===================================================== */
+
+.custom-token-selector {
+    position: relative;
+    width: 100%;
+}
+
+/* Trigger (botón principal) */
+.token-selector-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.token-selector-trigger:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.token-selector-trigger.open {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.token-trigger-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.token-trigger-symbol {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+
+.token-trigger-saldo {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.token-trigger-arrow {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.token-selector-trigger.open .token-trigger-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown */
+.token-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    background: #1a1a24;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.token-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Opciones de token */
+.token-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.token-option:last-child {
+    border-bottom: none;
+}
+
+.token-option:hover:not(.disabled) {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.token-option.selected {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.token-option.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.token-option-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.token-option-symbol {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #ffffff;
+}
+
+.token-option-saldo {
+    font-size: 0.85rem;
+    color: #10b981;
+}
+
+.token-option-saldo.sin-saldo {
+    color: #ef4444;
+}
+
+.token-option-lock {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.token-option-check {
+    color: #10b981;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Nota inferior */
+.token-selector-note {
+    display: block;
+    margin-top: 0.5rem;
+    color: #a0a0b8;
+    font-size: 0.8rem;
+}
+
+/* Scrollbar para modales de depósito y retiro */
+#depositModal .modal-content,
+#withdrawModal .modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #6366f1 rgba(255, 255, 255, 0.05);
+}
+
+#depositModal .modal-content::-webkit-scrollbar,
+#withdrawModal .modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+#depositModal .modal-content::-webkit-scrollbar-track,
+#withdrawModal .modal-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+#depositModal .modal-content::-webkit-scrollbar-thumb,
+#withdrawModal .modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #6366f1, #8b5cf6);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+#depositModal .modal-content::-webkit-scrollbar-thumb:hover,
+#withdrawModal .modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #7c3aed, #a855f7);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Scrollbar para el dropdown de tokens */
+.token-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: #6366f1 rgba(255, 255, 255, 0.05);
+}
+
+.token-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.token-dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+}
+
+.token-dropdown::-webkit-scrollbar-thumb {
+    background: #6366f1;
+    border-radius: 10px;
+}
+
+.token-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #8b5cf6;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    #depositModal .modal-content::-webkit-scrollbar,
+    #withdrawModal .modal-content::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    #depositModal .modal-content::-webkit-scrollbar-thumb,
+    #withdrawModal .modal-content::-webkit-scrollbar-thumb {
+        border: 3px solid rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* Exchanges Section - Billetera */
+.exchanges-wallet-grid {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    flex-wrap: wrap;
+}
+
+.exchange-wallet-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2.5rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    min-width: 160px;
+    text-decoration: none;
+}
+
+.exchange-wallet-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.exchange-wallet-logo {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exchange-wallet-logo img {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.exchange-wallet-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+@media (max-width: 600px) {
+    .exchange-wallet-card {
+        padding: 1.25rem 2rem;
+        min-width: 140px;
+    }
+    
+    .exchange-wallet-logo {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .exchange-wallet-logo img {
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+    }
+    
+    .exchange-wallet-name {
+        font-size: 0.9rem;
+    }
+}
+
+/* ============================================
+   MODAL DE RONDA PRIVADA DE INVERSORES
+   ESTILOS SIMPLIFICADOS
+   ============================================ */
+
+.investor-round-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.investor-round-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.investor-modal-content {
+    background: #0f0f14;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    max-width: 380px;
+    width: 100%;
+    position: relative;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.investor-round-modal.active .investor-modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.investor-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s;
+    line-height: 1;
+}
+
+.investor-modal-close:hover {
+    color: #fff;
+}
+
+.investor-modal-header {
+    margin-bottom: 1.5rem;
+}
+
+.investor-modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    color: #fff;
+}
+
+.investor-modal-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+}
+
+.investor-contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.investor-contact-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+}
+
+.investor-contact-btn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.investor-method-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.investor-method-icon svg {
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.investor-method-content {
+    flex: 1;
+}
+
+.investor-method-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 1px;
+}
+
+.investor-method-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Toast Notifications */
+.investor-toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.investor-toast {
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-width: 280px;
+    max-width: 360px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: investorToastIn 0.3s ease;
+}
+
+.investor-toast.hiding {
+    animation: investorToastOut 0.3s ease forwards;
+}
+
+.investor-toast.success {
+    border-left: 2px solid #22c55e;
+}
+
+.investor-toast.error {
+    border-left: 2px solid #ef4444;
+}
+
+@keyframes investorToastIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes investorToastOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.investor-toast-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.investor-toast.success .investor-toast-icon {
+    color: #22c55e;
+}
+
+.investor-toast.error .investor-toast-icon {
+    color: #ef4444;
+}
+
+.investor-toast-content {
+    flex: 1;
+}
+
+.investor-toast-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.investor-toast-message {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.investor-toast-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.investor-toast-close:hover {
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .investor-modal-content {
+        padding: 1.25rem;
+    }
+    
+    .investor-toast-container {
+        right: 10px;
+        left: 10px;
+    }
+    
+    .investor-toast {
+        min-width: auto;
+    }
+}
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="nav-header">
+        <div class="nav-left">
+<button class="back-button" onclick="window.history.back()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+    </svg>
+</button>
+            <h1 class="page-title">Mi Billetera</h1>
+        </div>
+    </div>
+
+    <!-- Header -->
+<div class="wallet-header">
+    <div class="user-info">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-details">
+            <h1 id="userName">Cargando...</h1>
+            <p id="userHandle">@username</p>
+        </div>
+    </div>
+    <div class="balance-display">
+        <!-- Saldo total prominente -->
+        <div class="total-balance">
+            <div class="total-amount" id="totalBalance">000</div>
+            <div class="total-label">Saldo Total</div>
+        </div>
+        
+        <!-- Saldos individuales -->
+        <div class="individual-balances">
+            <div class="balance-item">
+                <div class="balance-amount" id="balanceAmount">000</div>
+                <div class="balance-label" id="balance-billetera">En ChainFeed (CFT)</div>
+            </div>
+            <div class="balance-item">
+                <div class="balance-amount cft-balance" id="cftBalance">000</div>
+                <div class="balance-label" id="balance-billetera">En billetera (CFT)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón de Compra Directa CFT -->
+<div class="wallet-quick-action" style="
+background: rgb(60 69 175 / 20%);
+    border: 2px solid rgb(108 123 231 / 27%);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+" onmouseover="this.style.borderColor='rgb(108 123 231 / 27%)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgb(108 123 231 / 27%)'; this.style.transform='translateY(0)'">
+    <div style="flex: 1;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; justify-content: center;">
+            <img src="/icons/logo76.png" alt="ChainFeed logo" data-translated="true">
+            <h3 class="titudirecta" style="font-size: 1.3rem; font-weight: 700; color: #c3c5db; margin: 0;">
+                Compra CFT Directamente
+            </h3>
+        </div>
+        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; margin: 0; line-height: 1.4;">
+            Precio fijo: <strong class="ceropunto" style="color: #10b981;">$0.01 USD</strong> por CFT • Sin comisiones adicionales
+        </p>
+    </div>
+    <button onclick="openCompraDirectaModal()" style="
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        border-radius: 15px;
+        color: white;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+    " onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 5px 20px rgba(16, 185, 129, 0.3)'">
+        💰 Comprar Ahora
+    </button>
+</div>
+
+   <div id="securityWarningCard" class="stat-card security-warning-card" style="display: none;">
+    <div id="securityWarningContent"></div>
+</div>
+
+<div id="connectWalletCard" class="stat-card connect-wallet-card" style="display: none;">
+    <div id="connectWalletContent"></div>
+</div>
+
+<!-- Grid de estadísticas principales -->
+<div class="stats-grid">
+    
+    <!-- ✅ CARD DE ACCIONES: Depósito y Retiro -->
+    <div class="stat-card actions-card" id="actionsCard" style="display: none;">
+        <div class="stat-header">
+            <span class="stat-title">Acciones de Billetera</span>
+            <div class="stat-icon icon-wallet">💳</div>
+        </div>
+        <div class="wallet-actions">
+            <button class="action-btn withdraw-action-btn" onclick="openWithdrawModal()">
+                💰 Retirar Fondos
+            </button>
+            <button class="action-btn deposit-action-btn" onclick="openDepositModal()">
+                📥 Depositar Fondos
+            </button>
+        </div>
+    </div>
+
+<!-- ✅ CARD DE STAKE -->
+<div class="stat-card stake-summary-card" id="stakeSummaryCard" style="display: block;">
+    <div class="stat-header">
+        <span class="stat-title">Sistema de Stake</span>
+        <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">💎</div>
+    </div>
+    
+    <div class="stake-summary-stats">
+        <div class="stake-summary-item">
+            <div class="stake-summary-value" id="stakeTotalActivoCard">0</div>
+            <div class="stake-summary-label">Total Stakeado</div>
+        </div>
+        <div class="stake-summary-item">
+            <div class="stake-summary-value" id="stakeRecompensasCard">0</div>
+            <div class="stake-summary-label">Recompensas Ganadas</div>
+        </div>
+        <div class="stake-summary-item">
+            <div class="stake-summary-value" id="stakeActivosCard">0</div>
+            <div class="stake-summary-label">Stakes Activos</div>
+        </div>
+    </div>
+    
+    <button class="action-btn stake-action-btn" onclick="abrirStakeSection()">
+        💎 Abrir Panel de Stake
+    </button>
+</div> <!-- ✅ CERRAR AQUÍ -->
+    
+<!-- ✅ CARD DE REFERIDOS (Estructura vacía que se llenará con JS) -->
+<div class="stat-card referral-wallet-card" id="referralWalletCard" style="display: none;">
+    <div class="stat-header">
+        <span class="stat-title">Sistema de Referidos</span>
+        <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #f59e0b);">🎁</div>
+    </div>
+    
+    <!-- Loading state -->
+    <div class="referral-loading-state" style="text-align: center; padding: 2rem;">
+        <div style="font-size: 2rem; margin-bottom: 1rem; animation: pulse 1.5s infinite;">🎁</div>
+        <div style="color: var(--text-secondary);">Cargando datos de referidos...</div>
+    </div>
+    
+    <!-- Contenido real (oculto inicialmente, se muestra cuando cargue) -->
+    <div class="referral-content-wrapper" style="display: none;">
+        <!-- Código de referido -->
+        <div class="referral-code-section">
+            <div class="stat-label" style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                Tu código de referido
+            </div>
+            <div class="referral-code-display">
+                <div class="referral-code-value" id="walletReferralCode">
+                    <span class="loading-shimmer">━━━━━</span>
+                </div>
+                <button class="share-code-btn" id="walletShareBtn" title="Compartir código" disabled>
+                    📤
+                </button>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="referral-stats-grid">
+            <div class="referral-stat-item">
+                <div class="referral-stat-icon">👥</div>
+                <div class="referral-stat-value" id="walletReferralCount">0</div>
+                <div class="referral-stat-label">Referidos</div>
+            </div>
+            <div class="referral-stat-item">
+                <div class="referral-stat-icon">💰</div>
+                <div class="referral-stat-value" id="walletReferralBonus">0</div>
+                <div class="referral-stat-label">CFT Ganados</div>
+            </div>
+        </div>
+        
+        <!-- Input para código (solo si no ha usado uno) -->
+        <div class="referral-input-section" id="walletReferralInput">
+            <div class="stat-label" style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                ¿Tienes un código de referido? (Ambos reciben 15 CFT)
+            </div>
+            <div class="referral-input-group">
+                <input 
+                    type="text" 
+                    id="walletCodeInput" 
+                    class="referral-code-input"
+                    placeholder="Ingresa código"
+                    maxlength="20"
+                />
+                <button class="apply-code-btn" id="walletApplyBtn" title="Aplicar código">
+                    ✓
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Total Ganado</span>
+                <div class="stat-icon icon-sales">💰</div>
+            </div>
+            <div class="stat-value" id="totalEarned">000</div>
+            <div class="stat-description">Tokens ganados por ventas</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Total Gastado</span>
+                <div class="stat-icon icon-purchases">💸</div>
+            </div>
+            <div class="stat-value" id="totalSpent">000</div>
+            <div class="stat-description">Tokens gastados en compras</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Ventas Realizadas</span>
+                <div class="stat-icon icon-chart">📈</div>
+            </div>
+            <div class="stat-value" id="totalSales">0</div>
+            <div class="stat-description">Posts vendidos exitosamente</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Colección</span>
+                <div class="stat-icon icon-collection">🎨</div>
+            </div>
+            <div class="stat-value" id="collectionSize">0</div>
+            <div class="stat-description">Posts en tu colección</div>
+        </div>
+
+    <div id="reportesWarning" class="stat-card" style="display: none;">
+        <div class="stat-header">
+            <span class="stat-title">Estado de Cuenta</span>
+            <div class="stat-icon" id="reportesIconCard" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">⚠️</div>
+        </div>
+
+        <div class="reportes-main-info">
+            <div class="stat-value" id="reportesCount" style="font-size: 2rem;">0</div>
+            <div class="stat-description" id="reportesStatus">Sin infracciones</div>
+        </div>
+        
+        <div class="reportes-progress-section">
+            <div class="reportes-bar">
+                <div class="reportes-fill" id="reportesFill" style="width: 0%;"></div>
+            </div>
+            <div class="reportes-next" id="reportesNext">Sin sanciones próximas</div>
+        </div>
+    </div>
+
+</div>
+
+    <!-- NUEVA SECCIÓN: Promociones -->
+<div class="stat-card" style="grid-column: span 2; margin-bottom: 2rem;">
+    <div class="stat-header">
+        <span class="stat-title">Mis Promociones</span>
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">📢</div>
+    </div>
+    <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+        <div>
+            <div class="stat-value" id="promocionesActivas">0</div>
+            <div class="stat-description">Activas ahora</div>
+        </div>
+        <div>
+            <div class="stat-value" id="totalPromocionesHistoricas">0</div>
+            <div class="stat-description">Total realizadas</div>
+        </div>
+        <div>
+            <div class="stat-value" id="tokensInvertidosPromos">0</div>
+            <div class="stat-description">Tokens invertidos</div>
+        </div>
+    </div>
+    <button onclick="verDetallePromociones()" style="
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        📊 Ver Panel de Promociones
+    </button>
+</div>
+
+    <!-- Sección de gráficos -->
+    <div class="charts-section">
+        <div class="chart-container">
+            <h3 class="chart-title">Actividad Financiera</h3>
+            <div class="chart-wrapper">
+                <canvas id="activityChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3 class="chart-title">Distribución de Ventas vs Compras</h3>
+            <div class="chart-wrapper">
+                <canvas id="distributionChart" class="chart-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de transacciones -->
+    <div class="transactions-section">
+        <h2 class="section-title">Historial de Transacciones</h2>
+        <div class="transactions-container" id="transactionsContainer">
+            <div class="transactions-wrapper" id="transactionsWrapper">
+                <div>Cargando transacciones...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top posts más rentables -->
+    <div class="transactions-section">
+        <h2 class="section-title">Posts Más Rentables</h2>
+        <div class="top-posts-container">
+            <div id="topPostsList" class="top-posts-grid">Cargando posts...</div>
+        </div>
+    </div>
+
+    <!-- Posts con más interacciones -->
+    <div class="transactions-section">
+        <h2 class="section-title">Posts con Más Interacciones</h2>
+        <div class="top-posts-container">
+            <div id="topInteractionsList" class="top-posts-grid">Cargando posts...</div>
+        </div>
+    </div>
+
+    <!-- Panel de Promociones -->
+<div class="transactions-section" id="promocionesPanel" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2 class="section-title">📢 Panel de Promociones</h2>
+        <button onclick="cerrarPanelPromociones()" style="
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        ">✕</button>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="stat-card">
+            <div class="stat-title">Total Promociones</div>
+            <div class="stat-value" id="promoStatsTotal">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Activas Ahora</div>
+            <div class="stat-value" style="color: #10b981;" id="promoStatsActivas">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Completadas</div>
+            <div class="stat-value" style="color: #6366f1;" id="promoStatsCompletadas">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Tokens Invertidos</div>
+            <div class="stat-value" style="color: #f59e0b;" id="promoStatsTokens">0</div>
+        </div>
+    </div>
+
+    <!-- Tabs de navegación -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
+        <button class="promo-tab active" onclick="cambiarTabPromo('activas')" data-tab="activas">
+            🔥 Activas
+        </button>
+        <button class="promo-tab" onclick="cambiarTabPromo('historial')" data-tab="historial">
+            📜 Historial
+        </button>
+        <button class="promo-tab" onclick="cambiarTabPromo('estadisticas')" data-tab="estadisticas">
+            📊 Estadísticas
+        </button>
+    </div>
+
+    <!-- Tab: Promociones Activas -->
+    <div id="tabActivasPromo" class="promo-tab-content">
+        <div id="promocionesActivasLista" style="display: grid; gap: 1rem;">
+            <div style="text-align: center; padding: 2rem; color: rgba(255, 255, 255, 0.6);">
+                Cargando promociones activas...
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Historial Completo -->
+    <div id="tabHistorialPromo" class="promo-tab-content" style="display: none;">
+        <div class="transactions-container" style="max-height: 500px;">
+            <div id="promocionesHistorialLista" class="transactions-wrapper">
+                <div style="text-align: center; padding: 2rem; color: rgba(255, 255, 255, 0.6);">
+                    Cargando historial...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab: Estadísticas -->
+    <div id="tabEstadisticasPromo" class="promo-tab-content" style="display: none;">
+        <div class="chart-container">
+            <h3 class="chart-title">Distribución de Planes de Promoción</h3>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="promoPlansChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Retirar Fondos -->
+<div class="modal-overlay" id="withdrawModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <img src="/icons/logo76.png" alt="ChainFeed logo" data-translated="true">
+            <h2 class="modal-title">Retirar Fondos</h2>
+            <button class="modal-close" onclick="closeWithdrawModal()">×</button>
+        </div>
+        
+        <div class="balance-info">
+            <div class="current-balance-label">Saldo Disponible</div>
+            <div class="current-balance-amount" id="modalBalance">000 CFT</div>
+        </div>
+        
+<div class="form-group">
+    <label class="form-label" for="protonAccount">Cuenta Proton (Destino)</label>
+    <div class="proton-account-display">
+        <div class="user-avatar-small" id="modalUserAvatar">U</div>
+        <div class="account-info">
+            <input 
+                type="text" 
+                id="protonAccount" 
+                class="form-input account-readonly"
+                placeholder="@usuario"
+                maxlength="13"
+                readonly
+                required
+            >
+            <div class="account-name" id="modalUserName">Nombre del Usuario</div>
+        </div>
+    </div>
+    <div class="input-help">
+        <small>Tu cuenta ChainFeed se usará como destino en Proton. Los tokens se enviarán aquí.</small>
+    </div>
+</div>
+        
+        <div class="form-group">
+            <label class="form-label" for="withdrawAmount">Cantidad a Retirar (CFT)</label>
+            <input 
+                type="number" 
+                id="withdrawAmount" 
+                class="form-input"
+                placeholder="0000"
+                step="1000"
+                min="1000"
+                max="0"
+                required
+            >
+            <div class="conversion-info">
+                <small>CFT se enviarán directamente a tu billetera Proton</small>
+            </div>
+            <div class="amount-buttons">
+                <button class="amount-preset" onclick="setAmountPercentage(25)">25%</button>
+                <button class="amount-preset" onclick="setAmountPercentage(50)">50%</button>
+                <button class="amount-preset" onclick="setAmountPercentage(75)">75%</button>
+                <button class="amount-preset" onclick="setAmountPercentage(100)">Todo</button>
+            </div>
+        </div>
+        
+<div class="level-info-box" id="withdrawLevelInfo">
+    <div class="level-current">🔰 Calculando nivel...</div>
+</div>
+        
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeWithdrawModal()">
+                Cancelar
+            </button>
+            <button class="btn-withdraw" id="withdrawBtn" onclick="processWithdraw()">
+                📧 Enviar Solicitud
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Depositar Fondos -->
+<div class="modal-overlay" id="depositModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <img src="/icons/logo76.png" alt="ChainFeed logo" data-translated="true">
+            <h2 class="modal-title">Depositar Fondos</h2>
+            <button class="modal-close" onclick="closeDepositModal()">×</button>
+        </div>
+        
+        <div class="balance-info">
+            <div class="current-balance-label">Saldo Actual en ChainFeed</div>
+            <div class="current-balance-amount" id="modalDepositBalance"> CFT</div>
+        </div>
+        
+        <!-- Estado de conexión -->
+        <div class="wallet-connection">
+            <div class="wallet-status" id="depositWalletStatus">
+                <div class="status-icon">🔗</div>
+                <div class="status-text">
+                    <div class="status-title">Verificando conexión...</div>
+                    <div class="status-description">Conectando con tu billetera Proton</div>
+                </div>
+                <button class="connect-wallet-btn" id="depositLoginBtn" onclick="depositLogin()">Conectar Billetera</button>
+            </div>
+        </div>
+        
+        <!-- Información de cuenta conectada -->
+        <div class="form-group" id="depositConnectedInfo" style="display: none;">
+            <label class="form-label">Cuenta Proton Conectada</label>
+            <div class="proton-account-display">
+                <div class="user-avatar-small" id="depositUserAvatar">P</div>
+                <div class="account-info">
+                    <input type="text" id="depositFromAccount" class="form-input account-readonly" readonly placeholder="@usuario">
+                    <div class="account-name">Billetera Proton externa</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group" id="depositAmountGroup" style="display: none;">
+            <label class="form-label" for="depositAmount">Cantidad a Depositar</label>
+            <input type="number" id="depositAmount" class="form-input" placeholder="0000" step="100" min="100" required>
+            <div class="conversion-info">
+                <small>Tokens CFT desde tu billetera Proton hacia ChainFeed (@chainfeed)</small>
+            </div>
+            <div class="amount-buttons">
+                <button class="amount-preset" onclick="setDepositAmount('200')">200 CFT</button>
+                <button class="amount-preset" onclick="setDepositAmount('300')">300 CFT</button>
+                <button class="amount-preset" onclick="setDepositAmount('500')">500 CFT</button>
+                <button class="amount-preset" onclick="setDepositAmount('1000')">1K CFT</button>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeDepositModal()">Cancelar</button>
+            <button class="btn-withdraw" id="depositTransferBtn" onclick="processDepositTransfer()" disabled>🔗 Conectar Primero</button>
+        </div>
+    </div>
+</div>
+    <!-- ============================================
+     SECCIÓN DE STAKE
+     ============================================ -->
+
+<div class="stake-wallet-section" id="stakeSection">
+    <div class="stake-header">
+        <h2 class="stake-title">
+            💎 Sistema de Stake
+        </h2>
+        <button class="cerrar-boton" onclick="cerrarStakeSection()" style="
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        ">✕</button>
+    </div>
+    
+    <!-- Estadísticas Resumen -->
+    <div class="stake-stats-summary">
+        <div class="stake-stat-box">
+            <div class="stake-stat-value" id="stakeTotalActivo">0</div>
+            <div class="stake-stat-label">Total Stakeado</div>
+        </div>
+        <div class="stake-stat-box">
+            <div class="stake-stat-value" id="stakeRecompensasGanadas">0</div>
+            <div class="stake-stat-label">Recompensas Ganadas</div>
+        </div>
+        <div class="stake-stat-box">
+            <div class="stake-stat-value" id="stakeActivos">0</div>
+            <div class="stake-stat-label">Stakes Activos</div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="stake-tabs">
+        <button class="stake-tab active" onclick="cambiarTabStake('crear')" data-tab="crear">
+            ➕ Crear Stake
+        </button>
+        <button class="stake-tab" onclick="cambiarTabStake('activos')" data-tab="activos">
+            🔥 Mis Stakes
+        </button>
+        <button class="stake-tab" onclick="cambiarTabStake('historial')" data-tab="historial">
+            📜 Historial
+        </button>
+    </div>
+    
+    <!-- Tab: Crear Stake -->
+    <div id="tabCrearStake" class="stake-tab-content">
+        <div class="stake-plans-grid" id="stakePlansGrid">
+            <!-- Planes se cargan dinámicamente -->
+        </div>
+        
+        <div class="stake-form" id="stakeForm" style="display: none;">
+            <h3 style="margin-bottom: 1rem; color: white;">Configurar Stake</h3>
+            
+            <div class="stake-input-group">
+                <label class="stake-input-label">Cantidad a Stakear (CFT)</label>
+                <input 
+                    type="number" 
+                    id="stakeAmountInput" 
+                    class="stake-input"
+                    placeholder="Mínimo: 1,000 CFT"
+                    min="1000"
+                    step="100"
+                    oninput="calcularRecompensaStake()"
+                >
+                <div class="stake-amount-presets">
+                    <button class="stake-preset-btn" onclick="setStakeAmount('1000')">1,000 CFT</button>
+                    <button class="stake-preset-btn" onclick="setStakeAmount('5000')">5,000 CFT</button>
+                    <button class="stake-preset-btn" onclick="setStakeAmount('10000')">10,000 CFT</button>
+                    <button class="stake-preset-btn" onclick="setStakePercentage(50)">50%</button>
+                    <button class="stake-preset-btn" onclick="setStakePercentage(100)">100%</button>
+                </div>
+            </div>
+            
+            <div class="stake-calculator" id="stakeCalculator" style="display: none;">
+                <div class="stake-calc-title">📊 Resumen de tu Stake</div>
+                <div class="stake-calc-details">
+                    <div class="stake-calc-row">
+                        <span>Cantidad a stakear:</span>
+                        <span id="calcCantidad">0 CFT</span>
+                    </div>
+                    <div class="stake-calc-row">
+                        <span>Período de bloqueo:</span>
+                        <span id="calcPeriodo">-</span>
+                    </div>
+                    <div class="stake-calc-row">
+                        <span>APY aplicado:</span>
+                        <span id="calcAPY">0%</span>
+                    </div>
+                    <div class="stake-calc-row">
+                        <span>Recompensa estimada:</span>
+                        <span id="calcRecompensa">0 CFT</span>
+                    </div>
+                    <div class="stake-calc-row total">
+                        <span>Total a recibir:</span>
+                        <span id="calcTotal">0 CFT</span>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="stake-submit-btn" id="stakeSubmitBtn" onclick="confirmarStake()">
+                🔒 Crear Stake
+            </button>
+        </div>
+    </div>
+    
+<!-- Tab: Stakes Activos -->
+<div id="tabActivosStake" class="stake-tab-content" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+            Los stakes se actualizan automáticamente cada minuto
+        </div>
+        <button onclick="cargarMisStakes()" style="
+            padding: 0.5rem 1rem;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            color: #c4b5fd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        " onmouseover="this.style.background='rgba(139, 92, 246, 0.3)'" onmouseout="this.style.background='rgba(139, 92, 246, 0.2)'">
+            🔄
+        </button>
+    </div>
+    <div id="stakesActivosList" class="stakes-list">
+            <div class="stake-empty-state">
+                <div class="stake-empty-icon">💎</div>
+                <div class="stake-empty-title">Cargando stakes...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tab: Historial -->
+    <div id="tabHistorialStake" class="stake-tab-content" style="display: none;">
+        <div id="stakesHistorialList" class="stakes-list">
+            <div class="stake-empty-state">
+                <div class="stake-empty-icon">📜</div>
+                <div class="stake-empty-title">Cargando historial...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exchanges Section -->
+<div class="transactions-section" style="margin-top: 2rem;">
+    <h2 class="section-title">Oportunidades de Inversión</h2>
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; padding: 0 1rem;">
+        Únete a ChainFeed como inversor o accede a exchanges
+    </p>
+    
+    <div class="exchanges-wallet-grid">
+        <!-- NUEVO: Card de Ronda Privada -->
+        <button onclick="openInvestorRoundModal()" class="exchange-wallet-card" style="
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='rgba(99, 102, 241, 0.6)'; this.style.transform='translateY(-3px)'" 
+           onmouseout="this.style.borderColor='rgba(99, 102, 241, 0.3)'; this.style.transform='translateY(0)'">
+            <div class="exchange-wallet-logo">
+                <img src="/icons/logo76.png" alt="ChainFeed Inversión" style="width: 72px; height: 72px; border-radius: 12px;">
+            </div>
+            <span class="exchange-wallet-name" style="color: #a5b4fc; font-weight: 700;">Ronda Privada</span>
+        </button>
+        
+        <!-- Exchanges existentes -->
+        <a href="https://alcor.exchange/" target="_blank" rel="noopener" class="exchange-wallet-card">
+            <div class="exchange-wallet-logo">
+                <img src="/logos/alcor.png" alt="Alcor Exchange">
+            </div>
+            <span class="exchange-wallet-name">Alcor DEX</span>
+        </a>
+
+        <a href="https://www.coingecko.com/" target="_blank" rel="noopener" class="exchange-wallet-card">
+            <div class="exchange-wallet-logo">
+                <img src="/logos/coingecko.png" alt="CoinGecko">
+            </div>
+            <span class="exchange-wallet-name">CoinGecko</span>
+        </a>
+    </div>
+</div>
+
+<!-- ============================================
+     MODAL DE RONDA PRIVADA DE INVERSORES
+     VERSIÓN SIMPLIFICADA - COPIAR Y PEGAR
+     ============================================ -->
+
+<!-- AGREGAR ANTES DE </body> EN billetera.html -->
+
+<!-- Modal -->
+<div id="investor-round-modal" class="investor-round-modal">
+    <div class="investor-modal-content">
+        <button class="investor-modal-close" onclick="closeInvestorRoundModal()">×</button>
+        
+        <div class="investor-modal-header">
+            <h2 class="investor-modal-title">Ronda Privada de Inversores</h2>
+            <p class="investor-modal-subtitle">Participa en el crecimiento de ChainFeed</p>
+        </div>
+        
+        <div class="investor-contact-methods">
+            <a href="https://www.linkedin.com/in/carlosjuana" target="_blank" rel="noopener noreferrer" class="investor-contact-btn">
+                <div class="investor-method-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                </div>
+                <div class="investor-method-content">
+                    <div class="investor-method-title">LinkedIn</div>
+                    <div class="investor-method-desc">Conecta con nosotros</div>
+                </div>
+            </a>
+            
+            <button class="investor-contact-btn" onclick="copyInvestorEmail()">
+                <div class="investor-method-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="5" width="18" height="14" rx="2"/>
+                        <polyline points="3 7 12 13 21 7"/>
+                    </svg>
+                </div>
+                <div class="investor-method-content">
+                    <div class="investor-method-title">Email</div>
+                    <div class="investor-method-desc">chainfeed@chainfeed.space</div>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container para notificaciones -->
+<div id="investor-toast-container" class="investor-toast-container"></div>
+
+</div> <!-- FIN DEL CONTAINER -->
+      
+  <script src="/js/deposito.js"></script>
+  <script src="/js/billetera.js"></script>
+<script src="js/barra-inferior.js"></script>
+<script src="/js/create-post-toggle.js"></script>
+<script src="/js/fullscreen-viewer-wallet.js"></script>
+<script src="/js/wallet-referrals.js"></script>
+<script src="/js/wallet-stake.js"></script>
+
+<script src="/js/compra-directa.js"></script>
+
+<script>
+// ============================================
+// DETECCIÓN DE HASH PARA ABRIR STAKE AUTOMÁTICAMENTE
+// ============================================
+window.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash;
+    
+    console.log('🔍 Hash detectado al cargar:', hash);
+    
+    if (hash === '#stake-section') {
+        console.log('🔗 Hash #stake-section detectado');
+        
+        // Esperar a que billetera termine de cargar
+        setTimeout(() => {
+            const stakeSection = document.getElementById('stakeSection');
+            
+            if (stakeSection) {
+                console.log('✅ stakeSection encontrado, abriendo...');
+                
+                stakeSection.style.display = 'block';
+                
+                stakeSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                
+                if (typeof inicializarStake === 'function') {
+                    console.log('🚀 Inicializando stake...');
+                    inicializarStake();
+                    iniciarAutoRefresh();
+                } else {
+                    console.error('❌ inicializarStake no está definida');
+                }
+                
+            } else {
+                console.error('❌ #stakeSection no encontrado');
+            }
+        }, 1500);
+    }
+});
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')  // ✅ CORRECTO
+                .then(registration => {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ Error registrando Service Worker:', error);
+                });
+        });
+    }
+</script>
+
+<script src="/js/temas.js"></script>
+
+<script src="/js/auto-modal-handler.js"></script>
+
+<script src="/js/terms-modal.js"></script>
+
+<script src="/js/investor-modal-wallet.js"></script>
+
+</body>
+</html>

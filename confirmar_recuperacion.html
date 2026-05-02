@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Contraseña - ChainFeed</title>
+    <style>
+        /* ESTILOS IDÉNTICOS AL MODAL DE CHAINFEED */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #ec4899;
+            --dark: #0f0f14;
+            --dark-secondary: #1a1a24;
+            --dark-tertiary: #252532;
+            --text: #ffffff;
+            --text-secondary: #a0a0b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-modal {
+            background: linear-gradient(135deg, rgba(26, 26, 36, 0.98), rgba(15, 15, 20, 0.98));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-title {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--text), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-input {
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .password-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            z-index: 2;
+        }
+
+        .password-toggle:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .password-input-container .form-input {
+            padding-right: 48px;
+            width: 100%;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .form-error {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .auth-submit-btn {
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .auth-submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.4);
+        }
+
+        .auth-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-error {
+            padding: 14px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            color: #ef4444;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .auth-success {
+            padding: 14px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            color: #10b981;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .auth-modal {
+                padding: 24px;
+            }
+            
+            .auth-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-modal">
+        <div class="auth-header">
+            <h1 class="auth-title">Nueva Contraseña</h1>
+            <p class="auth-subtitle">Crea una contraseña segura para tu cuenta</p>
+        </div>
+        
+        <form id="newpassword-form" class="auth-form">
+            <div class="form-group">
+                <label class="form-label">Nueva Contraseña</label>
+                <div class="password-input-container">
+                    <input 
+                        type="password" 
+                        id="new-password" 
+                        class="form-input" 
+                        placeholder="••••••••"
+                        required
+                        minlength="8"
+                    />
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('new-password')">
+                        👁️
+                    </button>
+                </div>
+                <small class="form-hint">Mínimo 8 caracteres</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Confirmar Contraseña</label>
+                <div class="password-input-container">
+                    <input 
+                        type="password" 
+                        id="confirm-password" 
+                        class="form-input" 
+                        placeholder="••••••••"
+                        required
+                        minlength="8"
+                    />
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirm-password')">
+                        👁️
+                    </button>
+                </div>
+                <div id="password-match-error" class="form-error">
+                    ❌ Las contraseñas no coinciden
+                </div>
+            </div>
+            
+            <button type="submit" class="auth-submit-btn" id="newpassword-submit-btn">
+                Cambiar Contraseña
+            </button>
+        </form>
+        
+        <div id="newpassword-error" class="auth-error"></div>
+        <div id="newpassword-success" class="auth-success"></div>
+        
+        <div class="back-link">
+            <a href="/">← Volver al inicio</a>
+        </div>
+    </div>
+
+    <script>
+        // Obtener token de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (!token) {
+            showError('Token no encontrado en la URL');
+        }
+
+        // Elementos del DOM
+        const form = document.getElementById('newpassword-form');
+        const newPasswordInput = document.getElementById('new-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const matchError = document.getElementById('password-match-error');
+        const submitBtn = document.getElementById('newpassword-submit-btn');
+        const errorDiv = document.getElementById('newpassword-error');
+        const successDiv = document.getElementById('newpassword-success');
+
+        // Toggle visibilidad contraseña
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const toggleBtn = input.parentNode.querySelector('.password-toggle');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+
+        // Validación en tiempo real
+        function validatePasswords() {
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+                matchError.style.display = 'block';
+                return false;
+            } else {
+                matchError.style.display = 'none';
+                return true;
+            }
+        }
+
+        newPasswordInput.addEventListener('input', validatePasswords);
+        confirmPasswordInput.addEventListener('input', validatePasswords);
+
+        // Mostrar/ocultar mensajes
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        }
+
+        function hideMessages() {
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+        }
+
+        // Manejar envío del formulario
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validaciones
+            if (!newPassword || !confirmPassword) {
+                showError('Por favor completa ambos campos');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showError('La contraseña debe tener al menos 8 caracteres');
+                return;
+            }
+
+            if (!validatePasswords()) {
+                showError('Las contraseñas no coinciden');
+                return;
+            }
+
+            // Deshabilitar botón
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Cambiando contraseña...';
+            hideMessages();
+
+            try {
+                const response = await fetch('/php/confirmar_recuperacion_password.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess(data.message);
+                    submitBtn.textContent = '✅ Contraseña Cambiada';
+                    
+                    // Redirigir al login después de 3 segundos
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    showError(data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Cambiar Contraseña';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error de conexión. Intenta nuevamente.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Cambiar Contraseña';
+            }
+        });
+
+        // Validación inicial
+        validatePasswords();
+    </script>
+</body>
+</html>
